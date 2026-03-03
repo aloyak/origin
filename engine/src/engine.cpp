@@ -34,6 +34,8 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
         glfwTerminate();
     }
 
+    m_input = new Input(m_window);
+
     glfwMakeContextCurrent(m_window);
     
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -43,6 +45,19 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     
     glViewport(0, 0, width, height); 
     glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
+}
+
+void Engine::setVerbose(int verbose) {
+    // 0 = off, 1 = error, 2 = warn, 3 = info, 4 = debug, 5 = trace
+    switch (verbose) {
+        case 0: spdlog::set_level(spdlog::level::off); break;
+        case 1: spdlog::set_level(spdlog::level::err); break;
+        case 2: spdlog::set_level(spdlog::level::warn); break;
+        case 3: spdlog::set_level(spdlog::level::info); break;
+        case 4: spdlog::set_level(spdlog::level::debug); break;
+        case 5: spdlog::set_level(spdlog::level::trace); break;
+        default: spdlog::set_level(spdlog::level::info); break;
+    }
 }
 
 bool Engine::isRunning() {
@@ -74,6 +89,10 @@ float Engine::getTime() {
 }
 
 void Engine::beginFrame() {
+    float currentFrame = (float)glfwGetTime();
+    m_deltaTime = currentFrame - m_lastFrame;
+    m_lastFrame = currentFrame;
+
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -82,6 +101,7 @@ void Engine::endFrame() {
     glfwSwapBuffers(m_window);
     glfwPollEvents();
 }
+
 
 Engine::~Engine() {
     glfwDestroyWindow(m_window);
