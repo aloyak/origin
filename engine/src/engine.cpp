@@ -1,6 +1,7 @@
 #include "engine/engine.h"
 #include "engine/mesh.h"
 #include "engine/shader.h"
+#include "engine/texture.h"
 #include "engine/camera.h"
 
 #include <glm/glm.hpp>
@@ -43,6 +44,8 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     }
     spdlog::info("Using OpenGL {}", (const char*)glGetString(GL_VERSION));
     
+    glEnable(GL_DEPTH_TEST);
+
     glViewport(0, 0, width, height); 
     glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
 }
@@ -64,7 +67,7 @@ bool Engine::isRunning() {
     return !glfwWindowShouldClose(m_window);
 }
 
-void Engine::render(const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform) {
+void Engine::render(const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform, const Texture& texture) {
     shader.use();
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -76,6 +79,9 @@ void Engine::render(const Mesh& mesh, Shader& shader, const Camera& camera, cons
     model = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
     
     model = glm::scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
+
+    texture.bind(0);
+    shader.setInt("u_Texture", 0);
 
     shader.setMat4("u_Model", &model);
     shader.setMat4("u_View", camera.getViewMatrix());
@@ -94,7 +100,7 @@ void Engine::beginFrame() {
     m_lastFrame = currentFrame;
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Engine::endFrame() {

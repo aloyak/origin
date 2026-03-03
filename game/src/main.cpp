@@ -1,6 +1,9 @@
 #include "engine/engine.h"
+
 #include "engine/mesh.h"
 #include "engine/shader.h"
+#include "engine/texture.h"
+
 #include "engine/camera.h"
 #include "engine/input/input.h"
 #include "engine/input/keycodes.h"
@@ -13,27 +16,59 @@ int main() {
     Input &input = engine.getInput();
 
     std::vector<float> vertices = {
-        -0.5f, -0.5f,  0.5f, // 0: Bottom-front-left
-        0.5f, -0.5f,  0.5f, // 1: Bottom-front-right
-        0.5f,  0.5f,  0.5f, // 2: Top-front-right
-        -0.5f,  0.5f,  0.5f, // 3: Top-front-left
-        -0.5f, -0.5f, -0.5f, // 4: Bottom-back-left
-        0.5f, -0.5f, -0.5f, // 5: Bottom-back-right
-        0.5f,  0.5f, -0.5f, // 6: Top-back-right
-        -0.5f,  0.5f, -0.5f  // 7: Top-back-left
+        // Positions          // Colors (RGB)     // Texture Coords
+        // Back face (Red)
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,   1.0f, 0.0f, 
+        0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 
+        -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,   0.0f, 1.0f, 
+
+        // Front face (Green)
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
+        0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+        0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,   1.0f, 1.0f, 
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,   0.0f, 1.0f, 
+
+        // Left face (Blue)
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,   1.0f, 0.0f, 
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 1.0f,   0.0f, 1.0f, 
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f, 
+
+        // Right face (Yellow)
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,   1.0f, 1.0f, 
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f, 
+        0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 0.0f,   0.0f, 0.0f, 
+
+        // Bottom face (Magenta)
+        -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,   0.0f, 1.0f, 
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,   1.0f, 1.0f, 
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f,   1.0f, 0.0f, 
+        -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f,   0.0f, 0.0f, 
+
+        // Top face (Cyan)
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 1.0f,   0.0f, 1.0f, 
+        0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 1.0f,   1.0f, 1.0f, 
+        0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 1.0f,   1.0f, 0.0f, 
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 1.0f,   0.0f, 0.0f
     };
 
     std::vector<unsigned int> indices = {
-        0, 1, 2, 2, 3, 0, // Front
-        1, 5, 6, 6, 2, 1, // Right
-        7, 6, 5, 5, 4, 7, // Back
-        4, 0, 3, 3, 7, 4, // Left
-        4, 5, 1, 1, 0, 4, // Bottom
-        3, 2, 6, 6, 7, 3  // Top
+        0,  1,  2,  2,  3,  0,  // Back
+        4,  5,  6,  6,  7,  4,  // Front
+        8,  9,  10, 10, 11, 8,  // Left
+        12, 13, 14, 14, 15, 12, // Right
+        16, 17, 18, 18, 19, 16, // Bottom
+        20, 21, 22, 22, 23, 20  // Top
     };
 
+    // This should be an 'Entity' ------
     Mesh cube(vertices, indices);
     Shader shader("assets/shaders/vert.glsl", "assets/shaders/frag.glsl");
+    Texture texture("assets/textures/crate.jpg");
+    // ---------------------------------
+
     Camera camera(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
 
     Transform cubeTransform;
@@ -53,7 +88,7 @@ int main() {
             break;
         }
 
-        engine.render(cube, shader, camera, cubeTransform);
+        engine.render(cube, shader, camera, cubeTransform, texture);
 
         engine.endFrame();
     }

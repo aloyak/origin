@@ -7,6 +7,7 @@ struct GLFWwindow;
 class Shader;
 class Mesh;
 class Camera;
+class Texture;
 
 class Engine {
 public:
@@ -17,7 +18,10 @@ public:
 
     bool isRunning();
     void beginFrame();
-    void render(const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform);
+    void render(
+        const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform, const Texture& texture
+    );
+    
     void endFrame();
     
     float getTime();
