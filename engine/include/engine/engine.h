@@ -1,6 +1,11 @@
 #pragma once
 
+#include "engine/transform.h"
+
 struct GLFWwindow;
+class Shader;
+class Mesh;
+class Camera;
 
 class Engine {
 public:
@@ -9,8 +14,10 @@ public:
 
     bool isRunning();
     void beginFrame();
+    void render(const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform);
     void endFrame();
-
+    
+    float getTime();
 private:
     GLFWwindow* m_window;
 };
