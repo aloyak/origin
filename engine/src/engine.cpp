@@ -1,6 +1,7 @@
 #include "engine/engine.h"
 #include "engine/mesh.h"
 #include "engine/shader.h"
+#include "engine/model.h"
 #include "engine/texture.h"
 #include "engine/camera.h"
 
@@ -67,27 +68,24 @@ bool Engine::isRunning() {
     return !glfwWindowShouldClose(m_window);
 }
 
-void Engine::render(const Mesh& mesh, Shader& shader, const Camera& camera, const Transform& transform, const Texture& texture) {
+void Engine::render(Model& model, Shader& shader, const Camera& camera, const Transform& transform) {
     shader.use();
 
-    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 modelMat = glm::mat4(1.0f);
     
-    model = glm::translate(model, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
+    modelMat = glm::translate(modelMat, glm::vec3(transform.position.x, transform.position.y, transform.position.z));
     
-    model = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
-    model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
-    model = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
+    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.z), glm::vec3(0, 0, 1));
+    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.y), glm::vec3(0, 1, 0));
+    modelMat = glm::rotate(modelMat, glm::radians(transform.rotation.x), glm::vec3(1, 0, 0));
     
-    model = glm::scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
+    modelMat = glm::scale(modelMat, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
 
-    texture.bind(0);
-    shader.setInt("u_Texture", 0);
-
-    shader.setMat4("u_Model", &model);
+    shader.setMat4("u_Model", &modelMat);
     shader.setMat4("u_View", camera.getViewMatrix());
     shader.setMat4("u_Projection", camera.getProjectionMatrix());
 
-    mesh.draw();
+    model.draw(shader);
 }
 
 float Engine::getTime() {
