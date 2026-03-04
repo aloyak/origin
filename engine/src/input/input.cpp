@@ -11,8 +11,26 @@ bool Input::isMouseButtonPressed(int button) const {
     return glfwGetMouseButton(m_window, button) == GLFW_PRESS;
 }
 
-void Input::getMousePos(double& x, double& y) const {
+Vec2 Input::getMousePos() const {
+    double x, y;
     glfwGetCursorPos(m_window, &x, &y);
+    return Vec2((float)x, (float)y);
+}
+
+Vec2 Input::getMouseDelta() {
+    double x, y;
+    glfwGetCursorPos(m_window, &x, &y);
+
+    if (m_firstMouse) {
+        m_lastX = x;
+        m_lastY = y;
+        m_firstMouse = false;
+    }
+
+    Vec2 delta((float)(x - m_lastX), (float)(y - m_lastY));
+    m_lastX = x;
+    m_lastY = y;
+    return delta;
 }
 
 void Input::setCursorMode(bool locked) {

@@ -3,12 +3,14 @@
 #include "engine/transform.h"
 #include "engine/input/input.h"
 
+#include <vector>
+#include <memory>
+
 struct GLFWwindow;
 class Shader;
-class Mesh;
 class Camera;
 class Model;
-class Texture;
+class Entity;
 
 class Engine {
 public:
@@ -19,18 +21,26 @@ public:
 
     bool isRunning();
     void beginFrame();
-    void render(Model& model, Shader& shader, const Camera& camera, const Transform& transform);
-    
     void endFrame();
-    
+
+    Entity* createEntity();
+    void destroyEntity(Entity* entity);
+
+    void updateScene();
+
+    // prefer updateScene() over calling this directly
+    void render(Model& model, Shader& shader, const Camera& camera, const Transform& cameraTransform, const Transform& modelTransform);
+
     float getTime();
     float getDeltaTime() const { return m_deltaTime; }
-
     Input& getInput() { return *m_input; }
 
 private:
     GLFWwindow* m_window;
-    Input* m_input;
+    Input*      m_input;
 
-    float m_deltaTime, m_lastFrame;
+    float m_deltaTime = 0.0f;
+    float m_lastFrame = 0.0f;
+
+    std::vector<std::unique_ptr<Entity>> m_entities;
 };

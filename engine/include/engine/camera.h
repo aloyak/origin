@@ -1,17 +1,17 @@
 #pragma once
+
 #include "engine/math.h"
+#include "engine/transform.h"
 
 class Camera {
-public: 
+public:
     Camera(float fov, float aspect, float zNear, float zFar);
     ~Camera();
 
-    void* getViewMatrix() const;
+    void* getViewMatrix(const Transform& transform) const;
     void* getProjectionMatrix() const;
 
-    void setPosition(Vec3 pos);
-
 private:
-    struct CameraData; 
+    struct CameraData;
     CameraData* m_data;
 };
