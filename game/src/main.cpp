@@ -30,9 +30,6 @@ int main() {
     suzanne->addComponent<RenderComponent>(
         "assets/models/suzanne.obj"
     );
-
-    suzanne->getComponent<RenderComponent>()->setTexture("assets/textures/kirk.jpg"); // diffuse or specular
-        
     suzanne->transform.position = Vec3(0.0f, 150.0f, 0.0f);
     suzanne->transform.scale = Vec3(25.0f, 25.0f, 25.0f);
 
