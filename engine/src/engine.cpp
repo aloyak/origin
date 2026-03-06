@@ -20,6 +20,17 @@
 #include <spdlog/spdlog.h>
 #include <algorithm>
 
+int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
+    if (event->type == SDL_WINDOWEVENT) {
+        if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            int width = event->window.data1;
+            int height = event->window.data2;
+            glViewport(0, 0, width, height);
+        }
+    }
+    return 0;
+}
+
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
@@ -65,6 +76,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     glViewport(0, 0, width, height);
     
     SDL_SetWindowResizable(m_window, SDL_TRUE);
+    SDL_AddEventWatch(frameBufferSizeCallback, m_window);
 }
 
 void Engine::stop() {
