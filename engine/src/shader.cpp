@@ -1,5 +1,8 @@
-
-#include <glad/glad.h>
+#ifdef __EMSCRIPTEN__
+    #include <GLES3/gl3.h>
+#else
+    #include <glad/glad.h>
+#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -10,6 +13,15 @@
 #include <sstream>
 
 #include "engine/shader.h"
+
+auto replaceFirstLine = [](std::string& src, const std::string& newLine)
+{
+    size_t pos = src.find('\n');
+    if (pos != std::string::npos)
+        src = newLine + "\n" + src.substr(pos + 1);
+    else
+        src = newLine;
+};
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode;
@@ -33,6 +45,12 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
 
         vertexCode = vShaderStream.str();
         fragmentCode = fShaderStream.str();
+
+#ifdef __EMSCRIPTEN__
+        replaceFirstLine(vertexCode, "#version 300 es");
+        replaceFirstLine(fragmentCode, "#version 300 es\nprecision mediump float;");
+#endif
+
     } catch (std::ifstream::failure& e) {
         spdlog::error("Failed to read shader files: {}", e.what());
     }

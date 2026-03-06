@@ -10,7 +10,7 @@ int main() {
     Engine engine(1440, 900, "ORIGIN DEMO");
     Input& input = engine.getInput();
 
-    input.setCursorMode(true); 
+    input.setCursorMode(true);
 
     //engine.setFullscreen(true);
     //engine.setWindowStartCentered(true);
@@ -35,10 +35,9 @@ int main() {
 
     float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
-    
-    while (engine.isRunning()) {
-        engine.beginFrame();
-        
+    int cooldown = 0;
+
+    engine.run([&]() {
         float speed = 300.0f * engine.getDeltaTime();
         if (input.isKeyPressed(KEY_W)) player->transform.position += player->transform.forward() * allowedMove * speed;
         if (input.isKeyPressed(KEY_S)) player->transform.position -= player->transform.forward() * allowedMove * speed;
@@ -51,7 +50,6 @@ int main() {
 
         suzanne->transform.rotation.y += .3f;
 
-        static int cooldown = 0;
         if (input.isKeyPressed(KEY_E) && cooldown == 0) {
             suzanne->getComponent<RenderComponent>()->isEnabled = !suzanne->getComponent<RenderComponent>()->isEnabled;
             cooldown = 50;
@@ -59,14 +57,10 @@ int main() {
         if (cooldown > 0) cooldown--;
 
         if (input.isKeyPressed(KEY_ESCAPE))
-            break;
-
-        engine.updateScene();
+            engine.stop();
 
         std::cout << "FPS: " << 1.0f / engine.getDeltaTime() << "\r" << std::flush;
-
-        engine.endFrame();
-    }
+    });
 
     return 0;
 }

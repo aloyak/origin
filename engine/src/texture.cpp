@@ -3,7 +3,12 @@
 
 #include "engine/texture.h"
 
-#include <glad/glad.h>
+#ifdef __EMSCRIPTEN__
+    #include <GLES3/gl3.h>
+#else
+    #include <glad/glad.h>
+#endif
+
 #include <spdlog/spdlog.h>
 
 Texture::Texture(const std::string& path) {

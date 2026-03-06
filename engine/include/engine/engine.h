@@ -3,6 +3,7 @@
 #include "engine/transform.h"
 #include "engine/input/input.h"
 
+#include <functional>
 #include <vector>
 #include <memory>
 
@@ -17,6 +18,9 @@ class Engine {
 public:
     Engine(unsigned int width = 640, unsigned int height = 480, const char* title = "Origin Engine");    
     ~Engine();
+
+    void run(std::function<void()> mainLoop);
+    void stop();
 
     void setVerbose(int verbose);
 
@@ -52,4 +56,6 @@ private:
     float m_lastFrame = 0.0f;
 
     std::vector<std::unique_ptr<Entity>> m_entities;
+
+    bool m_running = true;
 };

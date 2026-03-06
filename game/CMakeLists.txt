@@ -8,9 +8,12 @@ if(EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     target_link_options(${GAME_NAME} PRIVATE
         -sUSE_SDL=2
-        -sFULL_ES2=1
+        -sFULL_ES3=1
         -sUSE_WEBGL2=1
         -sALLOW_MEMORY_GROWTH=1
-        --shell-file ${CMAKE_SOURCE_DIR}/web/shell.html
+        -fexceptions
+        --shell-file ${CMAKE_SOURCE_DIR}/game/web/shell.html
+        --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
     )
+    target_compile_options(${GAME_NAME} PRIVATE -fexceptions)
 endif()
