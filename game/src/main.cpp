@@ -21,16 +21,22 @@ int main() {
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
     // Renderable entity
-    Entity* model = engine.createEntity();
-    model->addComponent<RenderComponent>(
-        "assets/models/sponza/sponza.obj",
-        "assets/shaders/vert.glsl",
-        "assets/shaders/frag.glsl"
+    Entity* sponza = engine.createEntity();
+    sponza->addComponent<RenderComponent>( // Shaders default to assets/shaders/vert.glsl or frag.glsl
+        "assets/models/sponza/sponza.obj"
     );
-    model->transform.position = Vec3(0.0f, 0.0f, -5.0f);
-    model->transform.scale    = Vec3(1.0f, 1.0f, 1.0f);
 
-    float sensitivity = 0.05f;
+    Entity* suzanne = engine.createEntity();
+    suzanne->addComponent<RenderComponent>(
+        "assets/models/suzanne.obj"
+    );
+
+    suzanne->getComponent<RenderComponent>()->setTexture("assets/textures/kirk.jpg"); // diffuse or specular
+        
+    suzanne->transform.position = Vec3(0.0f, 150.0f, 0.0f);
+    suzanne->transform.scale = Vec3(25.0f, 25.0f, 25.0f);
+
+    float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
     
     while (engine.isRunning()) {
@@ -45,6 +51,15 @@ int main() {
         Vec2 delta = input.getMouseDelta();
         player->transform.rotation.y += delta.x * sensitivity;
         player->transform.rotation.x -= delta.y * sensitivity;
+
+        suzanne->transform.rotation.y += .3f;
+
+        static int cooldown = 0;
+        if (input.isKeyPressed(KEY_E) && cooldown == 0) {
+            suzanne->getComponent<RenderComponent>()->isEnabled = !suzanne->getComponent<RenderComponent>()->isEnabled;
+            cooldown = 50;
+        }
+        if (cooldown > 0) cooldown--;
 
         if (input.isKeyPressed(KEY_ESCAPE))
             break;

@@ -8,6 +8,8 @@ class Camera;
 
 class Component {
 public:
+    bool isEnabled = true;
+
     Entity* entity = nullptr;
 
     virtual ~Component() = default;

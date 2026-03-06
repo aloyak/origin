@@ -1,10 +1,11 @@
 #include <glad/glad.h>
 
+#include "engine/texture.h"
 #include "engine/mesh.h"
 #include "engine/shader.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures) {
-    m_vertexCount = vertices.size(); // Fixed: was incorrectly dividing by 3
+    m_vertexCount = vertices.size(); 
     m_indexCount  = indices.size();
 
     this->vertices = vertices;
@@ -35,14 +36,11 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 }
 
 Mesh::~Mesh() {
-    // Only delete if we actually own the handles (not moved-from)
     if (m_vao) glDeleteVertexArrays(1, &m_vao);
     if (m_vbo) glDeleteBuffers(1, &m_vbo);
     if (m_ebo) glDeleteBuffers(1, &m_ebo);
 }
 
-// Move constructor — steal the GL handles, then zero them out on the source
-// so its destructor doesn't delete them
 Mesh::Mesh(Mesh&& other) noexcept
     : vertices(std::move(other.vertices))
     , indices(std::move(other.indices))
@@ -58,7 +56,6 @@ Mesh::Mesh(Mesh&& other) noexcept
     other.m_ebo = 0;
 }
 
-// Move assignment — clean up our own resources first, then steal from other
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     if (this == &other) return *this;
 
@@ -88,8 +85,6 @@ void Mesh::draw(Shader& shader) const {
     unsigned int specularNr = 1;
     
     for (unsigned int i = 0; i < textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i); 
-        
         std::string number;
         std::string name = textures[i].type;
         if (name == "texture_diffuse")
@@ -98,7 +93,7 @@ void Mesh::draw(Shader& shader) const {
             number = std::to_string(specularNr++);
 
         shader.setInt(("material." + name + number).c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        textures[i].texture->bind(i);
     }
     
     glBindVertexArray(m_vao);

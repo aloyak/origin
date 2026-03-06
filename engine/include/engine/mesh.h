@@ -3,10 +3,12 @@
 #include <vector>
 #include <string>
 #include <cstddef>
+#include <memory>
 
 #include "engine/math.h"
 
 class Shader; 
+class Texture;
 
 struct Vertex {
     Vec3 Position;
@@ -15,7 +17,7 @@ struct Vertex {
 };
 
 struct MeshTexture {
-    unsigned int id;
+    std::shared_ptr<Texture> texture;
     std::string type;
 };
 
