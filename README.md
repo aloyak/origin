@@ -18,7 +18,7 @@ You may want to change your game's name in `game/CMakeLists.txt`.
 
 > **Requirement:** CMake **3.23 or newer**.
 
-> Note that the `sponza` model is **not included**. You can download it with `assets/models/download-sponza.sh` or clone it yourself from (this repository)[git clone https://github.com/jimmiebergmann/Sponza].
+> Note that the `sponza` model is **not included**. You can download it with `assets/models/download-sponza.sh` or clone it yourself from https://github.com/jimmiebergmann/Sponza
 
 ### Linux
 
@@ -32,13 +32,28 @@ chmod +x ./build.sh
 This script will generate a build directory and compile the project.
 The final executable can be found in `build/game/`
 
+### Web
+
+> Emscripten sdk must be installed!
+
+> Note that the web build is based on a template 'shell' at `game/web/shell.html` that you can modify as you like
+
+```sh
+chmod +x ./build.sh 
+./build.sh --web
+
+python3 -m http.server 8080 --directory build-web/game/
+```
+
+This script will generate a build directory specific for web and compile the project.
+Your build can be found at `build-web/game/game.html`, it should be opened with a server in order to work!
+
 ### Other Platforms
 
-Support for other platforms is planned but currently limited:
+Support for other platforms is supported but currently limited:
 
 * Windows — not yet tested (recommended using Visual Studio)
-* macOS — not yet tested
-* Web (WebAssembly) — not yet implemented in the build system
+* macOS — not yet tested (origin uses OpenGL 4.1 as it is the last supported openGL version for MacOS, but **it is officially deprecated!**)
 
 ## License
 
