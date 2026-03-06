@@ -11,14 +11,18 @@ public:
 
     bool isKeyPressed(int key) const;
     bool isMouseButtonPressed(int button) const;
-    
+
     void setCursorMode(bool locked);
 
     Vec2 getMousePos() const;
     Vec2 getMouseDelta();
 
+    void accumulateMouseDelta(int x, int y);
+    void resetMouseDelta();
+
 private:
     SDL_Window* m_window;
-    double m_lastX = 0.0, m_lastY = 0.0;
-    bool m_firstMouse = true;
+
+    int m_mouseDeltaX = 0;
+    int m_mouseDeltaY = 0;
 };

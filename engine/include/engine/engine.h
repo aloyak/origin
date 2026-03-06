@@ -42,9 +42,7 @@ public:
     Input& getInput() { return *m_input; }
 
     // window
-    //void setWindowTitle(const char* title);
-    //void setFullscreen(bool fullscreen);
-    //void setWindowStartCentered(bool centered);
+    void setFullscreen(bool fullscreen);
 
 private:
     SDL_Window* m_window;

@@ -20,8 +20,6 @@
 #include <spdlog/spdlog.h>
 #include <algorithm>
 
-// TODO: Resize callback
-
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
@@ -46,25 +44,27 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
         spdlog::error("Failed to create SDL window: {}", SDL_GetError());
         SDL_Quit();
     }
-
+    
     m_glContext = SDL_GL_CreateContext(m_window);
     if (!m_glContext) {
         spdlog::error("Failed to create GL context: {}", SDL_GetError());
         SDL_Quit();
     }
     SDL_GL_MakeCurrent(m_window, m_glContext);
-
+    
     m_input = new Input(m_window);
-
+    
 #ifndef __EMSCRIPTEN__ 
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
         spdlog::error("Failed to init GLAD!");
     }
 #endif
     spdlog::info("Using OpenGL {}", (const char*)glGetString(GL_VERSION));
-
+    
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, width, height);
+    
+    SDL_SetWindowResizable(m_window, SDL_TRUE);
 }
 
 void Engine::stop() {
@@ -142,7 +142,22 @@ void Engine::beginFrame() {
 void Engine::endFrame() {
     SDL_GL_SwapWindow(m_window);
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {}
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                m_running = false;
+                break;
+            case SDL_MOUSEMOTION:
+                m_input->accumulateMouseDelta(event.motion.xrel, event.motion.yrel);
+        }
+    }
+}
+
+void Engine::setFullscreen(bool fullscreen) {
+    if (fullscreen)
+        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    else
+        SDL_SetWindowFullscreen(m_window, 0);
 }
 
 Engine::~Engine() {

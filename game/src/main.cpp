@@ -7,17 +7,15 @@
 #include <iostream>
 
 int main() {
-    Engine engine(1440, 900, "ORIGIN DEMO");
+    Engine engine(1920, 1080, "ORIGIN DEMO");
     Input& input = engine.getInput();
 
     input.setCursorMode(true);
-
-    //engine.setFullscreen(true);
-    //engine.setWindowStartCentered(true);
+    engine.setFullscreen(false);
 
     // Camera entity
     Entity* player = engine.createEntity();
-    player->addComponent<CameraComponent>(60.0f, 1440.0f / 900.0f, 0.1f, 10000.0f);
+    player->addComponent<CameraComponent>(60.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
     // Renderable entity
