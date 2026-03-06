@@ -1,5 +1,7 @@
 include(FetchContent)
 
+set(GLAD_INSTALL OFF CACHE INTERNAL "")
+
 FetchContent_Declare(
     glad
     GIT_REPOSITORY https://github.com/Dav1dde/glad.git
