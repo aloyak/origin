@@ -18,7 +18,7 @@ You may want to change your game's name in `game/CMakeLists.txt`.
 
 > **Requirement:** CMake **3.23 or newer**.
 
-> Note that the `sponza` model is **not included**. You can download it with `assets/models/download-sponza.sh` or clone it yourself from [this repository](git clone https://github.com/jimmiebergmann/Sponza)
+> Note that the `sponza` model is **not included**. You can download it with `assets/models/download-sponza.sh` or clone it yourself from (this repository)[git clone https://github.com/jimmiebergmann/Sponza].
 
 ### Linux
 
