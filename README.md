@@ -34,7 +34,7 @@ The final executable can be found in `build/game/`
 
 ### Web
 
-> Emscripten sdk must be installed!
+> **Requirement:** Emscripten sdk must be installed!
 
 > Note that the web build is based on a template 'shell' at `game/web/shell.html` that you can modify as you like
 
@@ -42,7 +42,7 @@ The final executable can be found in `build/game/`
 chmod +x ./build.sh 
 ./build.sh --web
 
-python3 -m http.server 8080 --directory build-web/game/
+python3 -m http.server 8080 --directory build-web/game/ # suggestion
 ```
 
 This script will generate a build directory specific for web and compile the project.
