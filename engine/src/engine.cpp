@@ -10,45 +10,47 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
 #include <spdlog/spdlog.h>
 #include <algorithm>
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
+// TODO: Resize callback
 
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
 
-    if (!glfwInit()) {
-        spdlog::error("Failed to initialize GLFW!");
-        glfwTerminate();
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
+        SDL_Quit();
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    m_window = glfwCreateWindow(width, height, title, NULL, NULL);
+    m_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
     if (!m_window) {
-        spdlog::error("Failed to create GLFW window");
-        glfwTerminate();
+        spdlog::error("Failed to create SDL window: {}", SDL_GetError());
+        SDL_Quit();
     }
+
+    m_glContext = SDL_GL_CreateContext(m_window);
+    if (!m_glContext) {
+        spdlog::error("Failed to create GL context: {}", SDL_GetError());
+        SDL_Quit();
+    }
+    SDL_GL_MakeCurrent(m_window, m_glContext);
 
     m_input = new Input(m_window);
 
-    glfwMakeContextCurrent(m_window);
-    
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
         spdlog::error("Failed to init GLAD!");
     }
     spdlog::info("Using OpenGL {}", (const char*)glGetString(GL_VERSION));
-    
+
     glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, width, height); 
-    glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
+    glViewport(0, 0, width, height);
 }
 
 Entity* Engine::createEntity() {
@@ -118,15 +120,16 @@ void Engine::setVerbose(int verbose) {
 }
 
 bool Engine::isRunning() {
-    return !glfwWindowShouldClose(m_window);
+    return !SDL_QuitRequested();
 }
 
 float Engine::getTime() {
-    return (float)glfwGetTime();
+    //sdl2
+    return (float)SDL_GetTicks() / 1000.0f;
 }
 
 void Engine::beginFrame() {
-    float currentFrame = (float)glfwGetTime();
+    float currentFrame = (float)SDL_GetTicks() / 1000.0f;
     m_deltaTime = currentFrame - m_lastFrame;
     m_lastFrame = currentFrame;
 
@@ -135,14 +138,15 @@ void Engine::beginFrame() {
 }
 
 void Engine::endFrame() {
-    glfwSwapBuffers(m_window);
-    glfwPollEvents();
+    SDL_GL_SwapWindow(m_window);
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {}
 }
-
 
 Engine::~Engine() {
     m_entities.clear();
     delete m_input;
-    glfwDestroyWindow(m_window);
-    glfwTerminate();
+    SDL_GL_DeleteContext(m_glContext);
+    SDL_DestroyWindow(m_window);
+    SDL_Quit();
 }

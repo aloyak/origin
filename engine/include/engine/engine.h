@@ -6,7 +6,8 @@
 #include <vector>
 #include <memory>
 
-struct GLFWwindow;
+struct SDL_Window;
+
 class Shader;
 class Camera;
 class Model;
@@ -33,11 +34,19 @@ public:
 
     float getTime();
     float getDeltaTime() const { return m_deltaTime; }
+
     Input& getInput() { return *m_input; }
 
+    // window
+    //void setWindowTitle(const char* title);
+    //void setFullscreen(bool fullscreen);
+    //void setWindowStartCentered(bool centered);
+
 private:
-    GLFWwindow* m_window;
+    SDL_Window* m_window;
     Input*      m_input;
+
+    void* m_glContext; // SDL_GLContext type, just not included
 
     float m_deltaTime = 0.0f;
     float m_lastFrame = 0.0f;

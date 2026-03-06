@@ -12,12 +12,12 @@ if(EMSCRIPTEN)
 
 else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/glad.cmake)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/glfw.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/glm.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/stb.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
 
-    target_link_libraries(engine PRIVATE glad glfw glm spdlog stb_image assimp)
+    target_link_libraries(engine PRIVATE glad SDL2::SDL2 glm::glm spdlog::spdlog stb_image assimp::assimp)
 
 endif()

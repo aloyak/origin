@@ -1,10 +1,10 @@
 #pragma once
 
-#define ORIGIN_KEY_W          87
-#define ORIGIN_KEY_S          83
-#define ORIGIN_KEY_A          65
-#define ORIGIN_KEY_D          68
-#define ORIGIN_KEY_SPACE      32
-#define ORIGIN_KEY_ESCAPE     256
-#define ORIGIN_MOUSE_LEFT     0
-#define ORIGIN_MOUSE_RIGHT    1
+#define KEY_W          26
+#define KEY_S          22
+#define KEY_A          4
+#define KEY_D          7
+#define KEY_SPACE      44
+#define KEY_ESCAPE     41
+#define MOUSE_LEFT     1
+#define MOUSE_RIGHT    3
