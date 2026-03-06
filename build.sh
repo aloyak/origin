@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo "Building Project..."
 
 mkdir build && cd build
