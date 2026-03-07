@@ -104,5 +104,11 @@ void Mesh::draw(Shader& shader) const {
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
+    // Unbind all texture units that were used
+    for (unsigned int i = 0; i < textures.size(); i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
     glActiveTexture(GL_TEXTURE0);
 }

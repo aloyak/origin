@@ -43,6 +43,7 @@ public:
 
     // window
     void setFullscreen(bool fullscreen);
+    void enableVSync(bool enabled);
 
 private:
     SDL_Window* m_window;

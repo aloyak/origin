@@ -165,12 +165,6 @@ void Engine::endFrame() {
     }
 }
 
-void Engine::setFullscreen(bool fullscreen) {
-    if (fullscreen)
-        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    else
-        SDL_SetWindowFullscreen(m_window, 0);
-}
 
 Engine::~Engine() {
     m_entities.clear();
@@ -178,6 +172,22 @@ Engine::~Engine() {
     SDL_GL_DeleteContext(m_glContext);
     SDL_DestroyWindow(m_window);
     SDL_Quit();
+}
+
+// Window Management
+
+void Engine::setFullscreen(bool fullscreen) {
+    if (fullscreen)
+        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    else
+        SDL_SetWindowFullscreen(m_window, 0);
+}
+
+void Engine::enableVSync(bool enabled) {
+    if (enabled)
+        SDL_GL_SetSwapInterval(1);
+    else
+        SDL_GL_SetSwapInterval(0);
 }
 
 // Entity Management
