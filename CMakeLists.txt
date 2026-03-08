@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 set(PROJECT_NAME "origin")
-set(PROJECT_VERS "0.3.0")
+set(PROJECT_VERS "0.4.0")
 
 project(${PROJECT_NAME} VERSION ${PROJECT_VERS})
 set(CMAKE_CXX_STANDARD 17)

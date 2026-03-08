@@ -160,7 +160,10 @@ void Engine::endFrame() {
                 m_running = false;
                 break;
             case SDL_MOUSEMOTION:
+            #ifndef __EMSCRIPTEN__
                 m_input->accumulateMouseDelta(event.motion.xrel, event.motion.yrel);
+            #endif
+                break;
         }
     }
 }

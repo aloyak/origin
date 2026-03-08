@@ -60,10 +60,14 @@ void Input::accumulateMouseDelta(int x, int y) {
 
 void Input::setCursorMode(bool locked) {
 #ifdef __EMSCRIPTEN__
-    if (locked)
-        emscripten_request_pointerlock("#canvas", 1);
-    else
+    if (locked) {
+        emscripten_set_click_callback("#canvas", nullptr, 1, [](int, const EmscriptenMouseEvent*, void*) -> EM_BOOL {
+            emscripten_request_pointerlock("#canvas", 0);
+            return EM_TRUE;
+        });
+    } else {
         emscripten_exit_pointerlock();
+    }
 #else
     SDL_SetRelativeMouseMode(locked ? SDL_TRUE : SDL_FALSE);
 #endif
