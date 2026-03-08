@@ -193,6 +193,16 @@ void Engine::enableVSync(bool enabled) {
         SDL_GL_SetSwapInterval(0);
 }
 
+void Engine::setWindowTitle(const char* title) {
+    SDL_SetWindowTitle(m_window, title);
+}
+
+float Engine::getAspectRatio() const {
+    int w, h;
+    SDL_GetWindowSize(m_window, &w, &h);
+    return (float)w / (float)h;
+}
+
 // Entity Management
 
 Entity* Engine::createEntity() {

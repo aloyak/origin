@@ -12,11 +12,12 @@ if(EMSCRIPTEN)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/stb.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
 
     # SDL2 and OpenGL come with Emscripten
     target_compile_options(engine PUBLIC -sUSE_SDL=2 -fexceptions)
 
-    target_link_libraries(engine PRIVATE glm::glm spdlog::spdlog stb_image assimp::assimp)
+    target_link_libraries(engine PRIVATE glm::glm spdlog::spdlog stb_image assimp::assimp nlohmann_json::nlohmann_json)
 
 else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/glad.cmake)
@@ -25,7 +26,8 @@ else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/stb.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
 
-    target_link_libraries(engine PRIVATE glad SDL2::SDL2 glm::glm spdlog::spdlog stb_image assimp::assimp)
+    target_link_libraries(engine PRIVATE glad SDL2::SDL2 glm::glm spdlog::spdlog stb_image assimp::assimp nlohmann_json::nlohmann_json)
 
 endif()

@@ -43,7 +43,9 @@ public:
 
     // window
     void setFullscreen(bool fullscreen);
+    void setWindowTitle(const char* title);
     void enableVSync(bool enabled);
+    float getAspectRatio() const;
 
 private:
     SDL_Window* m_window;

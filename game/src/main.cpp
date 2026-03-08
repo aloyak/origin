@@ -6,34 +6,27 @@
 
 #include <iostream>
 
+// Simplified "game" for easy testing!
 int main() {
-    Engine engine(1920, 1080, "ORIGIN DEMO");
+    Engine engine(1440, 900, "ORIGIN DEMO");
     Input& input = engine.getInput();
 
-    input.setCursorMode(true);
+    input.setCursorMode(true); // true = locked
     engine.setFullscreen(false);
+    engine.enableVSync(false);
 
     // Camera entity
     Entity* player = engine.createEntity();
-    player->addComponent<CameraComponent>(60.0f, 1920.0f / 1080.0f, 0.1f, 10000.0f);
+    player->addComponent<CameraComponent>(60.0f, engine.getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
     // Renderable entity
     Entity* sponza = engine.createEntity();
-    sponza->addComponent<RenderComponent>( // Shaders default to assets/shaders/vert.glsl or frag.glsl
-        "assets/models/sponza/sponza.obj"
-    );
-
-    Entity* suzanne = engine.createEntity();
-    suzanne->addComponent<RenderComponent>(
-        "assets/models/suzanne.obj"
-    );
-    suzanne->transform.position = Vec3(0.0f, 150.0f, 0.0f);
-    suzanne->transform.scale = Vec3(25.0f, 25.0f, 25.0f);
+    // Shaders default to assets/shaders/vert.glsl or frag.glsl if not specified
+    sponza->addComponent<RenderComponent>("assets/models/sponza/sponza.obj");
 
     float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
-    int cooldown = 0;
 
     engine.run([&]() {
         float speed = 300.0f * engine.getDeltaTime();
@@ -46,19 +39,9 @@ int main() {
         player->transform.rotation.y += delta.x * sensitivity;
         player->transform.rotation.x -= delta.y * sensitivity;
 
-        suzanne->transform.rotation.y += .3f;
-
-        if (input.isKeyPressed(KEY_E) && cooldown == 0) {
-            suzanne->getComponent<RenderComponent>()->isEnabled = !suzanne->getComponent<RenderComponent>()->isEnabled;
-            cooldown = 50;
-        }
-        if (cooldown > 0) cooldown--;
-
         if (input.isKeyPressed(KEY_ESCAPE))
             engine.stop();
 
         std::cout << "FPS: " << 1.0f / engine.getDeltaTime() << "\r" << std::flush;
     });
-
-    return 0;
 }
