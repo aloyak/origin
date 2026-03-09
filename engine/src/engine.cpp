@@ -64,6 +64,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     SDL_GL_MakeCurrent(m_window, m_glContext);
     
     m_input = new Input(m_window);
+    m_sceneManager = new SceneManager();
     
 #ifndef __EMSCRIPTEN__ 
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
@@ -172,6 +173,8 @@ void Engine::endFrame() {
 Engine::~Engine() {
     m_entities.clear();
     delete m_input;
+    delete m_sceneManager;
+
     SDL_GL_DeleteContext(m_glContext);
     SDL_DestroyWindow(m_window);
     SDL_Quit();
@@ -205,8 +208,9 @@ float Engine::getAspectRatio() const {
 
 // Entity Management
 
-Entity* Engine::createEntity() {
+Entity* Engine::createEntity(std::string name) {
     m_entities.push_back(std::make_unique<Entity>());
+    m_entities.back()->name = name;
     return m_entities.back().get();
 }
 
@@ -230,14 +234,35 @@ void Engine::updateScene() {
         }
     }
 
+    if (!activeCamera && m_sceneManager->getActiveScene()) {
+        for (auto& entity : m_sceneManager->getActiveScene()->getEntities()) {
+            auto* camComp = entity->getComponent<CameraComponent>();
+            if (camComp) {
+                activeCamera = &camComp->getCamera();
+                activeCameraTransform = &entity->transform;
+                break;
+            }
+        }
+    }
+
     if (!activeCamera) {
-        spdlog::warn("No active camera found in scene!");
+        spdlog::warn("No active camera found in engine or active scene!");
         return;
     }
 
-    for (auto& entity : m_entities)
+    for (auto& entity : m_entities) {
         entity->update(m_deltaTime);
+    }
 
-    for (auto& entity : m_entities)
+    if (m_sceneManager->getActiveScene()) {
+        m_sceneManager->getActiveScene()->update(m_deltaTime);
+    }
+
+    for (auto& entity : m_entities) {
         entity->render(*this, *activeCamera, *activeCameraTransform);
+    }
+
+    if (m_sceneManager->getActiveScene()) {
+        m_sceneManager->getActiveScene()->render(*this, *activeCamera, *activeCameraTransform);
+    }
 }

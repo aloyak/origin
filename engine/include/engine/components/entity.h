@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include <string>
 
 #include "engine/components/component.h"
 #include "engine/transform.h"
@@ -12,6 +13,7 @@ class Camera;
 
 class Entity {
 public:
+    std::string name = "Entity";
     Transform transform;
 
     template<typename T, typename... Args>

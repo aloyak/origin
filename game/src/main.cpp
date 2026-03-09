@@ -1,5 +1,7 @@
 #include "engine/engine.h"
 #include "engine/input/input.h"
+#include "engine/scene/sceneManager.h"
+
 #include "engine/components/entity.h"
 #include "engine/components/renderer.h"
 #include "engine/components/camera.h"
@@ -10,13 +12,14 @@
 int main() {
     Engine engine(1440, 900, "ORIGIN DEMO");
     Input& input = engine.getInput();
+    SceneManager& SceneManager = engine.getSceneManager();
 
     input.setCursorMode(true); // true = locked
     engine.setFullscreen(false);
     engine.enableVSync(false);
 
     // Camera entity
-    Entity* player = engine.createEntity();
+    Entity* player = engine.createEntity("Player");
     player->addComponent<CameraComponent>(60.0f, engine.getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
@@ -41,7 +44,7 @@ int main() {
 
         if (input.isKeyPressed(KEY_ESCAPE))
             engine.stop();
-
+            
         std::cout << "FPS: " << 1.0f / engine.getDeltaTime() << "\r" << std::flush;
     });
 }

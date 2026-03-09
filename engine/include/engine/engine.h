@@ -2,10 +2,12 @@
 
 #include "engine/transform.h"
 #include "engine/input/input.h"
+#include "engine/scene/sceneManager.h"
 
 #include <functional>
 #include <vector>
 #include <memory>
+#include <string>
 
 struct SDL_Window;
 
@@ -28,7 +30,7 @@ public:
     void beginFrame();
     void endFrame();
 
-    Entity* createEntity();
+    Entity* createEntity(std::string name = "Entity");
     void destroyEntity(Entity* entity);
 
     void updateScene();
@@ -40,6 +42,7 @@ public:
     float getDeltaTime() const { return m_deltaTime; }
 
     Input& getInput() { return *m_input; }
+    SceneManager& getSceneManager() { return *m_sceneManager; }
 
     // window
     void setFullscreen(bool fullscreen);
@@ -50,6 +53,7 @@ public:
 private:
     SDL_Window* m_window;
     Input*      m_input;
+    SceneManager* m_sceneManager;
 
     void* m_glContext; // SDL_GLContext type, just not included
 
