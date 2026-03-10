@@ -2,11 +2,14 @@
 #include "engine/input/input.h"
 #include "engine/scene/sceneManager.h"
 
+#include "engine/debug/logger.h"
+
 #include "engine/components/entity.h"
 #include "engine/components/renderer.h"
 #include "engine/components/camera.h"
 
 #include <iostream>
+#include <format>
 
 // Simplified "game" for easy testing!
 int main() {
@@ -45,6 +48,9 @@ int main() {
         if (input.isKeyPressed(KEY_ESCAPE))
             engine.stop();
             
-        std::cout << "FPS: " << 1.0f / engine.getDeltaTime() << "\r" << std::flush;
+        Logger::clear();
+        static float smoothed = 0.0f;
+        smoothed = 0.9f * smoothed + 0.1f * engine.getDeltaTime();
+        Logger::info(std::format("FPS: {:.2f}", 1.0f / smoothed));
     });
 }

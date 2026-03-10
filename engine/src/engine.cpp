@@ -54,6 +54,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     if (!m_window) {
         spdlog::error("Failed to create SDL window: {}", SDL_GetError());
         SDL_Quit();
+        throw std::runtime_error("SDL window creation failed");
     }
     
     m_glContext = SDL_GL_CreateContext(m_window);
@@ -119,18 +120,6 @@ void Engine::render(Model& model, Shader& shader, const Camera& camera, const Tr
     shader.setMat4("u_Projection", camera.getProjectionMatrix());
 
     model.draw(shader);
-}
-
-void Engine::setVerbose(int verbose) {
-    switch (verbose) {
-        case 0: spdlog::set_level(spdlog::level::off);   break;
-        case 1: spdlog::set_level(spdlog::level::err);   break;
-        case 2: spdlog::set_level(spdlog::level::warn);  break;
-        case 3: spdlog::set_level(spdlog::level::info);  break;
-        case 4: spdlog::set_level(spdlog::level::debug); break;
-        case 5: spdlog::set_level(spdlog::level::trace); break;
-        default: spdlog::set_level(spdlog::level::info); break;
-    }
 }
 
 bool Engine::isRunning() {

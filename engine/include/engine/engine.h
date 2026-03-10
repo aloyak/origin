@@ -24,8 +24,6 @@ public:
     void run(std::function<void()> mainLoop);
     void stop();
 
-    void setVerbose(int verbose);
-
     bool isRunning();
     void beginFrame();
     void endFrame();
