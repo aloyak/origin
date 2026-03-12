@@ -11,6 +11,11 @@
 ## General Information
 Origin is a true 3D pixel-art game engine written from scratch in modern C++. It uses OpenGL for rendering and is designed to be cross-platform, supporting Windows, macOS, Linux, and the Web. Web builds are enabled through WebAssembly using Emscripten.
 
+## Screenshot
+![Screenshot](assets/demo.png)
+
+> Origin Engine 0.7 running on Linux. You can see a simple scene with the sponza model and a simple skybox.
+
 ## Building
 
 The project uses **CMake** to generate and build the engine. The repository is organized into three main modules:
