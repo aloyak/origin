@@ -7,6 +7,7 @@
 #include "engine/components/entity.h"
 #include "engine/components/renderer.h"
 #include "engine/components/camera.h"
+#include "engine/components/skybox.h"
 
 #include <iostream>
 #include <format>
@@ -22,7 +23,17 @@ int main() {
 
     sm.load("assets/scenes/sponza.json");
 
-    // Camera entity
+    Entity* skybox = engine.createEntity("Skybox");
+    skybox->addComponent<SkyboxComponent>(std::vector<std::string>{ // Order matters!
+        "assets/textures/skybox/left.png",
+        "assets/textures/skybox/right.png",
+        "assets/textures/skybox/up.png",
+        "assets/textures/skybox/down.png",
+        "assets/textures/skybox/front.png",
+        "assets/textures/skybox/back.png"
+    });
+
+    // Player entity (camera)
     Entity* player = engine.createEntity("Player");
     player->addComponent<CameraComponent>(60.0f, engine.getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);

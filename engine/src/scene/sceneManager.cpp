@@ -1,7 +1,10 @@
 #include "engine/scene/sceneManager.h"
-#include "engine/components/renderer.h"
-#include "engine/components/camera.h"
+
 #include "spdlog/spdlog.h"
+
+#include "engine/components/camera.h"
+#include "engine/components/renderer.h"
+#include "engine/components/skybox.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -15,6 +18,10 @@ Component* createComponentByType(Entity* entity, const std::string& type, const 
     }
     if (type == "CameraComponent") {
         return entity->addComponent<CameraComponent>(60.0f, 1.0f, 0.1f, 100.0f);
+    }
+    if (type == "SkyboxComponent") {
+        std::vector<std::string> faces = jComp["faces"].get<std::vector<std::string>>();
+        return entity->addComponent<SkyboxComponent>(faces);
     }
     return nullptr;
 }
