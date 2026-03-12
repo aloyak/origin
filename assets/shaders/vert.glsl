@@ -10,9 +10,19 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
+uniform bool u_VertexSnap;
+uniform float u_SnapIntensity;
+
 void main() {
-    gl_Position = u_Projection * u_View * u_Model * vec4(aPos, 1.0);
+    vec4 pos = u_Projection * u_View * u_Model * vec4(aPos, 1.0);
     
+    if (u_VertexSnap) {
+        pos.xyz = pos.xyz / pos.w; 
+        pos.xy = floor(pos.xy * u_SnapIntensity) / u_SnapIntensity;
+        pos.xyz *= pos.w;
+    }
+
+    gl_Position = pos;
     TexCoord = aTexCoord;
     vNormal = mat3(transpose(inverse(u_Model))) * aNormal;
 }

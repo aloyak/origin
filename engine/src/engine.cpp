@@ -81,6 +81,61 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     SDL_AddEventWatch(frameBufferSizeCallback, m_window);
 }
 
+void Engine::setPixelArtSettings(unsigned int virtualWidth, unsigned int virtualHeight, int colorDepth) {
+    m_virtualWidth = virtualWidth;
+    m_virtualHeight = virtualHeight;
+    m_colorDepth = colorDepth;
+
+    if (m_fbo != 0) {
+        glDeleteFramebuffers(1, &m_fbo);
+        glDeleteTextures(1, &m_fboTexture);
+        glDeleteRenderbuffers(1, &m_rbo);
+    }
+
+    glGenFramebuffers(1, &m_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+    glGenTextures(1, &m_fboTexture);
+    glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, virtualWidth, virtualHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Very important for pixelarisation
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTexture, 0);
+
+    glGenRenderbuffers(1, &m_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, virtualWidth, virtualHeight);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        spdlog::error("Framebuffer is not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    float quadVertices[] = {
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
+    glGenVertexArrays(1, &m_quadVAO);
+    glGenBuffers(1, &m_quadVBO);
+    glBindVertexArray(m_quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    m_screenShader = std::make_unique<Shader>("assets/shaders/post_vert.glsl", "assets/shaders/post_frag.glsl");
+}
+
 void Engine::stop() {
     m_running = false;
 }
@@ -119,6 +174,9 @@ void Engine::render(Model& model, Shader& shader, const Camera& camera, const Tr
     shader.setMat4("u_View", camera.getViewMatrix(cameraTransform));
     shader.setMat4("u_Projection", camera.getProjectionMatrix());
 
+    shader.setBool("u_VertexSnap", m_vertexSnap);
+    shader.setFloat("u_SnapIntensity", m_snapIntensity);
+
     model.draw(shader);
 }
 
@@ -137,11 +195,56 @@ void Engine::beginFrame() {
     m_deltaTime = currentFrame - m_lastFrame;
     m_lastFrame = currentFrame;
 
+    if (m_fbo != 0) {
+        // Force OpenGL to draw pixel art res
+        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+        glViewport(0, 0, m_virtualWidth, m_virtualHeight); 
+    } else {
+        int w, h;
+        SDL_GetWindowSize(m_window, &w, &h);
+        glViewport(0, 0, w, h);
+    }
+
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Engine::endFrame() {
+    if (m_fbo != 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        
+        int windowWidth, windowHeight;
+        SDL_GetWindowSize(m_window, &windowWidth, &windowHeight);
+        glViewport(0, 0, windowWidth, windowHeight);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        m_screenShader->use();
+        
+        float levels = 255.0f; 
+        if (m_colorDepth <= 4) levels = 4.0f;
+        else if (m_colorDepth <= 8) levels = 8.0f;
+        else if (m_colorDepth <= 16) levels = 32.0f;
+        else if (m_colorDepth >= 32) levels = 0.0f; // 0.0 disables banding in our frag shader
+        
+        m_screenShader->setFloat("colorLevels", levels);
+
+        glBindVertexArray(m_quadVAO);
+        
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE); 
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+        m_screenShader->setInt("screenTexture", 0);
+        
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+    }
+
     SDL_GL_SwapWindow(m_window);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -163,6 +266,14 @@ Engine::~Engine() {
     m_entities.clear();
     delete m_input;
     delete m_sceneManager;
+
+    if (m_fbo) {
+        glDeleteFramebuffers(1, &m_fbo);
+        glDeleteTextures(1, &m_fboTexture);
+        glDeleteRenderbuffers(1, &m_rbo);
+        glDeleteVertexArrays(1, &m_quadVAO);
+        glDeleteBuffers(1, &m_quadVBO);
+    }
 
     SDL_GL_DeleteContext(m_glContext);
     SDL_DestroyWindow(m_window);

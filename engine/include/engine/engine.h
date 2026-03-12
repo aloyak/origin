@@ -25,8 +25,12 @@ public:
     void stop();
 
     bool isRunning();
-    void beginFrame();
-    void endFrame();
+
+    void setPixelArtSettings(unsigned int virtualWidth, unsigned int virtualHeight, int colorDepth = 32);
+    void setVertexSnap(bool enabled, float intensity = 40.0f) { 
+        m_vertexSnap = enabled; 
+        m_snapIntensity = intensity; 
+    }
 
     Entity* createEntity(std::string name = "Entity");
     void destroyEntity(Entity* entity);
@@ -56,10 +60,28 @@ private:
 
     void* m_glContext; // SDL_GLContext type, just not included
 
+    void beginFrame();
+    void endFrame();
+
     float m_deltaTime = 0.0f;
     float m_lastFrame = 0.0f;
 
     std::vector<std::unique_ptr<Entity>> m_entities;
 
     bool m_running = true;
+
+    // Pixel art framebuffer
+    unsigned int m_fbo = 0;
+    unsigned int m_fboTexture = 0;
+    unsigned int m_rbo = 0;
+    unsigned int m_quadVAO = 0;
+    unsigned int m_quadVBO = 0;
+    
+    unsigned int m_virtualWidth = 0;
+    unsigned int m_virtualHeight = 0;
+    int m_colorDepth = 32;
+    std::unique_ptr<Shader> m_screenShader;
+
+    bool m_vertexSnap = false;
+    float m_snapIntensity = 40.0f;
 };

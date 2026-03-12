@@ -14,6 +14,11 @@
 
 int main() {
     Engine engine(1440, 900, "ORIGIN DEMO");
+
+    // Pixel art settings
+    engine.setPixelArtSettings(360, 225, 8);
+    //engine.setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
+
     Input& input = engine.getInput();
     SceneManager& sm = engine.getSceneManager();
 
