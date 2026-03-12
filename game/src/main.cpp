@@ -23,16 +23,6 @@ int main() {
 
     sm.load("assets/scenes/sponza.json");
 
-    Entity* skybox = engine.createEntity("Skybox");
-    skybox->addComponent<SkyboxComponent>(std::vector<std::string>{ // Order matters!
-        "assets/textures/skybox/left.png",
-        "assets/textures/skybox/right.png",
-        "assets/textures/skybox/up.png",
-        "assets/textures/skybox/down.png",
-        "assets/textures/skybox/front.png",
-        "assets/textures/skybox/back.png"
-    });
-
     // Player entity (camera)
     Entity* player = engine.createEntity("Player");
     player->addComponent<CameraComponent>(60.0f, engine.getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
@@ -43,10 +33,17 @@ int main() {
 
     engine.run([&]() {
         float speed = 300.0f * engine.getDeltaTime();
-        if (input.isKeyPressed(KEY_W)) player->transform.position += player->transform.forward() * allowedMove * speed;
-        if (input.isKeyPressed(KEY_S)) player->transform.position -= player->transform.forward() * allowedMove * speed;
-        if (input.isKeyPressed(KEY_A)) player->transform.position += player->transform.right() * allowedMove * speed;
-        if (input.isKeyPressed(KEY_D)) player->transform.position -= player->transform.right() * allowedMove * speed;
+        Vec3 direction = Vec3(0.0f);
+        
+        if (input.isKeyPressed(KEY_W)) direction += player->transform.forward() * allowedMove;
+        if (input.isKeyPressed(KEY_S)) direction -= player->transform.forward() * allowedMove;
+        if (input.isKeyPressed(KEY_A)) direction += player->transform.right() * allowedMove;
+        if (input.isKeyPressed(KEY_D)) direction -= player->transform.right() * allowedMove;
+        
+        if (direction.length() > 0.0f) {
+            direction = direction.normalize();
+            player->transform.position += direction * speed;
+        }
 
         Vec2 delta = input.getMouseDelta();
         player->transform.rotation.y += delta.x * sensitivity;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 struct Vec4 {
     float x, y, z, w;
     Vec4(float _x = 0, float _y = 0, float _z = 0, float _w = 0) : x(_x), y(_y), z(_z), w(_w) {}
@@ -8,11 +10,17 @@ struct Vec4 {
 struct Vec3 {
     float x, y, z;
     Vec3(float _x = 0, float _y = 0, float _z = 0) : x(_x), y(_y), z(_z) {}
+    
+    float length() const { return std::sqrt(x*x + y*y + z*z); }
+    Vec3 normalize() const { float len = length(); return len > 0 ? Vec3(x / len, y / len, z / len) : *this; }
 };
 
 struct Vec2 {
     float x, y;
     Vec2(float _x = 0, float _y = 0) : x(_x), y(_y) {}
+    
+    float length() const { return std::sqrt(x*x + y*y); }
+    Vec2 normalize() const { float len = length(); return len > 0 ? Vec2(x / len, y / len) : *this; }
 };
 
 inline Vec3 operator*(Vec3 a, float s) { return {a.x*s, a.y*s, a.z*s}; }
