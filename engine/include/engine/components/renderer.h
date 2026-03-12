@@ -12,8 +12,9 @@ public:
     RenderComponent(const std::string& modelPath,
                     const std::string& vertPath = "assets/shaders/vert.glsl",
                     const std::string& fragPath = "assets/shaders/frag.glsl");
-
-    Shader& getShader() { return *m_shader; }
+    
+    void serialize(nlohmann::json& j) const override;
+    void deserialize(const nlohmann::json& j) override;
 
     void setTexture(const std::string& path, const std::string& type = "diffuse");
 
@@ -27,4 +28,8 @@ private:
     std::shared_ptr<Texture> m_specularOverride;
 
     void bindOverrides() const;
+
+    std::string m_modelPath;
+    std::string m_vertPath;
+    std::string m_fragPath;
 };

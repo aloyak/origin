@@ -5,9 +5,9 @@
 
 class SceneManager {
 public:
-    Scene* loadScene(const std::string& scenePath);
-    void unloadScene();
-    void saveScene(const std::string& scenePath);
+    Scene* load(const std::string& scenePath);
+    void unload();
+    void save(const std::string& scenePath);
 
     Scene* getActiveScene() { return m_activeScene; }
 

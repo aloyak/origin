@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 class Scene {
 public:
@@ -11,6 +12,7 @@ public:
 
     Entity* createEntity(std::string name = "Entity");
     void destroyEntity(Entity* entity);
+    void addEntity(std::unique_ptr<Entity> entity);
 
     void update(float deltaTime);
     void render(Engine& engine, const Camera& camera, const Transform& cameraTransform);

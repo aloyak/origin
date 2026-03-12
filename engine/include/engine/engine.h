@@ -30,6 +30,7 @@ public:
 
     Entity* createEntity(std::string name = "Entity");
     void destroyEntity(Entity* entity);
+    void moveToScene(Entity* entity);
 
     void updateScene();
 

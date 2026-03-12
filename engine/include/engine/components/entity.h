@@ -53,6 +53,10 @@ public:
             comp->render(engine, camera, cameraTransform);
     }
 
+    const std::unordered_map<std::type_index, std::unique_ptr<Component>>& getComponents() const { 
+        return m_components; 
+    }
+
 private:
     std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
 };

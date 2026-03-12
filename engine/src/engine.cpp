@@ -211,6 +211,20 @@ void Engine::destroyEntity(Entity* entity) {
     );
 }
 
+void Engine::moveToScene(Entity* entity) {
+    auto it = std::find_if(m_entities.begin(), m_entities.end(),
+        [entity](const std::unique_ptr<Entity>& e) { return e.get() == entity; });
+
+    if (it != m_entities.end()) {
+        if (m_sceneManager->getActiveScene()) {
+            m_sceneManager->getActiveScene()->addEntity(std::move(*it));
+        } else {
+            spdlog::warn("Cannot move entity to scene: No active scene");
+        }
+        m_entities.erase(it);
+    }
+}
+
 void Engine::updateScene() {
     Camera* activeCamera = nullptr;
     const Transform* activeCameraTransform = nullptr;

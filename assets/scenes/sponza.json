@@ -1,0 +1,33 @@
+{
+    "name": "Sponza Environment",
+    "entities": [
+        {
+            "name": "Sponza",
+            "components": [
+                {
+                    "type": "RenderComponent",
+                    "model": "assets/models/sponza/sponza.obj",
+                    "frag": "assets/shaders/frag.glsl",
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ]
+}
