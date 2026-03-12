@@ -28,6 +28,39 @@
                     1.0
                 ]
             }
+        },
+        {
+            "components": [
+                {
+                    "faces": [
+                        "assets/textures/skybox/left.png",
+                        "assets/textures/skybox/right.png",
+                        "assets/textures/skybox/up.png",
+                        "assets/textures/skybox/down.png",
+                        "assets/textures/skybox/front.png",
+                        "assets/textures/skybox/back.png"
+                    ],
+                    "type": "SkyboxComponent"
+                }
+            ],
+            "name": "Skybox",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
         }
     ]
 }
