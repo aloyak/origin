@@ -9,7 +9,7 @@
 * **[Demo Game](https://origin.aloyak.dev/game)**
 
 ## General Information
-Origin is a true 3D pixel-art game engine written from scratch in modern C++. It uses OpenGL for rendering and is designed to be cross-platform, supporting Windows, macOS, Linux, and the Web. Web builds are enabled through WebAssembly using Emscripten.
+Origin is a true 3D pixel-art game engine written from scratch in modern C++. It uses OpenGL for rendering and is designed to be cross-platform, supporting Windows, MacOS, Linux, and Web Builds. Web builds are enabled through WebAssembly using Emscripten.
 
 ## Screenshot
 ![Screenshot](assets/demo.png)
@@ -55,14 +55,12 @@ chmod +x ./build.sh
 python3 -m http.server 8080 --directory build-web/game/ # suggestion!
 ```
 
-* Mouse Input seems to be broken on Brave
-
 This script will generate a build directory specific for web and compile the project.
 Your build can be found at `build-web/game/game.html`, it should be opened with a server in order to work!
 
 ### Other Platforms
 
-Support for other platforms is supported but currently limited:
+Support for other platforms is enabled but currently limited:
 
 * Windows — not yet tested (recommended using Visual Studio to build)
 * macOS — not yet tested (origin uses OpenGL 4.1 as it is the last supported openGL version for MacOS, but **it is officially deprecated!**)
