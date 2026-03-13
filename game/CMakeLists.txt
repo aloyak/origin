@@ -4,6 +4,11 @@ add_executable(${GAME_NAME} src/main.cpp)
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/${GAME_NAME}/)
 
+target_include_directories(${GAME_NAME}
+    PUBLIC  include
+    PRIVATE src
+)
+
 target_link_libraries(${GAME_NAME} PRIVATE engine)
 
 if(EMSCRIPTEN)

@@ -11,6 +11,7 @@ public:
     void* getViewMatrix(const Transform& transform) const;
     void* getProjectionMatrix() const;
 
+    void setAspectRatio(float aspect);
 private:
     struct CameraData;
     CameraData* m_data;

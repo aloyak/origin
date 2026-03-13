@@ -408,8 +408,6 @@ void Engine::moveToScene(Entity* entity) {
     if (it != m_entities.end()) {
         if (m_sceneManager->getActiveScene()) {
             m_sceneManager->getActiveScene()->addEntity(std::move(*it));
-        } else {
-            spdlog::warn("Cannot move entity to scene: No active scene");
         }
         m_entities.erase(it);
     }
@@ -439,7 +437,6 @@ void Engine::updateScene() {
     }
 
     if (!activeCamera) {
-        spdlog::warn("No active camera found in engine or active scene!");
         return;
     }
 

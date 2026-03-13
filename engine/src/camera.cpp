@@ -34,6 +34,13 @@ void* Camera::getProjectionMatrix() const {
     return &m_data->projection;
 }
 
+void Camera::setAspectRatio(float aspect) {
+    float fov = glm::degrees(2.0f * atan(1.0f / m_data->projection[1][1]));
+    float zNear = m_data->projection[3][2] / (m_data->projection[2][2] - 1.0f);
+    float zFar = m_data->projection[3][2] / (m_data->projection[2][2] + 1.0f);
+    m_data->projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+}
+
 Camera::~Camera() {
     delete m_data;
 }
