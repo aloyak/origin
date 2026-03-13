@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 set(PROJECT_NAME "origin")
-set(PROJECT_VERS "0.4.0")
+set(PROJECT_VERS "0.7.0")
 
 project(${PROJECT_NAME} VERSION ${PROJECT_VERS})
 set(CMAKE_CXX_STANDARD 20)
@@ -17,3 +17,7 @@ endif()
 
 add_subdirectory(engine)
 add_subdirectory(game)
+
+if (NOT EMSCRIPTEN OR NOT DEFINED ORIGIN_NO_SANDBOX) # Emscripten may be added in the future
+    add_subdirectory(sandbox)
+endif()

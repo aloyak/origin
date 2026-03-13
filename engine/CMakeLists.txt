@@ -30,9 +30,10 @@ else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/stb.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imgui.cmake)
 
     target_link_libraries(engine 
-        PRIVATE glad SDL2::SDL2 glm::glm spdlog::spdlog stb_image assimp::assimp 
-        PUBLIC  nlohmann_json::nlohmann_json
+        PRIVATE glad glm::glm spdlog::spdlog stb_image assimp::assimp
+        PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui
     )
 endif()

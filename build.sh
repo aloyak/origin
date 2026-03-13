@@ -2,10 +2,12 @@
 echo "Building Project..."
 
 WEB_BUILD=false
+NO_SANDBOX=false
 
 for arg in "$@"; do
     case $arg in
         --web) WEB_BUILD=true ;;
+        --no-sandbox) NO_SANDBOX=true ;;
         *) echo "Unknown argument: $arg"; exit 1 ;;
     esac
 done
@@ -32,6 +34,11 @@ else
 
     mkdir -p build && cd build
     cmake .. 
+    if [ "$NO_SANDBOX" = true ]; then
+        cmake .. -DORIGIN_NO_SANDBOX=ON
+    else
+        cmake ..
+    fi
     cmake --build . -- -j$(nproc)
 
     echo "Build complete!"

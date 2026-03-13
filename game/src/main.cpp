@@ -4,7 +4,6 @@
 
 #include "engine/debug/logger.h"
 
-#include "engine/components/entity.h"
 #include "engine/components/renderer.h"
 #include "engine/components/camera.h"
 #include "engine/components/skybox.h"
@@ -13,10 +12,11 @@
 #include <format>
 
 int main() {
-    Engine engine(1440, 900, "ORIGIN DEMO");
+    Engine engine(1600, 900, "Origin Game");
 
     // Pixel art settings
-    engine.setPixelArtSettings(360, 225, 8);
+    engine.setupRenderTarget(400, 225); // Creates the offscreen framebuffer (used for pixelart or special post-processing effects, like the sandbox viewport!)
+    engine.setPixelArt(true, 8);
     //engine.setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
 
     Input& input = engine.getInput();

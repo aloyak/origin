@@ -9,6 +9,12 @@
 #include <memory>
 #include <string>
 
+#ifndef __EMSCRIPTEN__
+    #include <imgui.h>
+    #include <imgui_impl_sdl2.h>
+    #include <imgui_impl_opengl3.h>
+#endif
+
 struct SDL_Window;
 
 class Shader;
@@ -26,10 +32,15 @@ public:
 
     bool isRunning();
 
-    void setPixelArtSettings(unsigned int virtualWidth, unsigned int virtualHeight, int colorDepth = 32);
-    void setVertexSnap(bool enabled, float intensity = 40.0f) { 
-        m_vertexSnap = enabled; 
-        m_snapIntensity = intensity; 
+    void setupRenderTarget(unsigned int width, unsigned int height);
+    void resizeRenderTarget(unsigned int width, unsigned int height);
+
+    void setPixelArt(bool enabled, int colorDepth = 32);
+
+
+    void setVertexSnap(bool enabled, float intensity = 40.0f) {
+        m_vertexSnap = enabled;
+        m_snapIntensity = intensity;
     }
 
     Entity* createEntity(std::string name = "Entity");
@@ -47,6 +58,17 @@ public:
     Input& getInput() { return *m_input; }
     SceneManager& getSceneManager() { return *m_sceneManager; }
 
+    // UI
+    void initUI();
+    void beginUI();
+    void endUI();
+#ifndef __EMSCRIPTEN__
+    ImGuiIO& getIO() { return ImGui::GetIO(); }
+#endif
+
+    // Returns the FBO texture ID to use with Imgui (sandbox stuff)
+    unsigned int getRenderTexture() const { return m_fboTexture; }
+
     // window
     void setFullscreen(bool fullscreen);
     void setWindowTitle(const char* title);
@@ -61,6 +83,7 @@ private:
     void* m_glContext; // SDL_GLContext type, just not included
 
     void beginFrame();
+    void resolveFrame();
     void endFrame();
 
     float m_deltaTime = 0.0f;
@@ -70,15 +93,18 @@ private:
 
     bool m_running = true;
 
-    // Pixel art framebuffer
+    // Render target
     unsigned int m_fbo = 0;
     unsigned int m_fboTexture = 0;
     unsigned int m_rbo = 0;
     unsigned int m_quadVAO = 0;
     unsigned int m_quadVBO = 0;
-    
+
     unsigned int m_virtualWidth = 0;
     unsigned int m_virtualHeight = 0;
+
+    // Pixel Art
+    bool m_pixelArtEnabled = false;
     int m_colorDepth = 32;
     std::unique_ptr<Shader> m_screenShader;
 
