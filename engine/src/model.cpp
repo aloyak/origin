@@ -7,6 +7,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "engine/debug/path.h"
+
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>
 #else
@@ -25,6 +27,8 @@ void Model::draw(Shader& shader) {
 }
 
 void Model::loadModel(std::string path) {
+    path = Path::resolve(path).string();
+
     Assimp::Importer import;
     const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 

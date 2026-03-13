@@ -11,7 +11,11 @@
 
 #include <spdlog/spdlog.h>
 
+#include "engine/debug/path.h"
+
 Texture::Texture(const std::string& path) {
+    std::string resolvedPath = Path::resolve(path).string();
+    
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_2D, ID);
 

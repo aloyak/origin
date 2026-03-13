@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include "engine/shader.h"
+#include "engine/debug/path.h"
 
 auto replaceFirstLine = [](std::string& src, const std::string& newLine)
 {
@@ -23,7 +24,10 @@ auto replaceFirstLine = [](std::string& src, const std::string& newLine)
         src = newLine;
 };
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath) {
+Shader::Shader(std::string vertexPath, std::string fragmentPath) {
+    vertexPath = Path::resolve(vertexPath).string();
+    fragmentPath = Path::resolve(fragmentPath).string();
+
     std::string vertexCode;
     std::string fragmentCode;
     std::ifstream vShaderFile;

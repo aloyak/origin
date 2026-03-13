@@ -15,6 +15,8 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
+#include "engine/debug/path.h"
+
 SkyboxComponent::SkyboxComponent(const std::vector<std::string>& faces) 
     : m_facePaths(faces) {
     m_shader = std::make_unique<Shader>("assets/shaders/skybox/skybox_vert.glsl", "assets/shaders/skybox/skybox_frag.glsl");
@@ -30,7 +32,8 @@ void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
 
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 3);
+        std::string resolvedPath = Path::resolve(faces[i]).string();
+        unsigned char* data = stbi_load(resolvedPath.c_str(), &width, &height, &nrChannels, 3);
         if (data) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
                          0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);

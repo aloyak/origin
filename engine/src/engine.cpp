@@ -20,6 +20,8 @@
 #include <spdlog/spdlog.h>
 #include <algorithm>
 
+#include "engine/debug/path.h"
+
 int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
     if (event->type == SDL_WINDOWEVENT) {
         if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
@@ -32,6 +34,8 @@ int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
 }
 
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
+    Path::init();
+
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
 

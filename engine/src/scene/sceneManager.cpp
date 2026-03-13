@@ -9,6 +9,8 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
+#include "engine/debug/path.h"
+
 using json = nlohmann::json;
 
 Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
@@ -43,6 +45,7 @@ Entity* SceneManager::createEntity(std::string name) {
 }
 
 void SceneManager::save(const std::string& scenePath) {
+    std::string resolvedScenePath = Path::resolve(scenePath).string();
     if (!m_activeScene) {
         spdlog::warn("No active scene to save.");
         return;
@@ -72,19 +75,21 @@ void SceneManager::save(const std::string& scenePath) {
         j["entities"].push_back(jEnt);
     }
 
-    std::ofstream file(scenePath);
+    std::ofstream file(resolvedScenePath);
     if (file.is_open()) {
         file << j.dump(4);
-        spdlog::info("Scene saved to: {}", scenePath);
+        spdlog::info("Scene saved to: {}", resolvedScenePath);
     } else {
-        spdlog::error("Failed to open file for saving: {}", scenePath);
+        spdlog::error("Failed to open file for saving: {}", resolvedScenePath);
     }
 }
 
 Scene* SceneManager::load(const std::string& scenePath) {
-    std::ifstream file(scenePath);
+    std::string resolvedScenePath = Path::resolve(scenePath).string();
+
+    std::ifstream file(resolvedScenePath);
     if (!file.is_open()) {
-        spdlog::error("Could not open scene file: {}", scenePath);
+        spdlog::error("Could not open scene file: {}", resolvedScenePath);
         return nullptr;
     }
 
@@ -92,7 +97,7 @@ Scene* SceneManager::load(const std::string& scenePath) {
     try {
         file >> j;
     } catch (json::parse_error& e) {
-        spdlog::error("JSON parse error in {}: {}", scenePath, e.what());
+        spdlog::error("JSON parse error in {}: {}", resolvedScenePath, e.what());
         return nullptr;
     }
 
@@ -130,6 +135,6 @@ Scene* SceneManager::load(const std::string& scenePath) {
         }
     }
 
-    spdlog::info("Scene '{}' loaded from {}", m_activeScene->name, scenePath);
+    spdlog::info("Scene '{}' loaded from {}", m_activeScene->name, resolvedScenePath);
     return m_activeScene;
 }
