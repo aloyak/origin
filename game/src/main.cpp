@@ -23,14 +23,14 @@ int main() {
     SceneManager& sm = engine.getSceneManager();
 
     input.setCursorMode(true); // true = locked
-    engine.setFullscreen(false);
-    engine.enableVSync(false);
+    engine.getWindow().setFullscreen(false);
+    engine.getWindow().enableVSync(false);
 
     sm.load("assets/scenes/sponza.json");
 
     // Player entity (camera)
     Entity* player = engine.createEntity("Player");
-    player->addComponent<CameraComponent>(60.0f, engine.getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
+    player->addComponent<CameraComponent>(60.0f, engine.getWindow().getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
     float sensitivity = 0.035f;

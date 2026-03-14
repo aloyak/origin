@@ -18,20 +18,8 @@
 
 #include <SDL2/SDL.h>
 #include <spdlog/spdlog.h>
-#include <algorithm>
 
 #include "engine/debug/path.h"
-
-int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
-    if (event->type == SDL_WINDOWEVENT) {
-        if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-            int width = event->window.data1;
-            int height = event->window.data2;
-            glViewport(0, 0, width, height);
-        }
-    }
-    return 0;
-}
 
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     Path::init();
@@ -39,50 +27,31 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
 
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
-        SDL_Quit();
-    }
-
-#ifdef __EMSCRIPTEN__
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#else // OpenGL 4.1 as it is the last supported by MacOS
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#endif
-
-    m_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
-    if (!m_window) {
-        spdlog::error("Failed to create SDL window: {}", SDL_GetError());
-        SDL_Quit();
-        throw std::runtime_error("SDL window creation failed");
-    }
-
-    m_glContext = SDL_GL_CreateContext(m_window);
-    if (!m_glContext) {
-        spdlog::error("Failed to create GL context: {}", SDL_GetError());
-        SDL_Quit();
-    }
-    SDL_GL_MakeCurrent(m_window, m_glContext);
-
-    m_input = new Input(m_window);
+    m_window = new Window(width, height, title);
+    m_input = new Input(m_window->getHandle());
     m_sceneManager = new SceneManager();
+}
 
+Engine::~Engine() {
 #ifndef __EMSCRIPTEN__
-    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
-        spdlog::error("Failed to init GLAD!");
+    if (ImGui::GetCurrentContext() != nullptr) {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
     }
 #endif
-    spdlog::info("Using OpenGL {}", (const char*)glGetString(GL_VERSION));
 
-    glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, width, height);
+    m_entities.clear();
+    delete m_input;
+    delete m_sceneManager;
 
-    SDL_SetWindowResizable(m_window, SDL_TRUE);
-    SDL_AddEventWatch(frameBufferSizeCallback, m_window);
+    if (m_fbo) {
+        glDeleteFramebuffers(1, &m_fbo);
+        glDeleteTextures(1, &m_fboTexture);
+        glDeleteRenderbuffers(1, &m_rbo);
+        glDeleteVertexArrays(1, &m_quadVAO);
+        glDeleteBuffers(1, &m_quadVBO);
+    }
 }
 
 void Engine::setupRenderTarget(unsigned int width, unsigned int height) {
@@ -231,7 +200,7 @@ void Engine::initUI() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    ImGui_ImplSDL2_InitForOpenGL(m_window, m_glContext);
+    ImGui_ImplSDL2_InitForOpenGL(m_window->getHandle(), m_window->getGLContext());
     ImGui_ImplOpenGL3_Init("#version 410");
 #endif
 }
@@ -263,9 +232,8 @@ void Engine::beginFrame() {
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
         glViewport(0, 0, m_virtualWidth, m_virtualHeight);
     } else {
-        int w, h;
-        SDL_GetWindowSize(m_window, &w, &h);
-        glViewport(0, 0, w, h);
+        Vec2 size = m_window->getSize();
+        glViewport(0, 0, (int)size.x, (int)size.y);
     }
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -276,9 +244,8 @@ void Engine::resolveFrame() {
     if (m_fbo != 0) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        int windowWidth, windowHeight;
-        SDL_GetWindowSize(m_window, &windowWidth, &windowHeight);
-        glViewport(0, 0, windowWidth, windowHeight);
+        Vec2 size = m_window->getSize();
+        glViewport(0, 0, (int)size.x, (int)size.y);
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -312,7 +279,8 @@ void Engine::resolveFrame() {
 }
 
 void Engine::endFrame() {
-    SDL_GL_SwapWindow(m_window);
+    m_window->swapBuffers();
+
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
 #ifndef __EMSCRIPTEN__
@@ -332,61 +300,7 @@ void Engine::endFrame() {
     }
 }
 
-
-Engine::~Engine() {
-#ifndef __EMSCRIPTEN__
-    if (ImGui::GetCurrentContext() != nullptr) {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
-    }
-#endif
-
-    m_entities.clear();
-    delete m_input;
-    delete m_sceneManager;
-
-    if (m_fbo) {
-        glDeleteFramebuffers(1, &m_fbo);
-        glDeleteTextures(1, &m_fboTexture);
-        glDeleteRenderbuffers(1, &m_rbo);
-        glDeleteVertexArrays(1, &m_quadVAO);
-        glDeleteBuffers(1, &m_quadVBO);
-    }
-
-    SDL_GL_DeleteContext(m_glContext);
-    SDL_DestroyWindow(m_window);
-    SDL_Quit();
-}
-
-// Window Management
-
-void Engine::setFullscreen(bool fullscreen) {
-    if (fullscreen)
-        SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    else
-        SDL_SetWindowFullscreen(m_window, 0);
-}
-
-void Engine::enableVSync(bool enabled) {
-    if (enabled)
-        SDL_GL_SetSwapInterval(1);
-    else
-        SDL_GL_SetSwapInterval(0);
-}
-
-void Engine::setWindowTitle(const char* title) {
-    SDL_SetWindowTitle(m_window, title);
-}
-
-float Engine::getAspectRatio() const {
-    int w, h;
-    SDL_GetWindowSize(m_window, &w, &h);
-    return (float)w / (float)h;
-}
-
 // Entity Management
-
 Entity* Engine::createEntity(std::string name) {
     m_entities.push_back(std::make_unique<Entity>());
     m_entities.back()->name = name;
@@ -416,6 +330,7 @@ void Engine::moveToScene(Entity* entity) {
 void Engine::updateScene() {
     Camera* activeCamera = nullptr;
     const Transform* activeCameraTransform = nullptr;
+
     for (auto& entity : m_entities) {
         auto* camComp = entity->getComponent<CameraComponent>();
         if (camComp) {

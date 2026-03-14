@@ -13,11 +13,10 @@ Layer::Layer(Engine& engine)
     static std::string layout = Path::resolve("resources/layout.ini").string();
     io.IniFilename = layout.c_str();
 
-    //std::string input;
-    //std::cout << "Enter scene file path: "; // Placeholder!
-    //std::getline(std::cin, input);
+    std::string input;
+    std::cout << "Enter scene file path: "; // Placeholder!
+    std::getline(std::cin, input);
 
-    std::string input = "/home/aloyak/dev/origin/assets/scenes/sponza.json"; // DO NOT COMMIT!
 
     ScenePathInfo info = GetSceneContext(input);
     
@@ -25,7 +24,7 @@ Layer::Layer(Engine& engine)
     sm.load(info.scene.string());
 
     Entity* cam = m_Engine.createEntity("Editor Camera");
-    cam->addComponent<CameraComponent>(60.0f, m_Engine.getAspectRatio(), 0.1f, 10000.0f);
+    cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);
     cam->transform.position = Vec3(0.0f, 150.0f, 500.0f);
     m_EditorCamera = cam;
 }
@@ -42,6 +41,7 @@ void Layer::DrawMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Scene", "Ctrl+N")) m_Engine.getSceneManager().createScene("Empty Scene");
+            ImGui::Separator();
             if (ImGui::MenuItem("Exit")) m_Engine.stop();
             ImGui::EndMenu();
         }
@@ -52,6 +52,19 @@ void Layer::DrawMenuBar() {
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Window")) {
+            if (ImGui::MenuItem("Set Fullscreen", "F11")) {
+                m_Window.setFullscreen(!m_Window.isFullscreen());
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("GitHub")) {
+                // todo: https://github.com/aloyak/origin
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
 }
@@ -156,6 +169,7 @@ void Layer::DrawProperties() {
         ImGui::Text("Name: %s", m_SelectedEntity->name.c_str());
         ImGui::Separator();
 
+        ImGui::Text("Transform");
         float pos[3] = { m_SelectedEntity->transform.position.x, m_SelectedEntity->transform.position.y, m_SelectedEntity->transform.position.z };
         if (ImGui::DragFloat3("Position", pos, 0.5f)) m_SelectedEntity->transform.position = Vec3(pos[0], pos[1], pos[2]);
 
@@ -165,7 +179,12 @@ void Layer::DrawProperties() {
         float scale[3] = { m_SelectedEntity->transform.scale.x, m_SelectedEntity->transform.scale.y, m_SelectedEntity->transform.scale.z };
         if (ImGui::DragFloat3("Scale", scale, 0.01f)) m_SelectedEntity->transform.scale = Vec3(scale[0], scale[1], scale[2]);
 
-        // Component list
+        ImGui::Separator();
+
+        for (const auto& [type, comp] : m_SelectedEntity->getComponents()) {
+            ImGui::Text("%s", type.name());
+            ImGui::Separator();
+        }
 
         if (ImGui::Button("Add Component")) {
             //

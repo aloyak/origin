@@ -29,6 +29,8 @@ private:
 
     Engine& m_Engine;
     Input& m_Input = m_Engine.getInput();
+    Window& m_Window = m_Engine.getWindow();
+
     Entity* m_SelectedEntity = nullptr;
     ImVec2 m_ViewportSize = { 1600, 900 };
 

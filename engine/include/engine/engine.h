@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/transform.h"
+#include "engine/window.h"
 #include "engine/input/input.h"
 #include "engine/scene/sceneManager.h"
 
@@ -14,8 +15,6 @@
     #include <imgui_impl_sdl2.h>
     #include <imgui_impl_opengl3.h>
 #endif
-
-struct SDL_Window;
 
 class Shader;
 class Camera;
@@ -57,6 +56,7 @@ public:
 
     Input& getInput() { return *m_input; }
     SceneManager& getSceneManager() { return *m_sceneManager; }
+    Window& getWindow() { return *m_window; }
 
     // UI
     void initUI();
@@ -69,18 +69,10 @@ public:
     // Returns the FBO texture ID to use with Imgui (sandbox stuff)
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
-    // window
-    void setFullscreen(bool fullscreen);
-    void setWindowTitle(const char* title);
-    void enableVSync(bool enabled);
-    float getAspectRatio() const;
-
 private:
-    SDL_Window* m_window;
+    Window*     m_window;
     Input*      m_input;
     SceneManager* m_sceneManager;
-
-    void* m_glContext; // SDL_GLContext type, just not included
 
     void beginFrame();
     void resolveFrame();
