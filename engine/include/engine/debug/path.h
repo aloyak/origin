@@ -14,6 +14,10 @@ public:
         SDL_free(base);
     }
 
+    static void setBase(const std::filesystem::path& base) {
+        s_base = base;
+    }
+
     static std::filesystem::path resolve(const std::string& relative) {
         return s_base / relative;
     }

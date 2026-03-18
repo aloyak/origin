@@ -4,6 +4,8 @@
 #include "engine/components/camera.h"
 #include "engine/debug/path.h"
 
+#include "engine/debug/logger.h"
+
 #include <iostream>
 
 Layer::Layer(Engine& engine) 
@@ -19,7 +21,8 @@ Layer::Layer(Engine& engine)
 
 
     ScenePathInfo info = GetSceneContext(input);
-    
+    Path::setBase(info.root);
+
     SceneManager& sm = m_Engine.getSceneManager();
     sm.load(info.scene.string());
 
@@ -198,11 +201,12 @@ void Layer::DrawProperties() {
 ScenePathInfo Layer::GetSceneContext(const std::string& inputPath) {
     fs::path fullPath = fs::absolute(inputPath).lexically_normal();
     std::string pathStr = fullPath.generic_string();
-    std::string anchor = "/assets/";
 
-    size_t pos = pathStr.find(anchor);
-    if (pos != std::string::npos) {
-        return { fs::path(pathStr.substr(0, pos + 1)), fullPath };
+    size_t pos = pathStr.find("/assets/");
+    if (pos == std::string::npos) {
+        Logger::error(std::format("Invalid scene path: '{}'. Must be inside the 'assets' directory.", inputPath)); 
+        return { {}, {} };
     }
-    return { fullPath.parent_path(), fullPath };
+
+    return { fs::path(pathStr.substr(0, pos + 1)), fullPath };
 }

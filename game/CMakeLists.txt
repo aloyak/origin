@@ -18,9 +18,12 @@ if(EMSCRIPTEN)
         -sFULL_ES3=1
         -sUSE_WEBGL2=1
         -sALLOW_MEMORY_GROWTH=1
+        -sINITIAL_MEMORY=536870912
+        -sEXIT_RUNTIME=1
         -fexceptions
         --shell-file ${CMAKE_SOURCE_DIR}/game/web/shell.html
-        --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets
+        --preload-file ${CMAKE_SOURCE_DIR}/assets@/assets --no-heap-copy --no-decode
+        --use-preload-plugins
     )
     target_compile_options(${GAME_NAME} PRIVATE -fexceptions)
 endif()

@@ -16,6 +16,6 @@ endif()
 add_subdirectory(engine)
 add_subdirectory(game)
 
-if (NOT EMSCRIPTEN OR NOT DEFINED ORIGIN_NO_SANDBOX) # Emscripten may be added in the future
+if (NOT EMSCRIPTEN AND NOT ORIGIN_NO_SANDBOX)
     add_subdirectory(sandbox)
 endif()

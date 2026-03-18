@@ -2,7 +2,8 @@
 
 #include <string>
 
-// Meant to be used with std::format, which is C++20 so some compilers might not support this
+#include <format> // C++20 formatting library, may cause issues, remove if so
+
 class Logger {
 public:
     static void setVerbose(int verbose);

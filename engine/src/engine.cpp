@@ -109,7 +109,10 @@ void Engine::setupRenderTarget(unsigned int width, unsigned int height) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     if (!m_screenShader) {
-        m_screenShader = std::make_unique<Shader>("assets/shaders/post_vert.glsl", "assets/shaders/post_frag.glsl");
+        m_screenShader = std::make_unique<Shader>(
+            Path::resolve("assets/shaders/post_vert.glsl").string(),
+            Path::resolve("assets/shaders/post_frag.glsl").string()
+        );
     }
 }
 
