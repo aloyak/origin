@@ -18,6 +18,7 @@ public:
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
 
+    std::vector<std::string> getFaces() const { return m_facePaths; }
 private:
     unsigned int m_cubemapID;
     unsigned int m_skyboxVAO, m_skyboxVBO;

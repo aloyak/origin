@@ -1,4 +1,9 @@
-#include "layer.h"
+#include "sandbox/layer.h"
+#include "sandbox/inspectorRegistry.h"
+
+#include "engine/components/camera.h"
+#include "engine/components/renderer.h"
+#include "engine/components/skybox.h"
 
 #include "engine/input/input.h"
 #include "engine/components/camera.h"
@@ -18,6 +23,25 @@ Layer::Layer(Engine& engine)
     std::string input;
     std::cout << "Enter scene file path: "; // Placeholder!
     std::getline(std::cin, input);
+
+    
+    // Register Components
+    InspectorRegistry::registerComponent<CameraComponent>([](CameraComponent* c) {
+        float fov = c->getCamera().getFov();
+        if (ImGui::DragFloat("FOV", &fov, 0.5f, 10.0f, 170.0f))
+            c->getCamera().setFov(fov);
+    });
+
+    InspectorRegistry::registerComponent<RenderComponent>([](RenderComponent* c) {
+        ImGui::LabelText("Model", "%s", c->getModelPath().c_str());
+        ImGui::LabelText("Vert",  "%s", c->getVertPath().c_str());
+        ImGui::LabelText("Frag",  "%s", c->getFragPath().c_str());
+    });
+
+    InspectorRegistry::registerComponent<SkyboxComponent>([](SkyboxComponent* c) {
+        for (int i = 0; i < (int)c->getFaces().size(); i++)
+            ImGui::LabelText(("Face " + std::to_string(i)).c_str(), "%s", c->getFaces()[i].c_str());
+    });
 
 
     ScenePathInfo info = GetSceneContext(input);
@@ -63,7 +87,17 @@ void Layer::DrawMenuBar() {
         }
         if (ImGui::BeginMenu("Help")) {
             if (ImGui::MenuItem("GitHub")) {
-                // todo: https://github.com/aloyak/origin
+                std::string url = "https://github.com/aloyak/origin";
+                
+                #ifdef _WIN32
+                    ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+                #elif __APPLE__
+                    std::string command = "open " + url;
+                    system(command.c_str());
+                #else
+                    std::string command = "xdg-open " + url;
+                    system(command.c_str());
+                #endif
             }
             ImGui::EndMenu();
         }
@@ -169,23 +203,38 @@ void Layer::DrawHierarchy() {
 void Layer::DrawProperties() {
     ImGui::Begin("Properties");
     if (m_SelectedEntity) {
-        ImGui::Text("Name: %s", m_SelectedEntity->name.c_str());
+        char nameBuf[256];
+        strncpy(nameBuf, m_SelectedEntity->name.c_str(), sizeof(nameBuf));
+        if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
+            m_SelectedEntity->name = nameBuf;
+            
         ImGui::Separator();
 
-        ImGui::Text("Transform");
-        float pos[3] = { m_SelectedEntity->transform.position.x, m_SelectedEntity->transform.position.y, m_SelectedEntity->transform.position.z };
-        if (ImGui::DragFloat3("Position", pos, 0.5f)) m_SelectedEntity->transform.position = Vec3(pos[0], pos[1], pos[2]);
+        if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            float pos[3] = { m_SelectedEntity->transform.position.x, m_SelectedEntity->transform.position.y, m_SelectedEntity->transform.position.z };
+            if (ImGui::DragFloat3("Position", pos, 0.5f)) m_SelectedEntity->transform.position = Vec3(pos[0], pos[1], pos[2]);
 
-        float rot[3] = { m_SelectedEntity->transform.rotation.x, m_SelectedEntity->transform.rotation.y, m_SelectedEntity->transform.rotation.z };
-        if (ImGui::DragFloat3("Rotation", rot, 0.5f)) m_SelectedEntity->transform.rotation = Vec3(rot[0], rot[1], rot[2]);
+            float rot[3] = { m_SelectedEntity->transform.rotation.x, m_SelectedEntity->transform.rotation.y, m_SelectedEntity->transform.rotation.z };
+            if (ImGui::DragFloat3("Rotation", rot, 0.5f)) m_SelectedEntity->transform.rotation = Vec3(rot[0], rot[1], rot[2]);
 
-        float scale[3] = { m_SelectedEntity->transform.scale.x, m_SelectedEntity->transform.scale.y, m_SelectedEntity->transform.scale.z };
-        if (ImGui::DragFloat3("Scale", scale, 0.01f)) m_SelectedEntity->transform.scale = Vec3(scale[0], scale[1], scale[2]);
-
+            float scale[3] = { m_SelectedEntity->transform.scale.x, m_SelectedEntity->transform.scale.y, m_SelectedEntity->transform.scale.z };
+            if (ImGui::DragFloat3("Scale", scale, 0.01f)) m_SelectedEntity->transform.scale = Vec3(scale[0], scale[1], scale[2]);
+        }
         ImGui::Separator();
 
         for (const auto& [type, comp] : m_SelectedEntity->getComponents()) {
-            ImGui::Text("%s", type.name());
+            if (ImGui::CollapsingHeader(type.name(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                ImGui::Checkbox("Enabled", &comp->isEnabled);
+                ImGui::SameLine();
+                if (ImGui::Button(("Remove Component"))) {
+                    m_SelectedEntity->removeComponent<std::remove_pointer_t<decltype(comp.get())>>();
+                    break;
+                }
+
+                ImGui::PushID(type.hash_code());
+                InspectorRegistry::draw(type, comp.get());
+                ImGui::PopID();
+            }
             ImGui::Separator();
         }
 

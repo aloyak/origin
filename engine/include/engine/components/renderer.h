@@ -20,6 +20,9 @@ public:
 
     void render(Engine& engine, const Camera& camera, const Transform& cameraTransform) override;
 
+    std::string getModelPath() const { return m_modelPath; }
+    std::string getVertPath() const { return m_vertPath; }
+    std::string getFragPath() const { return m_fragPath; }
 private:
     std::unique_ptr<Model>  m_model;
     std::unique_ptr<Shader> m_shader;

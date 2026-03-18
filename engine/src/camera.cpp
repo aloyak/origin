@@ -13,6 +13,11 @@ struct Camera::CameraData {
 Camera::Camera(float fov, float aspect, float zNear, float zFar) {
     m_data = new CameraData();
     m_data->projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+
+    m_fov = fov;
+    m_aspect = aspect;
+    m_near = zNear;
+    m_far = zFar;
 }
 
 void* Camera::getViewMatrix(const Transform& transform) const {
