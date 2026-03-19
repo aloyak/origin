@@ -25,8 +25,8 @@ void Scene::update(float deltaTime) {
     }
 }
 
-void Scene::render(Engine& engine, const Camera& camera, const Transform& cameraTransform) {
+void Scene::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     for (auto& entity : m_entities) {
-        entity->render(engine, camera, cameraTransform);
+        entity->render(renderer, camera, cameraTransform);
     }
 }

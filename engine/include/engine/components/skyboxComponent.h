@@ -13,7 +13,7 @@ class SkyboxComponent : public Component {
 public:
     SkyboxComponent(const std::vector<std::string>& faces);
 
-    void render(Engine& engine, const Camera& camera, const Transform& cameraTransform) override;
+    void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;

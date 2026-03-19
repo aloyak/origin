@@ -15,9 +15,9 @@ int main() {
     Engine engine(1600, 900, "Origin Game");
 
     // Pixel art settings
-    engine.setupRenderTarget(400, 225); // Creates the offscreen framebuffer (used for pixelart or special post-processing effects, like the sandbox viewport!)
-    engine.setPixelArt(true, 8);
-    //engine.setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
+    engine.getRenderer().setupRenderTarget(400, 225); // Creates the offscreen framebuffer (used for pixelart or special post-processing effects, like the sandbox viewport!)
+    engine.getRenderer().setPixelArt(true, 8);
+    //engine.getRenderer().setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
 
     Input& input = engine.getInput();
     SceneManager& sm = engine.getSceneManager();

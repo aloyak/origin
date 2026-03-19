@@ -56,9 +56,9 @@ void RenderComponent::bindOverrides() const {
     }
 }
 
-void RenderComponent::render(Engine& engine, const Camera& camera, const Transform& cameraTransform) {
+void RenderComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
     bindOverrides();
-    engine.render(*m_model, *m_shader, camera, cameraTransform, entity->transform);
+    renderer.render(*m_model, *m_shader, camera, cameraTransform, entity->transform);
 }
 

@@ -18,7 +18,7 @@ public:
 
     void setTexture(const std::string& path, const std::string& type = "diffuse");
 
-    void render(Engine& engine, const Camera& camera, const Transform& cameraTransform) override;
+    void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     std::string getModelPath() const { return m_modelPath; }
     std::string getVertPath() const { return m_vertPath; }

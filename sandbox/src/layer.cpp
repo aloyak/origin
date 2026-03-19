@@ -135,13 +135,13 @@ void Layer::DrawSceneView() {
     if (available.x > 0 && available.y > 0 && (available.x != m_ViewportSize.x || available.y != m_ViewportSize.y)) {
         m_ViewportSize = available;
         
-        m_Engine.resizeRenderTarget((unsigned int)available.x, (unsigned int)available.y);
+        m_Renderer.resizeRenderTarget((unsigned int)available.x, (unsigned int)available.y);
         
         float aspectRatio = available.x / available.y;
         m_EditorCamera->getComponent<CameraComponent>()->getCamera().setAspectRatio(aspectRatio);
     }
 
-    ImGui::Image((ImTextureID)(intptr_t)m_Engine.getRenderTexture(), available, ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((ImTextureID)(intptr_t)m_Renderer.getRenderTexture(), available, ImVec2(0, 1), ImVec2(1, 0));
 
     static bool cameraLookActive = false;
     if (!cameraLookActive && ImGui::IsWindowHovered() && m_Input.isMouseButtonPressed(MOUSE_RIGHT)) {

@@ -48,9 +48,9 @@ public:
             comp->update(dt);
     }
 
-    void render(Engine& engine, const Camera& camera, const Transform& cameraTransform) {
+    void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
         for (auto& [type, comp] : m_components)
-            comp->render(engine, camera, cameraTransform);
+            comp->render(renderer, camera, cameraTransform);
     }
 
     const std::unordered_map<std::type_index, std::unique_ptr<Component>>& getComponents() const { 

@@ -3,6 +3,7 @@
 #include "engine/transform.h"
 #include "engine/window.h"
 #include "engine/input/input.h"
+#include "engine/render.h"
 #include "engine/scene/sceneManager.h"
 
 #include <functional>
@@ -16,14 +17,11 @@
     #include <imgui_impl_opengl3.h>
 #endif
 
-class Shader;
-class Camera;
-class Model;
 class Entity;
 
 class Engine {
 public:
-    Engine(unsigned int width = 640, unsigned int height = 480, const char* title = "Origin Engine");    
+    Engine(unsigned int width = 640, unsigned int height = 480, const char* title = "Origin Engine");
     ~Engine();
 
     void run(std::function<void()> mainLoop);
@@ -31,32 +29,23 @@ public:
 
     bool isRunning();
 
-    void setupRenderTarget(unsigned int width, unsigned int height);
-    void resizeRenderTarget(unsigned int width, unsigned int height);
-
-    void setPixelArt(bool enabled, int colorDepth = 32);
-
-
-    void setVertexSnap(bool enabled, float intensity = 40.0f) {
-        m_vertexSnap = enabled;
-        m_snapIntensity = intensity;
-    }
-
-    Entity* createEntity(std::string name = "Entity");
-    void destroyEntity(Entity* entity);
-    void moveToScene(Entity* entity);
-
-    void updateScene();
-
-    // prefer updateScene() over calling this directly
-    void render(Model& model, Shader& shader, const Camera& camera, const Transform& cameraTransform, const Transform& modelTransform);
-
     float getTime();
     float getDeltaTime() const { return m_deltaTime; }
 
+    // Core
     Input& getInput() { return *m_input; }
     SceneManager& getSceneManager() { return *m_sceneManager; }
     Window& getWindow() { return *m_window; }
+    Renderer& getRenderer() { return *m_renderer; }
+
+    // Entity management
+    Entity* createEntity(std::string name = "Entity");
+    void    destroyEntity(Entity* entity);
+    void    moveToScene(Entity* entity);
+
+    // Update & render all entities and the active scene
+    // Entities are expected to call renderer.render() themselves
+    void updateScene(); // Maybe split into update and render
 
     // UI
     void initUI();
@@ -66,12 +55,10 @@ public:
     ImGuiIO& getIO() { return ImGui::GetIO(); }
 #endif
 
-    // Returns the FBO texture ID to use with Imgui (sandbox stuff)
-    unsigned int getRenderTexture() const { return m_fboTexture; }
-
 private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Input> m_input;
+    std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<SceneManager> m_sceneManager;
 
     void beginFrame();
@@ -84,22 +71,4 @@ private:
     std::vector<std::unique_ptr<Entity>> m_entities;
 
     bool m_running = true;
-
-    // Render target
-    unsigned int m_fbo = 0;
-    unsigned int m_fboTexture = 0;
-    unsigned int m_rbo = 0;
-    unsigned int m_quadVAO = 0;
-    unsigned int m_quadVBO = 0;
-
-    unsigned int m_virtualWidth = 0;
-    unsigned int m_virtualHeight = 0;
-
-    // Pixel Art
-    bool m_pixelArtEnabled = false;
-    int m_colorDepth = 32;
-    std::unique_ptr<Shader> m_screenShader;
-
-    bool m_vertexSnap = false;
-    float m_snapIntensity = 40.0f;
 };

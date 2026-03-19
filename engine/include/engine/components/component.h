@@ -6,6 +6,7 @@
 class Entity;
 class Engine;
 class Camera;
+class Renderer;
 
 class Component {
 public:
@@ -16,7 +17,7 @@ public:
     virtual ~Component() = default;
 
     virtual void update(float dt) {}
-    virtual void render(Engine& engine, const Camera& camera, const Transform& cameraTransform) {}
+    virtual void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {}
 
     virtual void serialize(nlohmann::json& j) const {}
     virtual void deserialize(const nlohmann::json& j) {}

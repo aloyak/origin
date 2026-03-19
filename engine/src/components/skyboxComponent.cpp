@@ -75,7 +75,7 @@ void SkyboxComponent::setupMesh() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void SkyboxComponent::render(Engine& engine, const Camera& camera, const Transform& cameraTransform) {
+void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
 
     glDepthFunc(GL_LEQUAL); 

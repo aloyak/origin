@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/components/entity.h"
+#include "engine/render.h"
 
 #include <vector>
 #include <string>
@@ -15,7 +16,7 @@ public:
     void addEntity(std::unique_ptr<Entity> entity);
 
     void update(float deltaTime);
-    void render(Engine& engine, const Camera& camera, const Transform& cameraTransform);
+    void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform);
 
     const std::vector<std::unique_ptr<Entity>>& getEntities() const { return m_entities; }
 
