@@ -22,7 +22,7 @@ The project uses **CMake** to generate and build the engine. The repository is o
 
 * `engine` — the core engine code
 * `game` — the game project that uses the engine
-* `sandbox` **(not yet!)** — planned map editor with extra features
+* `sandbox` — map editor with extra features
 
 You may want to change your game's name in `game/CMakeLists.txt`.
 
@@ -68,3 +68,16 @@ Support for other platforms is enabled but currently limited:
 ## License
 
 This project is under the MIT License. Please see `LICENSE.md` for more information!
+
+## Thanks and Inspirations
+* [LearnOpenGL](https://learnopengl.com/) — the best OpenGL tutorial website out there
+* [Texel-Splatting](https://dylanebert.com/texel-splatting/) by [Dylan Ebert](https://github.com/dylanebert), gave me the idea to create this engine in the first place
+* [Lite Engine](https://github.com/maritim/LiteEngine) - introduced me to game engines a while back, used then to test and try stuff
+
+### HackClub
+
+<a href="https://hackclub.com/"><img style="position: absolute; top: 0; left: 10px; border: 0; width: 256px; z-index: 999;" src="https://assets.hackclub.com/flag-orpheus-left.svg" href="https://flavortown.hackclub.com/projects/8834" alt="Hack Club"/></a>
+
+Proud member of [Hack Club](https://hackclub.com/)!
+
+This project was made as part of HackClub's Flavortown Event (2026): <https://flavortown.hackclub.com/projects/14868>
