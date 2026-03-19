@@ -1,5 +1,5 @@
-#include "engine/camera.h"
-#include "engine/transform.h"
+#include "engine/render/camera.h"
+#include "engine/core/transform.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

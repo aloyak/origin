@@ -1,6 +1,6 @@
 #include "engine/components/skyboxComponent.h"
+#include "engine/render/camera.h"
 #include "engine/engine.h"
-#include "engine/camera.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 

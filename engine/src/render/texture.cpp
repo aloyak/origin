@@ -1,7 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "engine/texture.h"
+#include "engine/render/texture.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>

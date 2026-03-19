@@ -4,9 +4,9 @@
     #include <glad/glad.h>
 #endif
 
-#include "engine/texture.h"
-#include "engine/mesh.h"
-#include "engine/shader.h"
+#include "engine/render/texture.h"
+#include "engine/render/mesh.h"
+#include "engine/render/shader.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures) {
     m_vertexCount = vertices.size(); 

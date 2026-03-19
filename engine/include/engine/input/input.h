@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/input/keycodes.h"
-#include "engine/math.h"
+#include "engine/core/math.h"
 
 struct SDL_Window;
 

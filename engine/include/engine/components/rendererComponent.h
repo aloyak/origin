@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/components/component.h"
-#include "engine/model.h"
-#include "engine/shader.h"
+#include "engine/render/model.h"
+#include "engine/render/shader.h"
 
 #include <string>
 #include <memory>

@@ -1,7 +1,7 @@
-#include "engine/model.h"
-#include "engine/mesh.h"
-#include "engine/shader.h"
-#include "engine/texture.h"
+#include "engine/render/model.h"
+#include "engine/render/mesh.h"
+#include "engine/render/shader.h"
+#include "engine/render/texture.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

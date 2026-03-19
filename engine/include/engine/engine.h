@@ -1,9 +1,9 @@
 #pragma once
 
-#include "engine/transform.h"
-#include "engine/window.h"
+#include "engine/core/transform.h"
+#include "engine/core/window.h"
 #include "engine/input/input.h"
-#include "engine/render.h"
+#include "engine/render/render.h"
 #include "engine/scene/sceneManager.h"
 
 #include <functional>

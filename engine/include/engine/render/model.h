@@ -5,8 +5,8 @@
 #include <memory>
 #include <unordered_map>
 
-#include "engine/texture.h"
-#include "engine/mesh.h"
+#include "engine/render/texture.h"
+#include "engine/render/mesh.h"
 
 class Shader;
 

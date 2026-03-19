@@ -1,4 +1,4 @@
-#include "engine/window.h"
+#include "engine/core/window.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>

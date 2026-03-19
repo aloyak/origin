@@ -1,7 +1,7 @@
 #pragma once
 
-#include "engine/math.h"
-#include "engine/transform.h"
+#include "engine/core/math.h"
+#include "engine/core/transform.h"
 
 class Camera {
 public:

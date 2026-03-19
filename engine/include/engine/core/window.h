@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "engine/math.h"
+#include "engine/core/math.h"
 
 class Window {
 public:

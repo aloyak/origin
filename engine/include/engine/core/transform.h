@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/math.h"
+#include "engine/core/math.h"
 #include <cmath>
 
 class Transform {

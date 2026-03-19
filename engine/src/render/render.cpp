@@ -1,8 +1,9 @@
-#include "engine/render.h"
-#include "engine/window.h"
-#include "engine/shader.h"
-#include "engine/model.h"
-#include "engine/camera.h"
+#include "engine/render/render.h"
+#include "engine/render/shader.h"
+#include "engine/render/model.h"
+#include "engine/render/camera.h"
+
+#include "engine/core/window.h"
 #include "engine/debug/path.h"
 
 #ifdef __EMSCRIPTEN__

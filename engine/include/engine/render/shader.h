@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "engine/math.h"
+#include "engine/core/math.h"
 
 class Shader {
 public:

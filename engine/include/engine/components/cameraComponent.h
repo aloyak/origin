@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/components/component.h"
-#include "engine/camera.h"
+#include "engine/render/camera.h"
 
 #include <memory>
 
