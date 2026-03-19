@@ -45,7 +45,8 @@ public:
 
     // Update & render all entities and the active scene
     // Entities are expected to call renderer.render() themselves
-    void updateScene(); // Maybe split into update and render
+    void updateScene();
+    void renderScene();
 
     // UI
     void initUI();

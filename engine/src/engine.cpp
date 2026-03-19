@@ -53,6 +53,7 @@ void Engine::run(std::function<void()> mainLoop) {
         if (!m_running) { emscripten_cancel_main_loop(); return; }
         beginFrame();
         updateScene();
+        renderScene();
         resolveFrame();
         mainLoop();
         endFrame();
@@ -61,7 +62,10 @@ void Engine::run(std::function<void()> mainLoop) {
 #else
     while (m_running) {
         beginFrame();
+
         updateScene();
+        renderScene();
+
         resolveFrame();
         mainLoop();
         endFrame();
@@ -135,6 +139,14 @@ void Engine::moveToScene(Entity* entity) {
 
 // Scene update + render
 void Engine::updateScene() {
+    for (auto& entity : m_entities)
+        entity->update(m_deltaTime);
+
+    if (m_sceneManager->getActiveScene())
+        m_sceneManager->getActiveScene()->update(m_deltaTime);
+}
+
+void Engine::renderScene() {
     Camera* activeCamera = nullptr;
     const Transform* activeCameraTransform = nullptr;
 
@@ -159,12 +171,6 @@ void Engine::updateScene() {
     }
 
     if (!activeCamera) return;
-
-    for (auto& entity : m_entities)
-        entity->update(m_deltaTime);
-
-    if (m_sceneManager->getActiveScene())
-        m_sceneManager->getActiveScene()->update(m_deltaTime);
 
     for (auto& entity : m_entities)
         entity->render(*m_renderer, *activeCamera, *activeCameraTransform);
