@@ -62,16 +62,16 @@ Your build can be found at `build-web/game/game.html`, it should be opened with 
 
 Support for other platforms is enabled but currently limited:
 
-* Windows — not yet tested (recommended using Visual Studio to build)
-* macOS — not yet tested (origin uses OpenGL 4.1 as it is the last supported openGL version for MacOS, but **it is officially deprecated!**)
+* `Windows` — not yet tested (recommended using Visual Studio to build)
+* `MacOS` — not yet tested (origin uses OpenGL 4.1 as it is the last supported openGL version for MacOS, but **it is officially deprecated!**)
 
 ## License
 
 This project is under the MIT License. Please see `LICENSE.md` for more information!
 
 ## Thanks and Inspirations
-* [LearnOpenGL](https://learnopengl.com/) — the best OpenGL tutorial website out there
-* [Texel-Splatting](https://dylanebert.com/texel-splatting/) by [Dylan Ebert](https://github.com/dylanebert), gave me the idea to create this engine in the first place
+* [LearnOpenGL](https://learnopengl.com/) - the best OpenGL tutorial website out there
+* [Texel-Splatting](https://dylanebert.com/texel-splatting/) by [Dylan Ebert](https://github.com/dylanebert) - gave me the idea to create this engine in the first place
 * [Lite Engine](https://github.com/maritim/LiteEngine) - introduced me to game engines a while back, used then to test and try stuff
 
 ### HackClub
