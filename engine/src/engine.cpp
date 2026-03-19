@@ -4,7 +4,8 @@
 #include "engine/model.h"
 #include "engine/camera.h"
 #include "engine/components/entity.h"
-#include "engine/components/camera.h"
+
+#include "engine/components/cameraComponent.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -27,9 +28,9 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     spdlog::set_level(spdlog::level::info);
     spdlog::set_pattern("[%^%l%$] %v");
 
-    m_window = new Window(width, height, title);
-    m_input = new Input(m_window->getHandle());
-    m_sceneManager = new SceneManager();
+    m_window = std::make_unique<Window>(width, height, title);
+    m_input = std::make_unique<Input>(m_window->getHandle());
+    m_sceneManager = std::make_unique<SceneManager>();
 }
 
 Engine::~Engine() {
@@ -42,8 +43,6 @@ Engine::~Engine() {
 #endif
 
     m_entities.clear();
-    delete m_input;
-    delete m_sceneManager;
 
     if (m_fbo) {
         glDeleteFramebuffers(1, &m_fbo);

@@ -1,4 +1,4 @@
-#include "engine/components/skybox.h"
+#include "engine/components/skyboxComponent.h"
 #include "engine/engine.h"
 #include "engine/camera.h"
 

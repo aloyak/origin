@@ -4,9 +4,9 @@
 
 #include "engine/debug/logger.h"
 
-#include "engine/components/renderer.h"
-#include "engine/components/camera.h"
-#include "engine/components/skybox.h"
+#include "engine/components/rendererComponent.h"
+#include "engine/components/cameraComponent.h"
+#include "engine/components/skyboxComponent.h"
 
 #include <iostream>
 #include <format>

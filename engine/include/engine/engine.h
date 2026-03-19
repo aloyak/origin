@@ -70,9 +70,9 @@ public:
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
 private:
-    Window*     m_window;
-    Input*      m_input;
-    SceneManager* m_sceneManager;
+    std::unique_ptr<Window> m_window;
+    std::unique_ptr<Input> m_input;
+    std::unique_ptr<SceneManager> m_sceneManager;
 
     void beginFrame();
     void resolveFrame();

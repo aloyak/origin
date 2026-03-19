@@ -1,12 +1,11 @@
 #include "sandbox/layer.h"
 #include "sandbox/inspectorRegistry.h"
 
-#include "engine/components/camera.h"
-#include "engine/components/renderer.h"
-#include "engine/components/skybox.h"
+#include "engine/components/cameraComponent.h"
+#include "engine/components/rendererComponent.h"
+#include "engine/components/skyboxComponent.h"
 
 #include "engine/input/input.h"
-#include "engine/components/camera.h"
 #include "engine/debug/path.h"
 
 #include "engine/debug/logger.h"
@@ -43,12 +42,17 @@ Layer::Layer(Engine& engine)
             ImGui::LabelText(("Face " + std::to_string(i)).c_str(), "%s", c->getFaces()[i].c_str());
     });
 
-
     ScenePathInfo info = GetSceneContext(input);
     Path::setBase(info.root);
-
+    
     SceneManager& sm = m_Engine.getSceneManager();
     sm.load(info.scene.string());
+
+    const std::string title = sm.getActiveScene() 
+    ? "Origin Sandbox - " + sm.getActiveScene()->name 
+    : "Origin Sandbox";
+
+    m_Window.setWindowTitle(title.c_str());
 
     Entity* cam = m_Engine.createEntity("Editor Camera");
     cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);

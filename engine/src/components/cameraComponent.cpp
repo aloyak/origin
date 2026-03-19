@@ -1,4 +1,4 @@
-#include "engine/components/camera.h"
+#include "engine/components/cameraComponent.h"
 #include "engine/components/entity.h"
 #include <nlohmann/json.hpp>
 
