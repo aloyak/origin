@@ -51,7 +51,8 @@ void RenderComponent::render(Renderer& renderer, const Camera& camera, const Tra
     if (!isEnabled) return;
     if (!m_model || !m_material || !m_material->getShaderHandle()) return;
     
-    const auto& lights = LightingManager::instance().getDirectionalLights();
-    renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform, lights);
+    const auto& directionalLights = LightingManager::instance().getDirectionalLights();
+    const auto& pointLights = LightingManager::instance().getPointLights();
+    renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform, directionalLights, pointLights);
 }
 

@@ -5,6 +5,8 @@
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rendererComponent.h"
 #include "engine/components/skyboxComponent.h"
+#include "engine/components/directionalLightComponent.h"
+#include "engine/components/pointLightComponent.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -66,6 +68,14 @@ namespace {
                 return nullptr;
             }
             return entity->addComponent<SkyboxComponent>(faces);
+        }
+
+        if (type == "DirectionalLightComponent") {
+            return entity->addComponent<DirectionalLightComponent>();
+        }
+
+        if (type == "PointLightComponent") {
+            return entity->addComponent<PointLightComponent>();
         }
 
         spdlog::warn("Unknown component type '{}' on entity '{}'.", type, entity->name);

@@ -5,6 +5,7 @@
 #include "engine/render/texture.h"
 #include "engine/render/resourceManager.h"
 #include "engine/lighting/directionalLight.h"
+#include "engine/lighting/pointLight.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -24,9 +25,11 @@ Model::Model(const char* path) {
     loadModel(path);
 }
 
-void Model::draw(const Material& material, const std::vector<DirectionalLight>& lights) {
+void Model::draw(const Material& material,
+                 const std::vector<DirectionalLight>& directionalLights,
+                 const std::vector<PointLight>& pointLights) {
     for(unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw(material, lights);
+        meshes[i].draw(material, directionalLights, pointLights);
 }
 
 void Model::loadModel(std::string path) {

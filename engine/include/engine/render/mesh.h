@@ -11,6 +11,7 @@ class Shader;
 class Texture;
 class Material;
 class DirectionalLight;
+class PointLight;
 
 struct Vertex {
     Vec3 Position;
@@ -38,11 +39,14 @@ public:
     Mesh(Mesh&& other) noexcept;
     Mesh& operator=(Mesh&& other) noexcept;
 
-    void draw(const Material& material, const std::vector<DirectionalLight>& lights) const;
+    void draw(const Material& material,
+              const std::vector<DirectionalLight>& directionalLights,
+              const std::vector<PointLight>& pointLights) const;
 
 private:
     unsigned int m_vao, m_vbo, m_ebo;
     int m_vertexCount, m_indexCount;
 
     int m_maxDirectionalLights = 4;
+    int m_maxPointLights = 8;
 };

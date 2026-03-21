@@ -4,6 +4,7 @@
 #include "engine/render/model.h"
 #include "engine/render/camera.h"
 #include "engine/lighting/directionalLight.h"
+#include "engine/lighting/pointLight.h"
 
 #include "engine/core/window.h"
 #include "engine/debug/path.h"
@@ -177,7 +178,8 @@ void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,
                       const Transform& modelTransform,
-                      const std::vector<DirectionalLight>& lights)
+                      const std::vector<DirectionalLight>& directionalLights,
+                      const std::vector<PointLight>& pointLights)
 {
     Shader& shader = material.getShader();
     shader.use();
@@ -205,5 +207,5 @@ void Renderer::render(Model& model, Material& material,
     // Bind camera position for lighting calculations
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
-    model.draw(material, lights);
+    model.draw(material, directionalLights, pointLights);
 }

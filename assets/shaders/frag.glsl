@@ -59,6 +59,24 @@ vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 diffuseColor, ve
     return diffuse + specular;
 }
 
+vec3 calcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec3 diffuseColor, vec3 specularColor) {
+    vec3 toLight = light.position - fragPos;
+    float distanceToLight = length(toLight);
+    vec3 lightDir = normalize(toLight);
+
+    float radius = max(light.radius, 0.001);
+    float attenuation = clamp(1.0 - (distanceToLight / radius), 0.0, 1.0);
+
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * diffuseColor * light.color * light.intensity;
+
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfDir), 0.0), u_Shininess);
+    vec3 specular = u_SpecularStrength * spec * specularColor * light.color * light.intensity;
+
+    return (diffuse + specular) * attenuation;
+}
+
 void main() {
     vec4 diffuseTexture = texture(material.texture_diffuse1, TexCoord);
     vec4 specularTexture = texture(material.texture_specular1, TexCoord);
@@ -81,6 +99,10 @@ void main() {
     // Calculate lighting from all directional lights
     for(int i = 0; i < numDirLights && i < MAX_DIR_LIGHTS; i++) {
         result += calcDirLight(dirLights[i], norm, viewDir, diffuseColor, specularColor);
+    }
+
+    for (int i = 0; i < numPointLights && i < MAX_POINT_LIGHTS; i++) {
+        result += calcPointLight(pointLights[i], norm, vWorldPos, viewDir, diffuseColor, specularColor);
     }
     
     FragColor = vec4(result, diffuseTexture.a);

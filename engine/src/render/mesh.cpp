@@ -9,6 +9,7 @@
 #include "engine/render/shader.h"
 #include "engine/render/material.h"
 #include "engine/lighting/directionalLight.h"
+#include "engine/lighting/pointLight.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures) {
     m_vertexCount = vertices.size(); 
@@ -86,7 +87,9 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-void Mesh::draw(const Material& material, const std::vector<DirectionalLight>& lights) const {
+void Mesh::draw(const Material& material,
+                const std::vector<DirectionalLight>& directionalLights,
+                const std::vector<PointLight>& pointLights) const {
     Shader& shader = material.getShader();
 
     unsigned int textureUnit = 0;
@@ -122,8 +125,8 @@ void Mesh::draw(const Material& material, const std::vector<DirectionalLight>& l
     shader.setVec3("u_BaseColor", material.getBaseColor());
     
     // Bind directional light uniforms
-    for (size_t i = 0; i < lights.size() && i < m_maxDirectionalLights; ++i) {  // Max 4 directional lights
-        const auto& light = lights[i];
+    for (size_t i = 0; i < directionalLights.size() && i < m_maxDirectionalLights; ++i) {
+        const auto& light = directionalLights[i];
         std::string prefix = "dirLights[" + std::to_string(i) + "]";
         
         shader.setVec3((prefix + ".direction").c_str(), light.getDirection());
@@ -131,7 +134,19 @@ void Mesh::draw(const Material& material, const std::vector<DirectionalLight>& l
         shader.setFloat((prefix + ".intensity").c_str(), light.getIntensity());
     }
     
-    shader.setInt("numDirLights", static_cast<int>(std::min(lights.size(), size_t(m_maxDirectionalLights))));
+    shader.setInt("numDirLights", static_cast<int>(std::min(directionalLights.size(), size_t(m_maxDirectionalLights))));
+
+    for (size_t i = 0; i < pointLights.size() && i < m_maxPointLights; ++i) {
+        const auto& light = pointLights[i];
+        std::string prefix = "pointLights[" + std::to_string(i) + "]";
+
+        shader.setVec3((prefix + ".position").c_str(), light.getPosition());
+        shader.setVec3((prefix + ".color").c_str(), light.getColor());
+        shader.setFloat((prefix + ".intensity").c_str(), light.getIntensity());
+        shader.setFloat((prefix + ".radius").c_str(), light.getRadius());
+    }
+
+    shader.setInt("numPointLights", static_cast<int>(std::min(pointLights.size(), size_t(m_maxPointLights))));
     
     glBindVertexArray(m_vao);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);

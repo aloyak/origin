@@ -11,6 +11,7 @@ class Camera;
 class Model;
 class Material;
 class DirectionalLight;
+class PointLight;
 
 class Renderer {
 public:
@@ -42,7 +43,8 @@ public:
                 const Camera& camera,
                 const Transform& cameraTransform,
                 const Transform& modelTransform,
-                const std::vector<DirectionalLight>& lights);
+                const std::vector<DirectionalLight>& directionalLights,
+                const std::vector<PointLight>& pointLights);
 
     unsigned int getRenderTexture() const { return m_fboTexture; }
 

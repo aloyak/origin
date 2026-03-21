@@ -8,6 +8,7 @@
 #include "engine/components/cameraComponent.h"
 #include "engine/components/skyboxComponent.h"
 #include "engine/components/directionalLightComponent.h"
+#include "engine/components/pointLightComponent.h"
 
 #include <iostream>
 #include <format>
@@ -36,11 +37,14 @@ int main() {
     player->addComponent<CameraComponent>(60.0f, engine.getWindow().getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
-    //Entity* directionalLight = engine.createEntity("Directional Light");
-    //directionalLight->addComponent<DirectionalLightComponent>(Vec3(-1, -1, -1), Vec3(1, 1, 1), 1.0f);
-    //directionalLight->transform.rotation = Vec3(80.0f, 0.0f, 0.0f);
+    Entity* directionalLight = engine.createEntity("Directional Light");
+    directionalLight->addComponent<DirectionalLightComponent>(Vec3(-1, -1, -1), Vec3(1, 1, 1), 0.5f);
 
-    engine.getRenderer().setMinimumAmbientLight(0.8f);
+    Entity* pointLight = engine.createEntity("Point Light");
+    pointLight->transform.position = Vec3(0.0f, 180.0f, 0.0f);
+    pointLight->addComponent<PointLightComponent>(Vec3(1.0f, 0.95f, 0.85f), 2.2f, 1200.0f);
+
+    engine.getRenderer().setMinimumAmbientLight(0.2f);
 
     float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
