@@ -30,3 +30,12 @@ void Scene::render(Renderer& renderer, const Camera& camera, const Transform& ca
         entity->render(renderer, camera, cameraTransform);
     }
 }
+
+std::unique_ptr<Entity>& Scene::getEntityByName(const std::string name) {
+    auto it = std::find_if(m_entities.begin(), m_entities.end(),
+        [&name](const std::unique_ptr<Entity>& e) { return e->name == name; });
+    if (it != m_entities.end()) {
+        return *it;
+    }
+    throw std::runtime_error("Entity not found");
+}

@@ -19,6 +19,8 @@ public:
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform);
 
     const std::vector<std::unique_ptr<Entity>>& getEntities() const { return m_entities; }
+    std::unique_ptr<Entity>& getEntity(size_t index) { return m_entities[index]; }
+    std::unique_ptr<Entity>& getEntityByName(const std::string name);
 
 private:
     std::vector<std::unique_ptr<Entity>> m_entities;

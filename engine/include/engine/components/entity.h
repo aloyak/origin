@@ -18,6 +18,8 @@ public:
     std::string name = "Entity";
     Transform transform;
 
+    Entity* get() { return this; }
+
     template<typename T, typename... Args>
     T* addComponent(Args&&... args) {
         const std::type_index type = std::type_index(typeid(T));
