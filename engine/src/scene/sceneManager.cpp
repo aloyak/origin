@@ -8,37 +8,81 @@
 
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <memory>
 
 #include "engine/debug/path.h"
 
 using json = nlohmann::json;
 
-Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
-    if (type == "RenderComponent") {
-        std::string path = jComp.value("model", ""); 
-        return entity->addComponent<RenderComponent>(path);
+namespace {
+    bool tryReadVec3(const json& source, const char* key, Vec3& out) {
+        if (!source.contains(key) || !source[key].is_array() || source[key].size() < 3) {
+            return false;
+        }
+
+        const json& arr = source[key];
+        if (!arr[0].is_number() || !arr[1].is_number() || !arr[2].is_number()) {
+            return false;
+        }
+
+        out = Vec3(arr[0].get<float>(), arr[1].get<float>(), arr[2].get<float>());
+        return true;
     }
-    if (type == "CameraComponent") {
-        return entity->addComponent<CameraComponent>(60.0f, 1.0f, 0.1f, 100.0f);
+
+    std::vector<std::string> readStringArray(const json& source, const char* key) {
+        std::vector<std::string> out;
+        if (!source.contains(key) || !source[key].is_array()) {
+            return out;
+        }
+
+        for (const auto& value : source[key]) {
+            if (!value.is_string()) {
+                return {};
+            }
+            out.push_back(value.get<std::string>());
+        }
+
+        return out;
     }
-    if (type == "SkyboxComponent") {
-        std::vector<std::string> faces = jComp["faces"].get<std::vector<std::string>>();
-        return entity->addComponent<SkyboxComponent>(faces);
+
+    Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
+        if (type == "RenderComponent") {
+            const std::string modelPath = jComp.value("model", "");
+            if (modelPath.empty()) {
+                spdlog::warn("Skipping RenderComponent on entity '{}' due to missing model path.", entity->name);
+                return nullptr;
+            }
+            return entity->addComponent<RenderComponent>(modelPath);
+        }
+
+        if (type == "CameraComponent") {
+            return entity->addComponent<CameraComponent>(60.0f, 1.0f, 0.1f, 100.0f);
+        }
+
+        if (type == "SkyboxComponent") {
+            const std::vector<std::string> faces = readStringArray(jComp, "faces");
+            if (faces.size() != 6) {
+                spdlog::warn("Skipping SkyboxComponent on entity '{}' due to invalid faces array.", entity->name);
+                return nullptr;
+            }
+            return entity->addComponent<SkyboxComponent>(faces);
+        }
+
+        spdlog::warn("Unknown component type '{}' on entity '{}'.", type, entity->name);
+        return nullptr;
     }
-    return nullptr;
 }
 
 void SceneManager::unload() {
     if (m_activeScene) {
-        delete m_activeScene;
-        m_activeScene = nullptr;
+        m_activeScene.reset();
         spdlog::info("Scene unloaded.");
     }
 }
 
 Entity* SceneManager::createEntity(std::string name) {
     if (!m_activeScene) {
-        m_activeScene = new Scene();
+        m_activeScene = std::make_unique<Scene>();
         m_activeScene->name = "Default Scene";
     }
     return m_activeScene->createEntity(name);
@@ -101,40 +145,60 @@ Scene* SceneManager::load(const std::string& scenePath) {
         return nullptr;
     }
 
-    unload();
-    m_activeScene = new Scene();
-    m_activeScene->name = j.value("name", "New Scene");
+    if (!j.is_object()) {
+        spdlog::error("Scene root in {} must be a JSON object.", resolvedScenePath);
+        return nullptr;
+    }
+
+    auto loadedScene = std::make_unique<Scene>();
+    loadedScene->name = j.value("name", "New Scene");
 
     if (j.contains("entities") && j["entities"].is_array()) {
         for (const auto& jEnt : j["entities"]) {
-            Entity* ent = m_activeScene->createEntity(jEnt.value("name", "Entity"));
+            if (!jEnt.is_object()) {
+                spdlog::warn("Skipping malformed entity entry in scene '{}'.", loadedScene->name);
+                continue;
+            }
 
-            if (jEnt.contains("transform")) {
+            Entity* ent = loadedScene->createEntity(jEnt.value("name", "Entity"));
+
+            if (jEnt.contains("transform") && jEnt["transform"].is_object()) {
                 const auto& t = jEnt["transform"];
-                if (t.contains("pos") && t["pos"].size() >= 3) {
-                    ent->transform.position = { t["pos"][0], t["pos"][1], t["pos"][2] };
-                }
-                if (t.contains("rot") && t["rot"].size() >= 3) {
-                    ent->transform.rotation = { t["rot"][0], t["rot"][1], t["rot"][2] };
-                }
-                if (t.contains("sca") && t["sca"].size() >= 3) {
-                    ent->transform.scale = { t["sca"][0], t["sca"][1], t["sca"][2] };
-                }
+                Vec3 parsed;
+                if (tryReadVec3(t, "pos", parsed)) ent->transform.position = parsed;
+                if (tryReadVec3(t, "rot", parsed)) ent->transform.rotation = parsed;
+                if (tryReadVec3(t, "sca", parsed)) ent->transform.scale = parsed;
             }
 
             if (jEnt.contains("components") && jEnt["components"].is_array()) {
                 for (const auto& jComp : jEnt["components"]) {
+                    if (!jComp.is_object()) {
+                        spdlog::warn("Skipping malformed component on entity '{}'.", ent->name);
+                        continue;
+                    }
+
                     std::string type = jComp.value("type", "");
-                    // Updated call site to pass jComp
+                    if (type.empty()) {
+                        spdlog::warn("Skipping component with missing type on entity '{}'.", ent->name);
+                        continue;
+                    }
+
                     Component* c = createComponentByType(ent, type, jComp);
                     if (c) {
-                        c->deserialize(jComp);
+                        try {
+                            c->deserialize(jComp);
+                        } catch (const std::exception& e) {
+                            spdlog::error("Failed to deserialize component '{}' on entity '{}': {}", type, ent->name, e.what());
+                        }
                     }
                 }
             }
         }
     }
 
+    unload();
+    m_activeScene = std::move(loadedScene);
+
     spdlog::info("Scene '{}' loaded from {}", m_activeScene->name, resolvedScenePath);
-    return m_activeScene;
+    return m_activeScene.get();
 }

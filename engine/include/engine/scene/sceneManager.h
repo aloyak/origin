@@ -2,6 +2,7 @@
 
 #include "engine/scene/scene.h"
 #include <string>
+#include <memory>
 
 class SceneManager {
 public:
@@ -11,14 +12,14 @@ public:
 
     void createScene(std::string name = "Scene") {
         unload();
-        m_activeScene = new Scene();
+        m_activeScene = std::make_unique<Scene>();
         m_activeScene->name = name;
     }
 
-    Scene* getActiveScene() { return m_activeScene; }
+    Scene* getActiveScene() { return m_activeScene.get(); }
 
     Entity* createEntity(std::string name = "Entity");
 
 private:
-    Scene* m_activeScene = nullptr;
+    std::unique_ptr<Scene> m_activeScene;
 };
