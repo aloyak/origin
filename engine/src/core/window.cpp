@@ -65,6 +65,7 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 }
 
 Window::~Window() {
+    SDL_DelEventWatch(frameBufferSizeCallback, m_window);
     SDL_GL_DeleteContext(m_glContext);
     SDL_DestroyWindow(m_window);
     SDL_Quit();

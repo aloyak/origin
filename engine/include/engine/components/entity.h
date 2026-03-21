@@ -4,6 +4,8 @@
 #include <typeindex>
 #include <memory>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "engine/components/component.h"
 #include "engine/core/transform.h"
@@ -18,10 +20,16 @@ public:
 
     template<typename T, typename... Args>
     T* addComponent(Args&&... args) {
+        const std::type_index type = std::type_index(typeid(T));
         auto comp = std::make_unique<T>(std::forward<Args>(args)...);
         comp->entity = this;
         T* ptr = comp.get();
-        m_components[std::type_index(typeid(T))] = std::move(comp);
+
+        if (m_components.find(type) == m_components.end()) {
+            m_componentOrder.push_back(type);
+        }
+
+        m_components[type] = std::move(comp);
         return ptr;
     }
 
@@ -40,17 +48,28 @@ public:
 
     template<typename T>
     void removeComponent() {
-        m_components.erase(std::type_index(typeid(T)));
+        const std::type_index type = std::type_index(typeid(T));
+        m_components.erase(type);
+        m_componentOrder.erase(
+            std::remove(m_componentOrder.begin(), m_componentOrder.end(), type),
+            m_componentOrder.end()
+        );
     }
 
     void update(float dt) {
-        for (auto& [type, comp] : m_components)
-            comp->update(dt);
+        for (const auto& type : m_componentOrder) {
+            auto it = m_components.find(type);
+            if (it != m_components.end())
+                it->second->update(dt);
+        }
     }
 
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
-        for (auto& [type, comp] : m_components)
-            comp->render(renderer, camera, cameraTransform);
+        for (const auto& type : m_componentOrder) {
+            auto it = m_components.find(type);
+            if (it != m_components.end())
+                it->second->render(renderer, camera, cameraTransform);
+        }
     }
 
     const std::unordered_map<std::type_index, std::unique_ptr<Component>>& getComponents() const { 
@@ -59,4 +78,5 @@ public:
 
 private:
     std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
+    std::vector<std::type_index> m_componentOrder;
 };
