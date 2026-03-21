@@ -7,6 +7,7 @@
 #include "engine/components/rendererComponent.h"
 #include "engine/components/cameraComponent.h"
 #include "engine/components/skyboxComponent.h"
+#include "engine/components/directionalLightComponent.h"
 
 #include <iostream>
 #include <format>
@@ -17,6 +18,8 @@ int main() {
     // Pixel art settings
     engine.getRenderer().setupRenderTarget(400, 225); // Creates the offscreen framebuffer (used for pixelart or special post-processing effects, like the sandbox viewport!)
     engine.getRenderer().setPixelArt(true, 8);
+    engine.getRenderer().setLightingEnabled(true);
+    engine.getRenderer().setMinimumAmbientLight(0.1f);
     //engine.getRenderer().setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
 
     Input& input = engine.getInput();
@@ -32,6 +35,12 @@ int main() {
     Entity* player = engine.createEntity("Player");
     player->addComponent<CameraComponent>(60.0f, engine.getWindow().getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
+
+    //Entity* directionalLight = engine.createEntity("Directional Light");
+    //directionalLight->addComponent<DirectionalLightComponent>(Vec3(-1, -1, -1), Vec3(1, 1, 1), 1.0f);
+    //directionalLight->transform.rotation = Vec3(80.0f, 0.0f, 0.0f);
+
+    engine.getRenderer().setMinimumAmbientLight(0.8f);
 
     float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
@@ -57,5 +66,7 @@ int main() {
         if (input.isKeyPressed(KEY_ESCAPE))
             engine.stop();
 
+        if (input.isKeyPressed(KEY_E))
+            engine.getRenderer().setLightingEnabled(!engine.getRenderer().isLightingEnabled());
     });
 }

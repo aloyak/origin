@@ -1,8 +1,26 @@
 #version 410 core
+
+#define MAX_DIR_LIGHTS 4
+#define MAX_POINT_LIGHTS 8
+
 out vec4 FragColor;
 
 in vec3 vNormal;
+in vec3 vWorldPos;
 in vec2 TexCoord;
+
+struct DirLight { 
+    vec3 direction; 
+    vec3 color; 
+    float intensity; 
+};
+
+struct PointLight { 
+    vec3 position;
+    vec3 color; 
+    float intensity; 
+    float radius; 
+};
 
 struct Material {
     sampler2D texture_diffuse1;
@@ -11,11 +29,59 @@ struct Material {
 
 uniform Material material;
 
-void main() {
-    vec4 diffuseColor = texture(material.texture_diffuse1, TexCoord);
-    
-    float ambientStrength = 0.8; // TODO: Change with skybox
-    vec3 ambient = ambientStrength * diffuseColor.rgb;
+// Lighting uniforms
+uniform vec3 u_ViewPos;
+uniform DirLight dirLights[MAX_DIR_LIGHTS];
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform int numDirLights;
+uniform int numPointLights;
+uniform bool u_LightingEnabled;
+uniform float u_MinAmbientLight;
 
-    FragColor = vec4(ambient, diffuseColor.a);
+// Material properties
+uniform float u_AmbientStrength = 0.5;
+uniform float u_SpecularStrength = 1.0;
+uniform float u_Shininess = 32.0;
+uniform vec3 u_BaseColor = vec3(1.0, 1.0, 1.0);
+
+vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 diffuseColor, vec3 specularColor) {
+    vec3 lightDir = normalize(-light.direction);  // negative because direction points FROM light
+    
+    // Diffuse
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * diffuseColor * light.color * light.intensity;
+    
+    // Blinn-Phong
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfDir), 0.0), u_Shininess);
+    vec3 specular = u_SpecularStrength * spec * specularColor * light.color * light.intensity;
+    
+    return diffuse + specular;
+}
+
+void main() {
+    vec4 diffuseTexture = texture(material.texture_diffuse1, TexCoord);
+    vec4 specularTexture = texture(material.texture_specular1, TexCoord);
+    
+    vec3 diffuseColor = diffuseTexture.rgb * u_BaseColor;
+    vec3 specularColor = specularTexture.rgb;
+
+    if (!u_LightingEnabled) {
+        FragColor = vec4(diffuseColor, diffuseTexture.a);
+        return;
+    }
+    
+    vec3 norm = normalize(vNormal);
+    vec3 viewDir = normalize(u_ViewPos - vWorldPos);
+    
+    // Global ambient floor keeps objects visible even with no active directional lights.
+    float ambientLevel = max(u_AmbientStrength, u_MinAmbientLight);
+    vec3 result = ambientLevel * diffuseColor;
+
+    // Calculate lighting from all directional lights
+    for(int i = 0; i < numDirLights && i < MAX_DIR_LIGHTS; i++) {
+        result += calcDirLight(dirLights[i], norm, viewDir, diffuseColor, specularColor);
+    }
+    
+    FragColor = vec4(result, diffuseTexture.a);
 }

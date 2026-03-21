@@ -3,12 +3,14 @@
 #include "engine/core/transform.h"
 
 #include <memory>
+#include <vector>
 
 class Window;
 class Shader;
 class Camera;
 class Model;
 class Material;
+class DirectionalLight;
 
 class Renderer {
 public:
@@ -19,6 +21,12 @@ public:
     void resizeRenderTarget(unsigned int width, unsigned int height);
 
     void setPixelArt(bool enabled, int colorDepth = 32);
+
+    void setLightingEnabled(bool enabled) { m_lightingEnabled = enabled; }
+    bool isLightingEnabled() const { return m_lightingEnabled; }
+
+    void setMinimumAmbientLight(float value) { m_minAmbientLight = value; }
+    float getMinimumAmbientLight() const { return m_minAmbientLight; }
 
     void setVertexSnap(bool enabled, float intensity = 40.0f) {
         m_vertexSnap   = enabled;
@@ -33,7 +41,8 @@ public:
     void render(Model& model, Material& material,
                 const Camera& camera,
                 const Transform& cameraTransform,
-                const Transform& modelTransform);
+                const Transform& modelTransform,
+                const std::vector<DirectionalLight>& lights);
 
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
@@ -55,4 +64,7 @@ private:
 
     bool  m_vertexSnap    = false;
     float m_snapIntensity = 40.0f;
+
+    bool  m_lightingEnabled = true;
+    float m_minAmbientLight = 0.05f;
 };

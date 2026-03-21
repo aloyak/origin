@@ -10,6 +10,7 @@
 class Shader; 
 class Texture;
 class Material;
+class DirectionalLight;
 
 struct Vertex {
     Vec3 Position;
@@ -37,9 +38,11 @@ public:
     Mesh(Mesh&& other) noexcept;
     Mesh& operator=(Mesh&& other) noexcept;
 
-    void draw(const Material& material) const;
+    void draw(const Material& material, const std::vector<DirectionalLight>& lights) const;
 
 private:
     unsigned int m_vao, m_vbo, m_ebo;
     int m_vertexCount, m_indexCount;
+
+    int m_maxDirectionalLights = 4;
 };

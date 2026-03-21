@@ -1,6 +1,7 @@
 #include "engine/engine.h"
 #include "engine/components/entity.h"
 #include "engine/components/cameraComponent.h"
+#include "engine/lighting/lightingManager.h"
 
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
@@ -171,6 +172,16 @@ void Engine::renderScene() {
     }
 
     if (!activeCamera) return;
+
+    // Update lighting system with all active entities
+    std::vector<Entity*> allEntities;
+    for (auto& entity : m_entities)
+        allEntities.push_back(entity.get());
+    if (m_sceneManager->getActiveScene()) {
+        for (auto& entity : m_sceneManager->getActiveScene()->getEntities())
+            allEntities.push_back(entity.get());
+    }
+    LightingManager::instance().updateLights(allEntities);
 
     for (auto& entity : m_entities)
         entity->render(*m_renderer, *activeCamera, *activeCameraTransform);

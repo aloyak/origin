@@ -9,6 +9,7 @@
 
 class Shader;
 class Material;
+class DirectionalLight;
 
 struct aiNode;
 struct aiMesh;
@@ -18,7 +19,7 @@ struct aiMaterial;
 class Model {
 public:
     Model(const char* path);
-    void draw(const Material& material);
+    void draw(const Material& material, const std::vector<DirectionalLight>& lights);
 
 private:
     std::vector<Mesh> meshes;

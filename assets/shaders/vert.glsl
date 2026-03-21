@@ -4,6 +4,7 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 
 out vec3 vNormal;
+out vec3 vWorldPos;
 out vec2 TexCoord;
 
 uniform mat4 u_Model;
@@ -14,7 +15,8 @@ uniform bool u_VertexSnap;
 uniform float u_SnapIntensity;
 
 void main() {
-    vec4 pos = u_Projection * u_View * u_Model * vec4(aPos, 1.0);
+    vec4 worldPos = u_Model * vec4(aPos, 1.0);
+    vec4 pos = u_Projection * u_View * worldPos;
     
     if (u_VertexSnap) {
         pos.xyz = pos.xyz / pos.w; 
@@ -23,6 +25,7 @@ void main() {
     }
 
     gl_Position = pos;
+    vWorldPos = worldPos.xyz;
     TexCoord = aTexCoord;
     vNormal = mat3(transpose(inverse(u_Model))) * aNormal;
 }

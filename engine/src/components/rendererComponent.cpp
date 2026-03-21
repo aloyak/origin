@@ -3,6 +3,7 @@
 #include "engine/engine.h"
 #include "engine/render/material.h"
 #include "engine/render/resourceManager.h"
+#include "engine/lighting/lightingManager.h"
 
 #include <nlohmann/json.hpp>
 
@@ -49,6 +50,8 @@ void RenderComponent::setTexture(const std::string& path, const std::string& typ
 void RenderComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
     if (!m_model || !m_material || !m_material->getShaderHandle()) return;
-    renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform);
+    
+    const auto& lights = LightingManager::instance().getDirectionalLights();
+    renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform, lights);
 }
 

@@ -3,6 +3,7 @@
 #include "engine/render/shader.h"
 #include "engine/render/model.h"
 #include "engine/render/camera.h"
+#include "engine/lighting/directionalLight.h"
 
 #include "engine/core/window.h"
 #include "engine/debug/path.h"
@@ -175,7 +176,8 @@ void Renderer::resolveFrame() {
 void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,
-                      const Transform& modelTransform)
+                      const Transform& modelTransform,
+                      const std::vector<DirectionalLight>& lights)
 {
     Shader& shader = material.getShader();
     shader.use();
@@ -197,6 +199,11 @@ void Renderer::render(Model& model, Material& material,
 
     shader.setBool ("u_VertexSnap",    m_vertexSnap);
     shader.setFloat("u_SnapIntensity", m_snapIntensity);
+    shader.setBool ("u_LightingEnabled", m_lightingEnabled);
+    shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
+    
+    // Bind camera position for lighting calculations
+    shader.setVec3("u_ViewPos", cameraTransform.position);
 
-    model.draw(material);
+    model.draw(material, lights);
 }
