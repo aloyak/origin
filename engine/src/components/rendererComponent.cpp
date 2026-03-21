@@ -1,18 +1,20 @@
 #include "engine/components/rendererComponent.h"
 #include "engine/components/entity.h"
 #include "engine/engine.h"
+#include "engine/render/resourceManager.h"
 
 #include <nlohmann/json.hpp>
 
 RenderComponent::RenderComponent(const std::string& modelPath,
                                  const std::string& vertPath,
                                  const std::string& fragPath)
-    : m_model(std::make_unique<Model>(modelPath.c_str()))
-    , m_shader(std::make_unique<Shader>(vertPath.c_str(), fragPath.c_str()))
 {
     m_modelPath = modelPath;
     m_vertPath = vertPath;
     m_fragPath = fragPath;
+
+    m_model = ResourceManager::instance().getModel(m_modelPath);
+    m_shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
 }
 
 void RenderComponent::serialize(nlohmann::json& j) const {
@@ -23,26 +25,21 @@ void RenderComponent::serialize(nlohmann::json& j) const {
 }
 
 void RenderComponent::deserialize(const nlohmann::json& j) {
-    std::string path = j.value("model", "");
-    if (!path.empty()) {
-        m_model = std::make_unique<Model>(path.c_str());
-    }
-
     m_modelPath = j.value("model", "");
     m_vertPath = j.value("vert", "assets/shaders/vert.glsl");
     m_fragPath = j.value("frag", "assets/shaders/frag.glsl");
 
     if (!m_modelPath.empty()) {
-        m_model = std::make_unique<Model>(m_modelPath.c_str());
-        m_shader = std::make_unique<Shader>(m_vertPath.c_str(), m_fragPath.c_str());
+        m_model = ResourceManager::instance().getModel(m_modelPath);
+        m_shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
     }
 }
 
 void RenderComponent::setTexture(const std::string& path, const std::string& type) {
     if (type == "diffuse")
-        m_diffuseOverride = std::make_shared<Texture>(path);
+        m_diffuseOverride = ResourceManager::instance().getTexture(path);
     else if (type == "specular")
-        m_specularOverride = std::make_shared<Texture>(path);
+        m_specularOverride = ResourceManager::instance().getTexture(path);
 }
 
 void RenderComponent::bindOverrides() const {
@@ -58,6 +55,7 @@ void RenderComponent::bindOverrides() const {
 
 void RenderComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
+    if (!m_model || !m_shader) return;
     bindOverrides();
     renderer.render(*m_model, *m_shader, camera, cameraTransform, entity->transform);
 }

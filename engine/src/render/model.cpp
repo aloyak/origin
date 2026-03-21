@@ -2,6 +2,7 @@
 #include "engine/render/mesh.h"
 #include "engine/render/shader.h"
 #include "engine/render/texture.h"
+#include "engine/render/resourceManager.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -99,12 +100,8 @@ std::vector<MeshTexture> Model::loadMaterialTextures(aiMaterial *mat, int type, 
 
         std::string fullPath = directory + '/' + str.C_Str();
 
-        if (textureCache.find(fullPath) == textureCache.end()) {
-            textureCache[fullPath] = std::make_shared<Texture>(fullPath);
-        }
-
         MeshTexture meshTex;
-        meshTex.texture = textureCache[fullPath]; // Grab from cache
+        meshTex.texture = ResourceManager::instance().getTexture(fullPath);
         meshTex.type = typeName;
         textures.push_back(meshTex);
     }

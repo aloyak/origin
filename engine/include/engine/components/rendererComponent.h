@@ -24,8 +24,8 @@ public:
     std::string getVertPath() const { return m_vertPath; }
     std::string getFragPath() const { return m_fragPath; }
 private:
-    std::unique_ptr<Model>  m_model;
-    std::unique_ptr<Shader> m_shader;
+    std::shared_ptr<Model>  m_model;
+    std::shared_ptr<Shader> m_shader;
 
     std::shared_ptr<Texture> m_diffuseOverride;
     std::shared_ptr<Texture> m_specularOverride;
