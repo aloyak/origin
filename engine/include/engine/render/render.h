@@ -8,41 +8,33 @@ class Window;
 class Shader;
 class Camera;
 class Model;
+class Material;
 
 class Renderer {
 public:
     explicit Renderer(Window& window);
     ~Renderer();
 
-    // Call once to create the offscreen FBO and fullscreen quad.
-    // Required before setPixelArt() or resizeRenderTarget().
     void setupRenderTarget(unsigned int width, unsigned int height);
-
-    // Resize the virtual resolution without recreating the FBO.
     void resizeRenderTarget(unsigned int width, unsigned int height);
 
-    // Toggle pixel-art colour-depth banding. Requires setupRenderTarget().
     void setPixelArt(bool enabled, int colorDepth = 32);
 
-    // Toggle vertex snapping (passed through to shaders via render()).
     void setVertexSnap(bool enabled, float intensity = 40.0f) {
         m_vertexSnap   = enabled;
         m_snapIntensity = intensity;
     }
 
-    // Bind the FBO (or default framebuffer) and clear.
     void beginFrame();
 
-    // Blit the FBO to the default framebuffer with the post-process pass.
     void resolveFrame();
 
     // Draw a single model. Called per-entity from updateScene().
-    void render(Model& model, Shader& shader,
+    void render(Model& model, Material& material,
                 const Camera& camera,
                 const Transform& cameraTransform,
                 const Transform& modelTransform);
 
-    // Returns the FBO colour texture (used by ImGui viewport in the sandbox).
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
 private:

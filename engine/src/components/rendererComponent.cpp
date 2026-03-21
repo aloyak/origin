@@ -1,6 +1,7 @@
 #include "engine/components/rendererComponent.h"
 #include "engine/components/entity.h"
 #include "engine/engine.h"
+#include "engine/render/material.h"
 #include "engine/render/resourceManager.h"
 
 #include <nlohmann/json.hpp>
@@ -14,7 +15,8 @@ RenderComponent::RenderComponent(const std::string& modelPath,
     m_fragPath = fragPath;
 
     m_model = ResourceManager::instance().getModel(m_modelPath);
-    m_shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+    auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+    m_material = std::make_unique<Material>(shader);
 }
 
 void RenderComponent::serialize(nlohmann::json& j) const {
@@ -31,32 +33,22 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
 
     if (!m_modelPath.empty()) {
         m_model = ResourceManager::instance().getModel(m_modelPath);
-        m_shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+        auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+        m_material = std::make_unique<Material>(shader);
     }
 }
 
 void RenderComponent::setTexture(const std::string& path, const std::string& type) {
-    if (type == "diffuse")
-        m_diffuseOverride = ResourceManager::instance().getTexture(path);
-    else if (type == "specular")
-        m_specularOverride = ResourceManager::instance().getTexture(path);
-}
+    if (!m_material) {
+        return;
+    }
 
-void RenderComponent::bindOverrides() const {
-    if (m_diffuseOverride) {
-        m_diffuseOverride->bind(0);
-        m_shader->setInt("material.texture_diffuse1", 0);
-    }
-    if (m_specularOverride) {
-        m_specularOverride->bind(1);
-        m_shader->setInt("material.texture_specular1", 1);
-    }
+    m_material->setTexture(type, ResourceManager::instance().getTexture(path));
 }
 
 void RenderComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
-    if (!m_model || !m_shader) return;
-    bindOverrides();
-    renderer.render(*m_model, *m_shader, camera, cameraTransform, entity->transform);
+    if (!m_model || !m_material || !m_material->getShaderHandle()) return;
+    renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform);
 }
 

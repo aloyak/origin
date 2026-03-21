@@ -7,6 +7,7 @@
 #include "engine/render/texture.h"
 #include "engine/render/mesh.h"
 #include "engine/render/shader.h"
+#include "engine/render/material.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures) {
     m_vertexCount = vertices.size(); 
@@ -84,28 +85,41 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-void Mesh::draw(Shader& shader) const {
-    unsigned int diffuseNr  = 1;
-    unsigned int specularNr = 1;
-    
-    for (unsigned int i = 0; i < textures.size(); i++) {
-        std::string number;
-        std::string name = textures[i].type;
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++);
+void Mesh::draw(const Material& material) const {
+    Shader& shader = material.getShader();
 
-        shader.setInt(("material." + name + number).c_str(), i);
-        textures[i].texture->bind(i);
-    }
+    unsigned int textureUnit = 0;
+
+    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) {
+        std::shared_ptr<Texture> selected = material.getTexture(uniformName);
+
+        if (!selected) {
+            for (const auto& meshTexture : textures) {
+                if (meshTexture.type == meshType && meshTexture.texture) {
+                    selected = meshTexture.texture;
+                    break;
+                }
+            }
+        }
+
+        if (!selected) {
+            return;
+        }
+
+        shader.setInt(("material." + uniformName).c_str(), textureUnit);
+        selected->bind(textureUnit);
+        ++textureUnit;
+    };
+
+    bindTextureSlot("texture_diffuse1", "texture_diffuse");
+    bindTextureSlot("texture_specular1", "texture_specular");
     
     glBindVertexArray(m_vao);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     // Unbind all texture units that were used
-    for (unsigned int i = 0; i < textures.size(); i++) {
+    for (unsigned int i = 0; i < textureUnit; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
     }

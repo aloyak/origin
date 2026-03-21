@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/components/component.h"
+#include "engine/render/material.h"
 #include "engine/render/model.h"
-#include "engine/render/shader.h"
 
 #include <string>
 #include <memory>
@@ -25,12 +25,7 @@ public:
     std::string getFragPath() const { return m_fragPath; }
 private:
     std::shared_ptr<Model>  m_model;
-    std::shared_ptr<Shader> m_shader;
-
-    std::shared_ptr<Texture> m_diffuseOverride;
-    std::shared_ptr<Texture> m_specularOverride;
-
-    void bindOverrides() const;
+    std::unique_ptr<Material> m_material;
 
     std::string m_modelPath;
     std::string m_vertPath;

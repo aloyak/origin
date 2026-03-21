@@ -9,6 +9,7 @@
 
 class Shader; 
 class Texture;
+class Material;
 
 struct Vertex {
     Vec3 Position;
@@ -36,7 +37,7 @@ public:
     Mesh(Mesh&& other) noexcept;
     Mesh& operator=(Mesh&& other) noexcept;
 
-    void draw(Shader& shader) const; 
+    void draw(const Material& material) const;
 
 private:
     unsigned int m_vao, m_vbo, m_ebo;

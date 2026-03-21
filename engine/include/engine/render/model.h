@@ -8,6 +8,7 @@
 #include "engine/render/mesh.h"
 
 class Shader;
+class Material;
 
 struct aiNode;
 struct aiMesh;
@@ -17,7 +18,7 @@ struct aiMaterial;
 class Model {
 public:
     Model(const char* path);
-    void draw(Shader& shader);
+    void draw(const Material& material);
 
 private:
     std::vector<Mesh> meshes;

@@ -1,4 +1,5 @@
 #include "engine/render/render.h"
+#include "engine/render/material.h"
 #include "engine/render/shader.h"
 #include "engine/render/model.h"
 #include "engine/render/camera.h"
@@ -171,11 +172,12 @@ void Renderer::resolveFrame() {
 
 // Rendering
 // This would need to be a lot more complex when adding lighting
-void Renderer::render(Model& model, Shader& shader,
+void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,
                       const Transform& modelTransform)
 {
+    Shader& shader = material.getShader();
     shader.use();
 
     glm::mat4 modelMat = glm::mat4(1.0f);
@@ -196,5 +198,5 @@ void Renderer::render(Model& model, Shader& shader,
     shader.setBool ("u_VertexSnap",    m_vertexSnap);
     shader.setFloat("u_SnapIntensity", m_snapIntensity);
 
-    model.draw(shader);
+    model.draw(material);
 }

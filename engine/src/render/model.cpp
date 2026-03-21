@@ -1,4 +1,5 @@
 #include "engine/render/model.h"
+#include "engine/render/material.h"
 #include "engine/render/mesh.h"
 #include "engine/render/shader.h"
 #include "engine/render/texture.h"
@@ -22,9 +23,9 @@ Model::Model(const char* path) {
     loadModel(path);
 }
 
-void Model::draw(Shader& shader) {
+void Model::draw(const Material& material) {
     for(unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw(shader);
+    meshes[i].draw(material);
 }
 
 void Model::loadModel(std::string path) {
