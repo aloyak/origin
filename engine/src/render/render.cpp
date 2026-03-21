@@ -143,30 +143,30 @@ void Renderer::resolveFrame() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (m_pixelArtEnabled) {
-        m_screenShader->use();
+    m_screenShader->use();
 
-        float levels = 255.0f;
+    float levels = 0.0f;
+    if (m_pixelArtEnabled) {
+        levels = 255.0f;
         if      (m_colorDepth <= 4)  levels = 4.0f;
         else if (m_colorDepth <= 8)  levels = 8.0f;
         else if (m_colorDepth <= 16) levels = 32.0f;
         else if (m_colorDepth >= 32) levels = 0.0f;
-
-        m_screenShader->setFloat("colorLevels", levels);
-
-        glBindVertexArray(m_quadVAO);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_fboTexture);
-        m_screenShader->setInt("screenTexture", 0);
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
     }
+    m_screenShader->setFloat("colorLevels", levels);
+
+    glBindVertexArray(m_quadVAO);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+    m_screenShader->setInt("screenTexture", 0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 }
 
 // Rendering
