@@ -40,10 +40,6 @@ int main() {
     Entity* directionalLight = engine.createEntity("Directional Light");
     directionalLight->addComponent<DirectionalLightComponent>(Vec3(-1, -1, -1), Vec3(1, 1, 1), 0.5f);
 
-    Entity* pointLight = engine.createEntity("Point Light");
-    pointLight->transform.position = Vec3(0.0f, 180.0f, 0.0f);
-    pointLight->addComponent<PointLightComponent>(Vec3(1.0f, 0.95f, 0.85f), 2.2f, 1200.0f);
-
     engine.getRenderer().setMinimumAmbientLight(0.2f);
 
     float sensitivity = 0.035f;
