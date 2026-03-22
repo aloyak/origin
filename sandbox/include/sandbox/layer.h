@@ -1,10 +1,13 @@
 #pragma once
-
 #include "engine/engine.h"
+
+#include "sandbox/panel/panel.h"
+#include "sandbox/panel/aboutPanel.h"
 
 #include <imgui.h>
 #include <filesystem>
-#include <string>
+#include <vector>
+#include <memory>
 
 namespace fs = std::filesystem;
 
@@ -21,21 +24,22 @@ public:
 private:
     void DrawMenuBar();
     void DrawDockspace();
-    void DrawSceneView();
-    void DrawHierarchy();
-    void DrawProperties();
-
     ScenePathInfo GetSceneContext(const std::string& inputPath);
 
     Engine& m_Engine;
-    Input& m_Input = m_Engine.getInput();
-    Window& m_Window = m_Engine.getWindow();
     Renderer& m_Renderer = m_Engine.getRenderer();
+    Window& m_Window = m_Engine.getWindow();
+    SceneManager& m_SceneManager = m_Engine.getSceneManager();
 
     Entity* m_SelectedEntity = nullptr;
-    ImVec2 m_ViewportSize = { 1600, 900 };
-
-    void HandleCameraInput();
-
     Entity* m_EditorCamera = nullptr;
+    
+    std::vector<std::unique_ptr<Panel>> m_Panels;
+
+    ImFont* m_RegularFont = nullptr;
+    ImFont* m_SemiBoldFont = nullptr;
+    ImFont* m_ExtraBoldFont = nullptr;
+
+    // Closeable panels
+    AboutPanel* m_AboutPanel = nullptr;
 };
