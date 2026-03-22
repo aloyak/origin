@@ -45,6 +45,8 @@ private:
     ImFont* m_SemiBoldFont = nullptr;
     ImFont* m_ExtraBoldFont = nullptr;
 
+    bool m_ShowRenderStats = true;
+
     // Scene management
     void OpenScene();
     void SaveScene();

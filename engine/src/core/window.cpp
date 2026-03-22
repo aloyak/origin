@@ -56,8 +56,6 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
         spdlog::error("Failed to init GLAD!");
 #endif
 
-    spdlog::info("Using OpenGL {}", (const char*)glGetString(GL_VERSION));
-
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, width, height);
 
@@ -77,6 +75,7 @@ void Window::swapBuffers() {
 
 void Window::enableVSync(bool enabled) {
     SDL_GL_SetSwapInterval(enabled ? 1 : 0);
+    m_vsyncEnabled = enabled;
 }
 
 void Window::setWindowTitle(const char* title) {

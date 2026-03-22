@@ -124,7 +124,7 @@ Layer::Layer(Engine& engine)
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
-    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_SelectedEntity, m_GizmoOperation));
+    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_SelectedEntity, m_GizmoOperation, m_ShowRenderStats));
 }
 
 void Layer::OnUIRender() {
@@ -210,6 +210,9 @@ void Layer::DrawMenuBar() {
             if (ImGui::MenuItem("Set Fullscreen", "F11")) {
                 m_Window.setFullscreen(!m_Window.isFullscreen());
             }
+            if (ImGui::MenuItem("Toggle VSync", "", m_Window.isVSyncEnabled())) {
+                m_Window.enableVSync(!m_Window.isVSyncEnabled());
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Rendering")) {
@@ -239,6 +242,8 @@ void Layer::DrawMenuBar() {
             if (ImGui::DragFloat("##AmbientLight", &ambient, 0.01f, 0.0f)) {
                 m_Renderer.setMinimumAmbientLight(ambient);
             }
+            ImGui::Separator();
+            ImGui::MenuItem("Show Render Stats", "", &m_ShowRenderStats);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Gizmos")) {

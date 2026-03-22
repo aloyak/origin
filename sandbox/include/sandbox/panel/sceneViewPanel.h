@@ -10,8 +10,8 @@
 
 class SceneViewPanel : public Panel {
 public:
-    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef) 
-        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef) {}
+    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef)
+        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef) {}
 
     void OnUIRender() override {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -29,6 +29,7 @@ public:
 
         ImGui::Image((ImTextureID)(intptr_t)m_Engine.getRenderer().getRenderTexture(), available, ImVec2(0, 1), ImVec2(1, 0));
 
+        DrawRenderStatsOverlay();
         DrawGizmos();
 
         static bool cameraLookActive = false;
@@ -96,6 +97,66 @@ public:
         }
     }
 
+    void DrawRenderStatsOverlay() {
+        if (!m_ShowRenderStats) return;
+
+        ImVec2 viewportMin = ImGui::GetItemRectMin();
+        ImVec2 viewportSize = ImGui::GetItemRectSize();
+        if (viewportSize.x <= 0.0f || viewportSize.y <= 0.0f) return;
+
+        const float padding = 12.0f;
+        const ImVec2 textSizeFps = ImGui::CalcTextSize("FPS 0000");
+        const ImVec2 textSizeMs = ImGui::CalcTextSize("000.00 ms");
+        const float contentWidth = textSizeFps.x > textSizeMs.x ? textSizeFps.x : textSizeMs.x;
+        const ImVec2 overlaySize(contentWidth + 20.0f, textSizeFps.y + textSizeMs.y + 16.0f);
+
+        ImGui::SetNextWindowPos(
+            ImVec2(viewportMin.x + viewportSize.x - padding, viewportMin.y + padding),
+            ImGuiCond_Always,
+            ImVec2(1.0f, 0.0f)
+        );
+        ImGui::SetNextWindowSize(overlaySize, ImGuiCond_Always);
+        ImGui::SetNextWindowBgAlpha(0.65f);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 6.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 6.0f);
+
+        constexpr ImGuiWindowFlags overlayFlags =
+            ImGuiWindowFlags_NoDecoration |
+            ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoFocusOnAppearing |
+            ImGuiWindowFlags_NoNav |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoInputs;
+
+        if (ImGui::Begin("##SceneRenderStatsOverlay", nullptr, overlayFlags)) {
+            const float rawDeltaTime = m_Engine.getDeltaTime();
+            const float deltaTime = rawDeltaTime > 0.000001f ? rawDeltaTime : 0.000001f;
+
+            if (m_SmoothedDeltaTime <= 0.0f) {
+                m_SmoothedDeltaTime = deltaTime;
+            } else {
+                constexpr float smoothing = 0.1f;
+                m_SmoothedDeltaTime += (deltaTime - m_SmoothedDeltaTime) * smoothing;
+            }
+
+            const float fps = 1.0f / m_SmoothedDeltaTime;
+            const float frameMs = m_SmoothedDeltaTime * 1000.0f;
+
+            m_StatsTimer += deltaTime;
+            if (m_StatsTimer >= m_StatsUpdateInterval) {
+                m_StatsTimer = 0.0f;
+                m_DisplayedFps = fps;
+                m_DisplayedFrameMs = frameMs;
+            }
+
+            ImGui::Text("FPS %4.0f", m_DisplayedFps);
+            ImGui::Text("%6.2f ms", m_DisplayedFrameMs);
+        }
+        ImGui::End();
+        ImGui::PopStyleVar(2);
+    }
+
 private:
     static void BuildTransformMatrix(const Transform& t, float* outMatrix) {
         float translation[3] = { t.position.x, t.position.y, t.position.z };
@@ -127,5 +188,11 @@ private:
     Entity*& m_EditorCamera;
     Entity*& m_SelectedEntity;
     ImGuizmo::OPERATION& m_GizmoOperation;
+    bool& m_ShowRenderStats;
     ImVec2 m_ViewportSize = { 0, 0 };
+    float m_SmoothedDeltaTime = 0.0f;
+    float m_StatsTimer = 0.0f;
+    float m_StatsUpdateInterval = 0.12f;
+    float m_DisplayedFps = 0.0f;
+    float m_DisplayedFrameMs = 0.0f;
 };

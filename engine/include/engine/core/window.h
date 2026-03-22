@@ -14,6 +14,7 @@ public:
     void setFullscreen(bool fullscreen);
     void setWindowTitle(const char* title);
     void enableVSync(bool enabled);
+    bool isVSyncEnabled() const { return m_vsyncEnabled; }
 
     float getAspectRatio() const;
     Vec2 getSize() const;
@@ -25,4 +26,5 @@ public:
 private:
     SDL_Window* m_window;
     SDL_GLContext m_glContext;
+    bool m_vsyncEnabled;
 };
