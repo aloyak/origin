@@ -16,6 +16,10 @@ Origin is a true 3D pixel-art game engine written from scratch in modern C++. It
 
 > Origin Engine 0.7 running on Linux. You can see a simple scene with the sponza model and a simple skybox.
 
+![Sandbox Screenshot](assets/sandbox.png)
+
+> Sandbox Editor running on Linux. Featuring simple lighting & Gizmos.
+
 ## Building
 
 The project uses **CMake** to generate and build the engine. The repository is organized into three main modules:
