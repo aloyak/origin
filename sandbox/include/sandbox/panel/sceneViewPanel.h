@@ -51,8 +51,8 @@ private:
 
         float speed = 200.0f * m_Engine.getDeltaTime();
         Input& input = m_Engine.getInput();
-        if (input.isKeyPressed(KEY_SHIFT)) speed *= 2.0f;
-        if (input.isKeyPressed(KEY_CTRL)) speed *= 0.5f;
+        if (input.isKeyPressed(KEY_LSHIFT)) speed *= 3.0f;
+        if (input.isKeyPressed(KEY_LCTRL)) speed *= 0.5f;
 
         if (input.isKeyPressed(KEY_W)) m_EditorCamera->transform.position += m_EditorCamera->transform.forward() * speed;
         if (input.isKeyPressed(KEY_S)) m_EditorCamera->transform.position -= m_EditorCamera->transform.forward() * speed;

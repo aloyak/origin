@@ -22,6 +22,7 @@ public:
     void resizeRenderTarget(unsigned int width, unsigned int height);
 
     void setPixelArt(bool enabled, int colorDepth = 32);
+    bool isPixelArtEnabled() const { return m_pixelArtEnabled; }
 
     void setLightingEnabled(bool enabled) { m_lightingEnabled = enabled; }
     bool isLightingEnabled() const { return m_lightingEnabled; }
@@ -38,7 +39,6 @@ public:
 
     void resolveFrame();
 
-    // Draw a single model. Called per-entity from updateScene().
     void render(Model& model, Material& material,
                 const Camera& camera,
                 const Transform& cameraTransform,

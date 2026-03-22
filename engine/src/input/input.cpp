@@ -1,5 +1,6 @@
 #include "engine/input/input.h"
 #include <SDL2/SDL.h>
+#include <cstring>
 
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
@@ -16,13 +17,35 @@ static EM_BOOL mouseMoveCallback(int, const EmscriptenMouseEvent* e, void*) {
 #endif
 
 Input::Input(SDL_Window* window) : m_window(window) {
+    m_prevKeyState.resize(SDL_NUM_SCANCODES, 0);
 #ifdef __EMSCRIPTEN__
     emscripten_set_mousemove_callback("#canvas", nullptr, 1, mouseMoveCallback);
 #endif
 }
 
+void Input::update() {
+    SDL_PumpEvents();
+    
+    int numKeys;
+    const uint8_t* current = SDL_GetKeyboardState(&numKeys);
+    
+    if (m_prevKeyState.size() < (size_t)numKeys) {
+        m_prevKeyState.resize(numKeys);
+    }
+
+    memcpy(m_prevKeyState.data(), current, numKeys);
+}
+
 bool Input::isKeyPressed(int key) const {
-    return SDL_GetKeyboardState(NULL)[key] == SDL_PRESSED;
+    const uint8_t* current = SDL_GetKeyboardState(NULL);
+    if (key < 0 || key >= (int)m_prevKeyState.size()) return false;
+    return current[key] && !m_prevKeyState[key];
+}
+
+bool Input::isKeyDown(int key) const {
+    const uint8_t* current = SDL_GetKeyboardState(NULL);
+    if (key < 0) return false;
+    return current[key] != 0;
 }
 
 bool Input::isMouseButtonPressed(int button) const {

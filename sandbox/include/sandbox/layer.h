@@ -26,10 +26,13 @@ private:
     void DrawDockspace();
     ScenePathInfo GetSceneContext(const std::string& inputPath);
 
+    void HandleShortcuts();
+
     Engine& m_Engine;
     Renderer& m_Renderer = m_Engine.getRenderer();
     Window& m_Window = m_Engine.getWindow();
     SceneManager& m_SceneManager = m_Engine.getSceneManager();
+    Input &m_Input = m_Engine.getInput();
 
     Entity* m_SelectedEntity = nullptr;
     Entity* m_EditorCamera = nullptr;

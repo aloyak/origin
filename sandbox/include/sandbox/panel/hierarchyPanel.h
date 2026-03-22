@@ -19,7 +19,7 @@ public:
             m_Engine.moveToScene(entity);
         }
 
-        if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth)) {
             if (scene) {
                 for (auto& entity : scene->getEntities()) {
                     bool selected = (m_SelectedEntity == entity.get());

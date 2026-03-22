@@ -98,12 +98,6 @@ Layer::Layer(Engine& engine)
     
     m_SceneManager.load(info.scene.string());
 
-    const std::string title = m_SceneManager.getActiveScene() 
-    ? "Origin Sandbox - " + m_SceneManager.getActiveScene()->name 
-    : "Origin Sandbox";
-
-    m_Window.setWindowTitle(title.c_str());
-
     Entity* cam = m_Engine.createEntity("Editor Camera");
     cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);
     cam->transform.position = Vec3(0.0f, 150.0f, 500.0f);
@@ -124,9 +118,16 @@ void Layer::OnUIRender() {
     for (auto& panel : m_Panels) {
         panel->OnUIRender();
     }
+
+    const std::string title = m_SceneManager.getActiveScene() 
+    ? "Origin Sandbox - " + m_SceneManager.getActiveScene()->name 
+    : "Origin Sandbox";
+    m_Window.setWindowTitle(title.c_str());
 }
 
 void Layer::DrawMenuBar() {
+    HandleShortcuts();
+
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Scene", "Ctrl+N")) m_Engine.getSceneManager().createScene("Empty Scene");
@@ -138,22 +139,28 @@ void Layer::DrawMenuBar() {
             if (ImGui::MenuItem("Quit")) m_Engine.stop();
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Entity")) {
-            if (ImGui::MenuItem("Create Empty")) {
-                Entity* entity = m_Engine.createEntity("Entity");
-                m_Engine.moveToScene(entity);
-            }
-            ImGui::EndMenu();
-        }
         if (ImGui::BeginMenu("Window")) {
             if (ImGui::MenuItem("Set Fullscreen", "F11")) {
                 m_Window.setFullscreen(!m_Window.isFullscreen());
             }
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Lighting")) {
-            if (ImGui::MenuItem("Toggle Lighting", "Ctrl+L")) {
-                m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
+        if (ImGui::BeginMenu("Rendering")) {
+            bool isPixelArt = m_Renderer.isPixelArtEnabled();
+            if (ImGui::MenuItem("Toggle Pixelart", "", &isPixelArt)) {
+                if (isPixelArt) {
+                    m_Renderer.setupRenderTarget(350, 200);
+                    m_Renderer.setPixelArt(true, 4); // not working?
+                } else {
+                    Vec2 size = m_Window.getSize();
+                    m_Renderer.setupRenderTarget((unsigned int)size.x, (unsigned int)size.y);
+                    m_Renderer.setPixelArt(false, 32);
+                }
+            }
+            ImGui::Separator();
+            bool isLighting = m_Renderer.isLightingEnabled();
+            if (ImGui::MenuItem("Toggle Lighting", "Ctrl+L", &isLighting)) {
+                m_Renderer.setLightingEnabled(isLighting);
             }
             ImGui::EndMenu();
         }
@@ -182,6 +189,27 @@ void Layer::DrawMenuBar() {
         }
 
         ImGui::EndMainMenuBar();
+    }
+}
+
+void Layer::HandleShortcuts() {
+    static int cooldown = 0;
+    if (cooldown > 0) {
+        cooldown--;
+        return;
+    }
+
+    if (m_Input.isKeyPressed(KEY_F11)) {
+        m_Window.setFullscreen(!m_Window.isFullscreen());
+        cooldown = 30;
+    }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_N)) {
+        m_Engine.getSceneManager().createScene("Empty Scene");
+        cooldown = 30;
+    }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_L)) {
+        m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
+        cooldown = 30;
     }
 }
 
