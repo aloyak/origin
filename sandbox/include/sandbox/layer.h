@@ -5,6 +5,7 @@
 #include "sandbox/panel/aboutPanel.h"
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <filesystem>
 #include <vector>
 #include <memory>
@@ -36,6 +37,7 @@ private:
 
     Entity* m_SelectedEntity = nullptr;
     Entity* m_EditorCamera = nullptr;
+    ImGuizmo::OPERATION m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
     
     std::vector<std::unique_ptr<Panel>> m_Panels;
 

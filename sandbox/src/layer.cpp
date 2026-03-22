@@ -124,7 +124,7 @@ Layer::Layer(Engine& engine)
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
-    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera));
+    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_SelectedEntity, m_GizmoOperation));
 }
 
 void Layer::OnUIRender() {
@@ -241,6 +241,21 @@ void Layer::DrawMenuBar() {
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Gizmos")) {
+            if (ImGui::MenuItem("Translate", "1", m_GizmoOperation == ImGuizmo::OPERATION::TRANSLATE)) {
+                m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+            }
+            if (ImGui::MenuItem("Rotate", "2", m_GizmoOperation == ImGuizmo::OPERATION::ROTATE)) {
+                m_GizmoOperation = ImGuizmo::OPERATION::ROTATE;
+            }
+            if (ImGui::MenuItem("Scale", "3", m_GizmoOperation == ImGuizmo::OPERATION::SCALE)) {
+                m_GizmoOperation = ImGuizmo::OPERATION::SCALE;
+            }
+            if (ImGui::MenuItem("Universal", "4", m_GizmoOperation == ImGuizmo::OPERATION::UNIVERSAL)) {
+                m_GizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
+            }
+            ImGui::EndMenu();
+        }
         if (ImGui::BeginMenu("Help")) {
             if (ImGui::MenuItem("About")) {
                 if (!m_AboutPanel) {
@@ -300,6 +315,19 @@ void Layer::HandleShortcuts() {
     if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_L)) {
         m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
         cooldown = 30;
+    }
+
+    if (m_Input.isKeyPressed(KEY_1)) {
+        m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+    }
+    if (m_Input.isKeyPressed(KEY_2)) {
+        m_GizmoOperation = ImGuizmo::OPERATION::ROTATE;
+    }
+    if (m_Input.isKeyPressed(KEY_3)) {
+        m_GizmoOperation = ImGuizmo::OPERATION::SCALE;
+    }
+    if (m_Input.isKeyPressed(KEY_4)) {
+        m_GizmoOperation = ImGuizmo::OPERATION::UNIVERSAL;
     }
 }
 
