@@ -43,6 +43,14 @@ private:
     ImFont* m_SemiBoldFont = nullptr;
     ImFont* m_ExtraBoldFont = nullptr;
 
+    // Scene management
+    void OpenScene();
+    void SaveScene();
+    void SaveSceneAs();
+    void UnloadScene();
+
+    ScenePathInfo m_CurrentSceneInfo;
+
     // Closeable panels
     AboutPanel* m_AboutPanel = nullptr;
 };

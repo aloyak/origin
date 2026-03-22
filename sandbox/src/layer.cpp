@@ -3,6 +3,7 @@
 #include "sandbox/panel/hierarchyPanel.h"
 #include "sandbox/panel/propertiesPanel.h"
 #include "sandbox/panel/sceneViewPanel.h"
+#include "sandbox/dialog.h"
 
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rendererComponent.h"
@@ -85,22 +86,11 @@ Layer::Layer(Engine& engine)
     io.FontDefault = m_RegularFont;
     io.Fonts->Build();
 
-    // ----
-    std::string input;
-    std::cout << "[PLACEHOLDER] Enter scene file path: ";
-    std::getline(std::cin, input);
-    // ----
-
     registerDefaultInspectors();
-
-    ScenePathInfo info = GetSceneContext(input);
-    Path::setBase(info.root);
-    
-    m_SceneManager.load(info.scene.string());
 
     Entity* cam = m_Engine.createEntity("Editor Camera");
     cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);
-    cam->transform.position = Vec3(0.0f, 150.0f, 500.0f);
+    cam->transform.position = Vec3(0.0f, 150.0f, 0.0f);
     m_EditorCamera = cam;
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
@@ -125,6 +115,51 @@ void Layer::OnUIRender() {
     m_Window.setWindowTitle(title.c_str());
 }
 
+void Layer::OpenScene() {
+    std::string path = Dialog::openFile({ "Scene Files", "*.json" });
+    if (!path.empty()) {
+        m_CurrentSceneInfo = GetSceneContext(path);
+        Path::setBase(m_CurrentSceneInfo.root);
+        if (m_CurrentSceneInfo.scene.empty()) {
+            Logger::error("Failed to load scene: Invalid path.");
+        } else {
+            m_Engine.getSceneManager().load(m_CurrentSceneInfo.scene.string());
+        }
+    }
+}
+
+void Layer::SaveScene() {
+    if (!m_SceneManager.getActiveScene()) {
+        Logger::error("No active scene to save.");
+        return;
+    }
+    m_Engine.getSceneManager().save(m_CurrentSceneInfo.scene.string());
+}
+
+void Layer::SaveSceneAs() {
+    if (!m_SceneManager.getActiveScene()) {
+        Logger::error("No active scene to save.");
+        return;
+    }
+
+    std::string path = Dialog::saveFile({ "Scene Files", "*.json" });
+    if (!path.empty()) {
+        fs::path chosenPath(path);
+        if (!chosenPath.has_extension()) {
+            chosenPath.replace_extension(".json");
+        }
+
+        chosenPath = fs::absolute(chosenPath).lexically_normal();
+        m_CurrentSceneInfo = { chosenPath.parent_path(), chosenPath };
+
+        m_Engine.getSceneManager().save(chosenPath.string());
+    }
+}
+
+void Layer::UnloadScene() {
+    m_Engine.getSceneManager().unload();
+}
+
 void Layer::DrawMenuBar() {
     HandleShortcuts();
 
@@ -132,9 +167,12 @@ void Layer::DrawMenuBar() {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Scene", "Ctrl+N")) m_Engine.getSceneManager().createScene("Empty Scene");
             ImGui::Separator();
-            if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
-            if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
-            if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {}
+
+            if (ImGui::MenuItem("Open Scene", "Ctrl+O")) OpenScene();
+            if (ImGui::MenuItem("Save Scene", "Ctrl+S")) SaveScene();
+            if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) SaveSceneAs();
+            if (ImGui::MenuItem("Unload Scene")) UnloadScene();
+
             ImGui::Separator();
             if (ImGui::MenuItem("Quit")) m_Engine.stop();
             ImGui::EndMenu();
@@ -207,6 +245,19 @@ void Layer::HandleShortcuts() {
         m_Engine.getSceneManager().createScene("Empty Scene");
         cooldown = 30;
     }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_O)) {
+        OpenScene();
+        cooldown = 30;
+    }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_S)) {
+        SaveScene();
+        cooldown = 30;
+    }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyDown(KEY_LSHIFT) && m_Input.isKeyPressed(KEY_S)) {
+        SaveSceneAs();
+        cooldown = 30;
+    }
+
     if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_L)) {
         m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
         cooldown = 30;

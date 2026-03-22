@@ -9,8 +9,7 @@ target_include_directories(sandbox
     PRIVATE src
 )
 
-target_link_libraries(sandbox PRIVATE engine)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/pfd.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imguizmo.cmake)
 
-# include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imguizmo.cmake)
-
-#target_link_libraries(sandbox PRIVATE imguizmo)
+target_link_libraries(sandbox PRIVATE engine pfd)
