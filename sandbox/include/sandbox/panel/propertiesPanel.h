@@ -6,6 +6,12 @@
 #include "engine/engine.h"
 #include <imgui.h>
 
+#include "engine/components/cameraComponent.h"
+#include "engine/components/rendererComponent.h"
+#include "engine/components/skyboxComponent.h"
+#include "engine/components/directionalLightComponent.h"
+#include "engine/components/pointLightComponent.h"
+
 class PropertiesPanel : public Panel {
 public:
     PropertiesPanel(Engine& engine, Entity*& selectedRef) 
@@ -42,21 +48,48 @@ public:
 
             for (const auto& [type, comp] : m_SelectedEntity->getComponents()) {
                 if (ImGui::CollapsingHeader(type.name(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                    ImGui::PushID(type.hash_code());
                     ImGui::Checkbox("Enabled", &comp->isEnabled);
                     ImGui::SameLine();
                     if (ImGui::Button(("Remove Component"))) {
-                        //m_SelectedEntity->removeComponent(type);
+                        m_SelectedEntity->removeComponent(type);
+                        ImGui::PopID();
                         break;
                     }
 
-                    ImGui::PushID(type.hash_code());
                     InspectorRegistry::draw(type, comp.get());
                     ImGui::PopID();
                 }
             }
             
             ImGui::Separator();
-            if (ImGui::Button("Add Component", ImVec2(-1, 0))) { /* Implementation placeholder */ }
+            if (ImGui::Button("Add Component", ImVec2(-1, 0))) { 
+                ImGui::OpenPopup("AddComponentPopup");
+            }
+
+            if (ImGui::BeginPopup("AddComponentPopup")) {
+                if (!m_SelectedEntity->getComponent<CameraComponent>() && ImGui::MenuItem("Camera")) {
+                    m_SelectedEntity->addComponent<CameraComponent>(60.0f, m_Engine.getWindow().getAspectRatio(), 0.1f, 10000.0f);
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<DirectionalLightComponent>() && ImGui::MenuItem("Directional Light")) {
+                    m_SelectedEntity->addComponent<DirectionalLightComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<PointLightComponent>() && ImGui::MenuItem("Point Light")) {
+                    m_SelectedEntity->addComponent<PointLightComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<RenderComponent>() && ImGui::MenuItem("Renderer")) {
+                    m_SelectedEntity->addComponent<RenderComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<SkyboxComponent>() && ImGui::MenuItem("Skybox")) {
+                    m_SelectedEntity->addComponent<SkyboxComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
         } else {
             ImGui::TextDisabled("No entity selected");
         }

@@ -9,7 +9,7 @@
 
 class RenderComponent : public Component {
 public:
-    RenderComponent(const std::string& modelPath,
+    RenderComponent(const std::string& modelPath = "",
                     const std::string& vertPath = "assets/shaders/vert.glsl",
                     const std::string& fragPath = "assets/shaders/frag.glsl");
     

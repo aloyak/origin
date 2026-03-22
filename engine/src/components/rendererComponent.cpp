@@ -15,9 +15,12 @@ RenderComponent::RenderComponent(const std::string& modelPath,
     m_vertPath = vertPath;
     m_fragPath = fragPath;
 
-    m_model = ResourceManager::instance().getModel(m_modelPath);
     auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
     m_material = std::make_unique<Material>(shader);
+
+    if (!m_modelPath.empty()) {
+        m_model = ResourceManager::instance().getModel(m_modelPath);
+    }
 }
 
 void RenderComponent::serialize(nlohmann::json& j) const {

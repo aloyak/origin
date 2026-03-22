@@ -58,6 +58,14 @@ public:
         );
     }
 
+    void removeComponent(std::type_index type) {
+        m_components.erase(type);
+        m_componentOrder.erase(
+            std::remove(m_componentOrder.begin(), m_componentOrder.end(), type),
+            m_componentOrder.end()
+        );
+    }
+
     void update(float dt) {
         for (const auto& type : m_componentOrder) {
             auto it = m_components.find(type);

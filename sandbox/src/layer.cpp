@@ -24,6 +24,14 @@ void registerDefaultInspectors() {
         float fov = c->getCamera().getFov();
         if (ImGui::DragFloat("FOV", &fov, 0.5f, 10.0f, 170.0f))
             c->getCamera().setFov(fov);
+        float nearFar[2] = { c->getCamera().getNear(), c->getCamera().getFar() };
+        if (ImGui::DragFloat2("Near/Far", nearFar, 0.1f, 0.01f, 10000.0f, "Near: %.2f\nFar: %.2f")) {
+            if (nearFar[1] <= nearFar[0]) {
+                nearFar[1] = nearFar[0] + 0.01f;
+            }
+            c->getCamera().setNear(nearFar[0]);
+            c->getCamera().setFar(nearFar[1]);
+        }
     });
 
     InspectorRegistry::registerComponent<RenderComponent>([](RenderComponent* c) {
@@ -33,8 +41,24 @@ void registerDefaultInspectors() {
     });
 
     InspectorRegistry::registerComponent<SkyboxComponent>([](SkyboxComponent* c) {
-        for (int i = 0; i < (int)c->getFaces().size(); i++)
-            ImGui::LabelText(("Face " + std::to_string(i)).c_str(), "%s", c->getFaces()[i].c_str());
+        const std::vector<std::string> faces = c->getFaces();
+        if (ImGui::BeginListBox("Faces")) {
+            for (int i = 0; i < (int)faces.size(); i++) {
+                ImGui::PushID(i);
+                ImGui::Text("Face %d", i);
+                ImGui::SameLine();
+
+                const std::string buttonLabel = faces[i].empty() ? "Choose file...##face_path" : faces[i] + "##face_path";
+                if (ImGui::Button(buttonLabel.c_str())) {
+                    std::string chosenPath = Dialog::openFile({ "Image Files", "*.png *.jpg *.jpeg *.bmp *.tga *.hdr", "All Files", "*" });
+                    if (!chosenPath.empty()) {
+                        c->setFacePath((size_t)i, chosenPath);
+                    }
+                }
+                ImGui::PopID();
+            }
+            ImGui::EndListBox();
+        }
     });
 
     InspectorRegistry::registerComponent<PointLightComponent>([](PointLightComponent* c) {
@@ -55,6 +79,11 @@ void registerDefaultInspectors() {
     });
 
     InspectorRegistry::registerComponent<DirectionalLightComponent>([](DirectionalLightComponent* c) {
+        Vec3 direction = c->getDirection();
+        if (ImGui::DragFloat3("Direction", &direction.x, 0.1f, -1.0f, 1.0f)) {
+            c->setDirection(direction.normalize());
+        }
+
         Vec3 color = c->getColor();
         if (ImGui::ColorEdit3("Color", &color.x)) {
             c->setColor(color);
@@ -195,10 +224,20 @@ void Layer::DrawMenuBar() {
                     m_Renderer.setPixelArt(false, 32);
                 }
             }
+            if (ImGui::MenuItem("Toggle Vertex Snap", "", m_Renderer.isVertexSnapEnabled())) {
+                m_Renderer.setVertexSnap(!m_Renderer.isVertexSnapEnabled());
+            }
             ImGui::Separator();
             bool isLighting = m_Renderer.isLightingEnabled();
             if (ImGui::MenuItem("Toggle Lighting", "Ctrl+L", &isLighting)) {
                 m_Renderer.setLightingEnabled(isLighting);
+            }
+            float ambient = m_Renderer.getMinimumAmbientLight();
+            ImGui::TextUnformatted("Ambient Light");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(70.0f);
+            if (ImGui::DragFloat("##AmbientLight", &ambient, 0.01f, 0.0f)) {
+                m_Renderer.setMinimumAmbientLight(ambient);
             }
             ImGui::EndMenu();
         }

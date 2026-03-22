@@ -34,6 +34,7 @@ public:
         m_vertexSnap   = enabled;
         m_snapIntensity = intensity;
     }
+    bool isVertexSnapEnabled() const { return m_vertexSnap; }
 
     void beginFrame();
 

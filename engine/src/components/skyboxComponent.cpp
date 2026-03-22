@@ -17,14 +17,37 @@
 
 #include "engine/debug/path.h"
 
+namespace {
+    bool hasCompleteFaces(const std::vector<std::string>& faces) {
+        if (faces.size() != 6) {
+            return false;
+        }
+        for (const auto& face : faces) {
+            if (face.empty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 SkyboxComponent::SkyboxComponent(const std::vector<std::string>& faces) 
-    : m_facePaths(faces) {
+    : m_facePaths(faces.empty() ? std::vector<std::string>(6) : faces) {
     m_shader = std::make_unique<Shader>("assets/shaders/skybox/skybox_vert.glsl", "assets/shaders/skybox/skybox_frag.glsl");
     setupMesh();
-    loadCubemap(faces);
+    loadCubemap(m_facePaths);
 }
 
 void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
+    if (m_cubemapID != 0) {
+        glDeleteTextures(1, &m_cubemapID);
+        m_cubemapID = 0;
+    }
+
+    if (!hasCompleteFaces(faces)) {
+        return;
+    }
+
     glGenTextures(1, &m_cubemapID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemapID);
 
@@ -48,6 +71,16 @@ void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+bool SkyboxComponent::setFacePath(size_t index, const std::string& path) {
+    if (index >= m_facePaths.size() || path.empty()) {
+        return false;
+    }
+
+    m_facePaths[index] = path;
+    loadCubemap(m_facePaths);
+    return true;
 }
 
 void SkyboxComponent::setupMesh() {
@@ -77,6 +110,7 @@ void SkyboxComponent::setupMesh() {
 
 void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
+    if (m_cubemapID == 0) return;
 
     glDepthFunc(GL_LEQUAL); 
     m_shader->use();
@@ -103,6 +137,9 @@ void SkyboxComponent::serialize(nlohmann::json& j) const {
 void SkyboxComponent::deserialize(const nlohmann::json& j) {
     if (j.contains("faces") && j["faces"].is_array()) {
         m_facePaths = j["faces"].get<std::vector<std::string>>();
+        if (m_facePaths.size() != 6) {
+            m_facePaths = std::vector<std::string>(6);
+        }
         loadCubemap(m_facePaths);
     }
 }
