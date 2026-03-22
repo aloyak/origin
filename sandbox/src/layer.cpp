@@ -118,6 +118,9 @@ void Layer::OnUIRender() {
     DrawMenuBar();
     DrawDockspace();
     
+    // DEBUG!! (styling)
+    //ImGui::ShowStyleEditor();
+
     for (auto& panel : m_Panels) {
         panel->OnUIRender();
     }
@@ -132,7 +135,7 @@ void Layer::DrawMenuBar() {
             if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
             if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {}
             ImGui::Separator();
-            if (ImGui::MenuItem("Exit")) m_Engine.stop();
+            if (ImGui::MenuItem("Quit")) m_Engine.stop();
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Entity")) {
