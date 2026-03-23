@@ -10,8 +10,8 @@
 
 class SceneViewPanel : public Panel {
 public:
-    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef)
-        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef) {}
+    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef)
+        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef) {}
 
     void OnUIRender() override {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -168,7 +168,7 @@ private:
     void HandleCameraInput() {
         if (!m_EditorCamera) return;
 
-        float speed = 200.0f * m_Engine.getDeltaTime();
+        float speed = 200.0f * m_CameraSpeed * m_Engine.getDeltaTime();
         Input& input = m_Engine.getInput();
         if (input.isKeyPressed(KEY_LSHIFT)) speed *= 3.0f;
         if (input.isKeyPressed(KEY_LCTRL)) speed *= 0.5f;
@@ -186,6 +186,7 @@ private:
 
     Engine& m_Engine;
     Entity*& m_EditorCamera;
+    float& m_CameraSpeed;
     Entity*& m_SelectedEntity;
     ImGuizmo::OPERATION& m_GizmoOperation;
     bool& m_ShowRenderStats;

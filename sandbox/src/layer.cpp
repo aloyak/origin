@@ -124,7 +124,7 @@ Layer::Layer(Engine& engine)
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
-    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_SelectedEntity, m_GizmoOperation, m_ShowRenderStats));
+    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_GizmoOperation, m_ShowRenderStats));
 }
 
 void Layer::OnUIRender() {
@@ -213,6 +213,23 @@ void Layer::DrawMenuBar() {
             if (ImGui::MenuItem("Toggle VSync", "", m_Window.isVSyncEnabled())) {
                 m_Window.enableVSync(!m_Window.isVSyncEnabled());
             }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Scene")) {
+            if (ImGui::MenuItem("Add Entity", "Ctrl+Shift+A", false, m_SceneManager.getActiveScene() != nullptr)) {
+                Entity* newEntity = m_SceneManager.getActiveScene()->createEntity("Entity");
+                if (m_SelectedEntity) {
+                    newEntity->transform.position = m_SelectedEntity->transform.position;
+                }
+                m_SelectedEntity = newEntity;
+            }
+            if (ImGui::MenuItem("Delete Entity", "Del", false, m_SelectedEntity != nullptr)) {
+                m_SceneManager.getActiveScene()->destroyEntity(m_SelectedEntity);
+                m_SelectedEntity = nullptr;
+            }
+            if (ImGui::MenuItem("Duplicate Entity", "", false, m_SelectedEntity != nullptr)) {}
+            ImGui::Separator();
+            ImGui::SliderFloat("Editor Camera Speed", &m_CameraSpeed, 0.1f, 10.0f);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Rendering")) {
@@ -319,6 +336,21 @@ void Layer::HandleShortcuts() {
 
     if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_L)) {
         m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
+        cooldown = 30;
+    }
+
+    if (m_Input.isKeyPressed(KEY_DELETE) && m_SelectedEntity) {
+        m_SceneManager.getActiveScene()->destroyEntity(m_SelectedEntity);
+        m_SelectedEntity = nullptr;
+        cooldown = 30;
+    }
+
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_LSHIFT) && m_Input.isKeyPressed(KEY_A)) {
+        Entity* newEntity = m_SceneManager.getActiveScene()->createEntity("Entity");
+        if (m_SelectedEntity) {
+            newEntity->transform.position = m_SelectedEntity->transform.position;
+        }
+        m_SelectedEntity = newEntity;
         cooldown = 30;
     }
 

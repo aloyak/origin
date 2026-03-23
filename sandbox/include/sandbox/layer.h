@@ -37,6 +37,7 @@ private:
 
     Entity* m_SelectedEntity = nullptr;
     Entity* m_EditorCamera = nullptr;
+    float m_CameraSpeed = 1.0f;
     ImGuizmo::OPERATION m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
     
     std::vector<std::unique_ptr<Panel>> m_Panels;
