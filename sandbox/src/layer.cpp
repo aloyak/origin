@@ -229,12 +229,13 @@ void Layer::DrawMenuBar() {
             }
             if (ImGui::MenuItem("Duplicate Entity", "", false, m_SelectedEntity != nullptr)) {}
             ImGui::Separator();
+            ImGui::SetNextItemWidth(150.0f);
             ImGui::SliderFloat("Editor Camera Speed", &m_CameraSpeed, 0.1f, 10.0f);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Rendering")) {
             bool isPixelArt = m_Renderer.isPixelArtEnabled();
-            if (ImGui::MenuItem("Toggle Pixelart", "", &isPixelArt)) {
+            if (ImGui::MenuItem("Toggle Pixelart", "Ctrl+P", &isPixelArt)) {
                 if (isPixelArt) {
                     m_Renderer.setupRenderTarget(350, 200);
                     m_Renderer.setPixelArt(true, 4); // not working?
@@ -244,7 +245,7 @@ void Layer::DrawMenuBar() {
                     m_Renderer.setPixelArt(false, 32);
                 }
             }
-            if (ImGui::MenuItem("Toggle Vertex Snap", "", m_Renderer.isVertexSnapEnabled())) {
+            if (ImGui::MenuItem("Toggle Vertex Snap", "Ctrl+V", m_Renderer.isVertexSnapEnabled())) {
                 m_Renderer.setVertexSnap(!m_Renderer.isVertexSnapEnabled());
             }
             ImGui::Separator();
@@ -260,7 +261,7 @@ void Layer::DrawMenuBar() {
                 m_Renderer.setMinimumAmbientLight(ambient);
             }
             ImGui::Separator();
-            ImGui::MenuItem("Show Render Stats", "", &m_ShowRenderStats);
+            ImGui::MenuItem("Show Render Stats", "F1", &m_ShowRenderStats);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Gizmos")) {
@@ -329,6 +330,10 @@ void Layer::HandleShortcuts() {
         SaveScene();
         cooldown = 30;
     }
+    if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyPressed(KEY_V)) {
+        m_Renderer.setVertexSnap(!m_Renderer.isVertexSnapEnabled());
+        cooldown = 30;
+    }
     if (m_Input.isKeyDown(KEY_LCTRL) && m_Input.isKeyDown(KEY_LSHIFT) && m_Input.isKeyPressed(KEY_S)) {
         SaveSceneAs();
         cooldown = 30;
@@ -338,10 +343,14 @@ void Layer::HandleShortcuts() {
         m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled());
         cooldown = 30;
     }
-
     if (m_Input.isKeyPressed(KEY_DELETE) && m_SelectedEntity) {
         m_SceneManager.getActiveScene()->destroyEntity(m_SelectedEntity);
         m_SelectedEntity = nullptr;
+        cooldown = 30;
+    }
+
+    if (m_Input.isKeyPressed(KEY_F1)) {
+        m_ShowRenderStats = !m_ShowRenderStats;
         cooldown = 30;
     }
 

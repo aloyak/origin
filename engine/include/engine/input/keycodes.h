@@ -82,7 +82,7 @@
 #define KEY_RSHIFT     229
 #define KEY_RALT       230
 #define KEY_RSUPER     231
-#define KEY_DELETE     127
+#define KEY_DELETE     76
 
 #define MOUSE_LEFT     1
 #define MOUSE_RIGHT    3
