@@ -11,7 +11,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 Texture::Texture(const std::string& path) {
     std::string resolvedPath = Path::resolve(path).string();

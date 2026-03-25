@@ -13,7 +13,7 @@
 #include <sstream>
 
 #include "engine/render/shader.h"
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 auto replaceFirstLine = [](std::string& src, const std::string& newLine)
 {

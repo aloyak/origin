@@ -12,8 +12,8 @@
 #include "engine/components/pointLightComponent.h"
 
 #include "engine/input/input.h"
-#include "engine/debug/path.h"
-#include "engine/debug/logger.h"
+#include "engine/utils/path.h"
+#include "engine/utils/logger.h"
 
 #include "sandbox/styles.h"
 

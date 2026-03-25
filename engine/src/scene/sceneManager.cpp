@@ -12,7 +12,7 @@
 #include <fstream>
 #include <memory>
 
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 using json = nlohmann::json;
 

@@ -7,7 +7,7 @@
 #include "engine/lighting/pointLight.h"
 
 #include "engine/core/window.h"
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>

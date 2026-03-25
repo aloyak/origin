@@ -1,6 +1,6 @@
-#include "engine/render/resourceManager.h"
+#include "engine/core/resourceManager.h"
 
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 #include "engine/render/model.h"
 #include "engine/render/shader.h"
 #include "engine/render/texture.h"

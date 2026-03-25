@@ -10,7 +10,7 @@
 #include <SDL2/SDL.h>
 #include <spdlog/spdlog.h>
 
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     Path::init();

@@ -2,7 +2,7 @@
 #include "engine/components/entity.h"
 #include "engine/engine.h"
 #include "engine/render/material.h"
-#include "engine/render/resourceManager.h"
+#include "engine/core/resourceManager.h"
 #include "engine/lighting/lightingManager.h"
 
 #include <nlohmann/json.hpp>

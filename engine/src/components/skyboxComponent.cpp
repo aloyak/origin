@@ -15,7 +15,7 @@
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
-#include "engine/debug/path.h"
+#include "engine/utils/path.h"
 
 namespace {
     bool hasCompleteFaces(const std::vector<std::string>& faces) {

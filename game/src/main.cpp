@@ -2,7 +2,7 @@
 #include "engine/input/input.h"
 #include "engine/scene/sceneManager.h"
 
-#include "engine/debug/logger.h"
+#include "engine/utils/logger.h"
 
 #include "engine/components/rendererComponent.h"
 #include "engine/components/cameraComponent.h"
