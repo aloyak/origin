@@ -90,14 +90,6 @@ void SceneManager::unload() {
     }
 }
 
-Entity* SceneManager::createEntity(std::string name) {
-    if (!m_activeScene) {
-        m_activeScene = std::make_unique<Scene>();
-        m_activeScene->name = "Default Scene";
-    }
-    return m_activeScene->createEntity(name);
-}
-
 void SceneManager::save(const std::string& scenePath) {
     std::string resolvedScenePath = Path::resolve(scenePath).string();
     if (!m_activeScene) {

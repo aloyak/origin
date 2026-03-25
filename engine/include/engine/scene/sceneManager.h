@@ -17,9 +17,6 @@ public:
     }
 
     Scene* getActiveScene() { return m_activeScene.get(); }
-
-    Entity* createEntity(std::string name = "Entity");
-
 private:
     std::unique_ptr<Scene> m_activeScene;
 };
