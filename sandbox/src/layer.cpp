@@ -267,7 +267,7 @@ void Layer::DrawMenuBar() {
         }
         if (ImGui::BeginMenu("Rendering")) {
             bool isPixelArt = m_Renderer.isPixelArtEnabled();
-            if (ImGui::MenuItem("Toggle Pixelart", "Ctrl+P", &isPixelArt)) {
+            if (ImGui::MenuItem("Toggle Pixelart", "", &isPixelArt)) {
                 if (isPixelArt) {
                     m_Renderer.setupRenderTarget(350, 200);
                     m_Renderer.setPixelArt(true, 4); // not working?

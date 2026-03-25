@@ -11,7 +11,6 @@
 #include "engine/components/pointLightComponent.h"
 
 #include <iostream>
-#include <format>
 
 int main() {
     Engine engine(1600, 900, "Origin Game");
