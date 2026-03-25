@@ -17,7 +17,13 @@ static EM_BOOL mouseMoveCallback(int, const EmscriptenMouseEvent* e, void*) {
 #endif
 
 Input::Input(SDL_Window* window) : m_window(window) {
-    m_prevKeyState.resize(SDL_NUM_SCANCODES, 0);
+    SDL_PumpEvents();
+
+    int numKeys = 0;
+    const uint8_t* current = SDL_GetKeyboardState(&numKeys);
+
+    m_prevKeyState.assign(current, current + numKeys);
+    m_currKeyState.assign(current, current + numKeys);
 #ifdef __EMSCRIPTEN__
     emscripten_set_mousemove_callback("#canvas", nullptr, 1, mouseMoveCallback);
 #endif
@@ -25,27 +31,29 @@ Input::Input(SDL_Window* window) : m_window(window) {
 
 void Input::update() {
     SDL_PumpEvents();
-    
+
     int numKeys;
     const uint8_t* current = SDL_GetKeyboardState(&numKeys);
-    
+
+    if (m_currKeyState.size() < (size_t)numKeys) {
+        m_currKeyState.resize(numKeys, 0);
+    }
     if (m_prevKeyState.size() < (size_t)numKeys) {
-        m_prevKeyState.resize(numKeys);
+        m_prevKeyState.resize(numKeys, 0);
     }
 
-    memcpy(m_prevKeyState.data(), current, numKeys);
+    memcpy(m_prevKeyState.data(), m_currKeyState.data(), numKeys);
+    memcpy(m_currKeyState.data(), current, numKeys);
 }
 
 bool Input::isKeyPressed(int key) const {
-    const uint8_t* current = SDL_GetKeyboardState(NULL);
-    if (key < 0 || key >= (int)m_prevKeyState.size()) return false;
-    return current[key] && !m_prevKeyState[key];
+    if (key < 0 || key >= (int)m_currKeyState.size() || key >= (int)m_prevKeyState.size()) return false;
+    return m_currKeyState[key] && !m_prevKeyState[key];
 }
 
 bool Input::isKeyDown(int key) const {
-    const uint8_t* current = SDL_GetKeyboardState(NULL);
-    if (key < 0) return false;
-    return current[key] != 0;
+    if (key < 0 || key >= (int)m_currKeyState.size()) return false;
+    return m_currKeyState[key] != 0;
 }
 
 bool Input::isMouseButtonPressed(int button) const {

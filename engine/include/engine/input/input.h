@@ -28,6 +28,7 @@ private:
     SDL_Window* m_window;
 
     std::vector<uint8_t> m_prevKeyState;
+    std::vector<uint8_t> m_currKeyState;
     int m_mouseDeltaX = 0;
     int m_mouseDeltaY = 0;
 };

@@ -48,10 +48,10 @@ int main() {
         float speed = 300.0f * engine.getDeltaTime();
         Vec3 direction = Vec3(0.0f);
         
-        if (input.isKeyPressed(KEY_W)) direction += player->transform.forward() * allowedMove;
-        if (input.isKeyPressed(KEY_S)) direction -= player->transform.forward() * allowedMove;
-        if (input.isKeyPressed(KEY_A)) direction += player->transform.right() * allowedMove;
-        if (input.isKeyPressed(KEY_D)) direction -= player->transform.right() * allowedMove;
+        if (input.isKeyDown(KEY_W)) direction += player->transform.forward() * allowedMove;
+        if (input.isKeyDown(KEY_S)) direction -= player->transform.forward() * allowedMove;
+        if (input.isKeyDown(KEY_A)) direction += player->transform.right() * allowedMove;
+        if (input.isKeyDown(KEY_D)) direction -= player->transform.right() * allowedMove;
         
         if (direction.length() > 0.0f) {
             direction = direction.normalize();

@@ -78,19 +78,8 @@ void Engine::run(std::function<void()> mainLoop) {
 void Engine::beginFrame() {
     if (SDL_QuitRequested()) m_running = false;
 
-    float currentFrame = (float)SDL_GetTicks() / 1000.0f;
-    m_deltaTime = currentFrame - m_lastFrame;
-    m_lastFrame = currentFrame;
-
-    m_renderer->beginFrame();
-}
-
-void Engine::resolveFrame() {
-    m_renderer->resolveFrame();
-}
-
-void Engine::endFrame() {
-    m_window->swapBuffers();
+    m_input->update();
+    m_input->resetMouseDelta();
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -109,6 +98,20 @@ void Engine::endFrame() {
                 break;
         }
     }
+
+    float currentFrame = (float)SDL_GetTicks() / 1000.0f;
+    m_deltaTime = currentFrame - m_lastFrame;
+    m_lastFrame = currentFrame;
+
+    m_renderer->beginFrame();
+}
+
+void Engine::resolveFrame() {
+    m_renderer->resolveFrame();
+}
+
+void Engine::endFrame() {
+    m_window->swapBuffers();
 }
 
 // Entity Management

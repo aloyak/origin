@@ -178,13 +178,13 @@ private:
 
         float speed = 200.0f * m_CameraSpeed * m_Engine.getDeltaTime();
         Input& input = m_Engine.getInput();
-        if (input.isKeyPressed(KEY_LSHIFT)) speed *= 3.0f;
-        if (input.isKeyPressed(KEY_LCTRL)) speed *= 0.5f;
+        if (input.isKeyDown(KEY_LSHIFT)) speed *= 3.0f;
+        if (input.isKeyDown(KEY_LCTRL)) speed *= 0.5f;
 
-        if (input.isKeyPressed(KEY_W)) m_EditorCamera->transform.position += m_EditorCamera->transform.forward() * speed;
-        if (input.isKeyPressed(KEY_S)) m_EditorCamera->transform.position -= m_EditorCamera->transform.forward() * speed;
-        if (input.isKeyPressed(KEY_A)) m_EditorCamera->transform.position += m_EditorCamera->transform.right() * speed;
-        if (input.isKeyPressed(KEY_D)) m_EditorCamera->transform.position -= m_EditorCamera->transform.right() * speed;
+        if (input.isKeyDown(KEY_W)) m_EditorCamera->transform.position += m_EditorCamera->transform.forward() * speed;
+        if (input.isKeyDown(KEY_S)) m_EditorCamera->transform.position -= m_EditorCamera->transform.forward() * speed;
+        if (input.isKeyDown(KEY_A)) m_EditorCamera->transform.position += m_EditorCamera->transform.right() * speed;
+        if (input.isKeyDown(KEY_D)) m_EditorCamera->transform.position -= m_EditorCamera->transform.right() * speed;
 
         float sensitivity = 0.15f;
         Vec2 delta = input.getMouseDelta();
