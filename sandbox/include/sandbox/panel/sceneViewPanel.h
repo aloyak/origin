@@ -45,6 +45,14 @@ public:
         if (cameraLookActive) {
             HandleCameraInput();
         }
+            if (!m_Engine.getSceneManager().getActiveScene()) {
+                ImGui::SetCursorPosX((available.x - ImGui::CalcTextSize("No Active Scene!").x) * 0.5f);
+                ImGui::SetCursorPosY((available.y - ImGui::CalcTextSize("No Active Scene!").y) * 0.5f);
+
+                ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+                ImGui::TextUnformatted("No Active Scene!");
+                ImGui::PopFont();
+            }
 
         ImGui::End();
         ImGui::PopStyleVar();

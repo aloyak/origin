@@ -35,9 +35,41 @@ void registerDefaultInspectors() {
     });
 
     InspectorRegistry::registerComponent<RenderComponent>([](RenderComponent* c) {
-        ImGui::LabelText("Model", "%s", c->getModelPath().c_str());
-        ImGui::LabelText("Vert",  "%s", c->getVertPath().c_str());
-        ImGui::LabelText("Frag",  "%s", c->getFragPath().c_str());
+        if (ImGui::BeginListBox("Renderer")) {
+            ImGui::TextUnformatted("Model");
+            ImGui::SameLine();
+            const std::string modelPath = c->getModelPath();
+            const std::string modelLabel = modelPath.empty() ? "Choose file...##model_path" : modelPath + "##model_path";
+            if (ImGui::Button(modelLabel.c_str())) {
+                std::string chosenPath = Dialog::openFile({ "Model Files", "*.obj *.fbx *.dae *.gltf *.glb", "All Files", "*" });
+                if (!chosenPath.empty()) {
+                    c->setModelPath(chosenPath);
+                }
+            }
+
+            ImGui::TextUnformatted("Vertex Shader");
+            ImGui::SameLine();
+            const std::string vertPath = c->getVertPath();
+            const std::string vertLabel = vertPath.empty() ? "Choose file...##vert_path" : vertPath + "##vert_path";
+            if (ImGui::Button(vertLabel.c_str())) {
+                std::string chosenPath = Dialog::openFile({ "Shader Files", "*.glsl *.vert *.vs", "All Files", "*" });
+                if (!chosenPath.empty()) {
+                    c->setVertPath(chosenPath);
+                }
+            }
+
+            ImGui::TextUnformatted("Fragment Shader");
+            ImGui::SameLine();
+            const std::string fragPath = c->getFragPath();
+            const std::string fragLabel = fragPath.empty() ? "Choose file...##frag_path" : fragPath + "##frag_path";
+            if (ImGui::Button(fragLabel.c_str())) {
+                std::string chosenPath = Dialog::openFile({ "Shader Files", "*.glsl *.frag *.fs", "All Files", "*" });
+                if (!chosenPath.empty()) {
+                    c->setFragPath(chosenPath);
+                }
+            }
+            ImGui::EndListBox();
+        }
     });
 
     InspectorRegistry::registerComponent<SkyboxComponent>([](SkyboxComponent* c) {

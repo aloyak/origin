@@ -20,6 +20,10 @@ public:
 
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
+    void setModelPath(const std::string& modelPath);
+    void setVertPath(const std::string& vertPath);
+    void setFragPath(const std::string& fragPath);
+
     std::string getModelPath() const { return m_modelPath; }
     std::string getVertPath() const { return m_vertPath; }
     std::string getFragPath() const { return m_fragPath; }

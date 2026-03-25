@@ -42,6 +42,29 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     }
 }
 
+void RenderComponent::setModelPath(const std::string& modelPath) {
+    m_modelPath = modelPath;
+
+    if (m_modelPath.empty()) {
+        m_model.reset();
+        return;
+    }
+
+    m_model = ResourceManager::instance().getModel(m_modelPath);
+}
+
+void RenderComponent::setVertPath(const std::string& vertPath) {
+    m_vertPath = vertPath;
+    auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+    m_material = std::make_unique<Material>(shader);
+}
+
+void RenderComponent::setFragPath(const std::string& fragPath) {
+    m_fragPath = fragPath;
+    auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
+    m_material = std::make_unique<Material>(shader);
+}
+
 void RenderComponent::setTexture(const std::string& path, const std::string& type) {
     if (!m_material) {
         return;
