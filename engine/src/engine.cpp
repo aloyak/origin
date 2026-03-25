@@ -122,6 +122,10 @@ Entity* Engine::createEntity(std::string name) {
 }
 
 void Engine::destroyEntity(Entity* entity) {
+    if (m_activeCamera == entity) {
+        clearActiveCamera();
+    }
+
     m_entities.erase(
         std::remove_if(m_entities.begin(), m_entities.end(),
             [entity](const std::unique_ptr<Entity>& e) { return e.get() == entity; }),
@@ -154,21 +158,55 @@ void Engine::renderScene() {
     Camera* activeCamera = nullptr;
     const Transform* activeCameraTransform = nullptr;
 
-    for (auto& entity : m_entities) {
+    auto isTrackedEntity = [this](Entity* entity) {
+        if (!entity) return false;
+
+        for (const auto& e : m_entities) {
+            if (e.get() == entity) return true;
+        }
+
+        Scene* scene = m_sceneManager->getActiveScene();
+        if (scene) {
+            for (const auto& e : scene->getEntities()) {
+                if (e.get() == entity) return true;
+            }
+        }
+
+        return false;
+    };
+
+    auto tryUseCameraEntity = [&](Entity* entity) -> bool {
+        if (!entity) return false;
         auto* camComp = entity->getComponent<CameraComponent>();
-        if (camComp) {
-            activeCamera           = &camComp->getCamera();
-            activeCameraTransform  = &entity->transform;
-            break;
+        if (!camComp || !camComp->isEnabled) return false;
+
+        activeCamera = &camComp->getCamera();
+        activeCameraTransform = &entity->transform;
+        return true;
+    };
+
+    // First go with preferred camera
+    if (m_activeCamera) {
+        if (isTrackedEntity(m_activeCamera)) {
+            tryUseCameraEntity(m_activeCamera);
+        } else {
+            m_activeCamera = nullptr;
         }
     }
 
+    // First camera in engine-owned entities
+    if (!activeCamera) {
+        for (auto& entity : m_entities) {
+            if (tryUseCameraEntity(entity.get())) {
+                break;
+            }
+        }
+    }
+
+    // First camera in active scene
     if (!activeCamera && m_sceneManager->getActiveScene()) {
         for (auto& entity : m_sceneManager->getActiveScene()->getEntities()) {
-            auto* camComp = entity->getComponent<CameraComponent>();
-            if (camComp) {
-                activeCamera          = &camComp->getCamera();
-                activeCameraTransform = &entity->transform;
+            if (tryUseCameraEntity(entity.get())) {
                 break;
             }
         }

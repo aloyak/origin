@@ -43,6 +43,10 @@ public:
     void    destroyEntity(Entity* entity);
     void    moveToScene(Entity* entity);
 
+    void setActiveCamera(Entity* camera) { m_activeCamera = camera; }
+    void clearActiveCamera() { m_activeCamera = nullptr; }
+    Entity* getActiveCamera() const { return m_activeCamera; }
+
     // Update & render all entities and the active scene
     // Entities are expected to call renderer.render() themselves
     void updateScene();
@@ -70,6 +74,7 @@ private:
     float m_lastFrame = 0.0f;
 
     std::vector<std::unique_ptr<Entity>> m_entities;
+    Entity* m_activeCamera = nullptr;
 
     bool m_running = true;
 };
