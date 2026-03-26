@@ -1,9 +1,7 @@
 <div align="center">
-  <img src="originlogo.png" alt="Origin Logo"  width="750"> 
+  <img src="originlogo.png" alt="Origin Logo"  width="550"> 
   <h1 style="font-size: 3rem; margin-top: 10px;"><strong>Origin Engine</strong></h1>
 </div>
-
-**Important Links (Under Construction!):**
 
 * **[Origin Website](https://origin.aloyak.dev)**
 * **[Demo Game](https://origin.aloyak.dev/game)**
@@ -41,6 +39,9 @@ To build the project on Linux:
 ```sh
 chmod +x ./build.sh
 ./build.sh
+
+# If you don't want to build the sandbox:
+./build.sh --no-sandbox
 ```
 
 This script will generate a build directory and compile the project.
@@ -54,8 +55,9 @@ The final executable can be found in `build/game/`
 
 ```sh
 chmod +x ./build.sh 
-./build.sh --web
-
+./build.sh --web # Sandbox isn't built for web
+```
+```sh
 python3 -m http.server 8080 --directory build-web/game/ # suggestion!
 ```
 
