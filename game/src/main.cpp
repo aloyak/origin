@@ -62,7 +62,7 @@ int main() {
             player->transform.position += direction * speed;
         }
 
-        lightObj->transform.position.x += cosf(engine.getTime()) * 500.0f * engine.getDeltaTime();
+        lightObj->transform.position.x = cosf(engine.getTime()) * 400.0f;
         Vec3 dynamicColor(
             0.5f + 0.5f * sinf(engine.getTime() * 0.8f),
             0.5f + 0.5f * sinf(engine.getTime() * 0.8f + 2.094f),
