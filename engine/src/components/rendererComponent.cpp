@@ -4,6 +4,7 @@
 #include "engine/render/material.h"
 #include "engine/core/resourceManager.h"
 #include "engine/lighting/lightingManager.h"
+#include "engine/utils/path.h"
 
 #include <nlohmann/json.hpp>
 
@@ -11,9 +12,9 @@ RenderComponent::RenderComponent(const std::string& modelPath,
                                  const std::string& vertPath,
                                  const std::string& fragPath)
 {
-    m_modelPath = modelPath;
-    m_vertPath = vertPath;
-    m_fragPath = fragPath;
+    m_modelPath = Path::toAssetsRelative(modelPath);
+    m_vertPath = Path::toAssetsRelative(vertPath);
+    m_fragPath = Path::toAssetsRelative(fragPath);
 
     auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
     m_material = std::make_unique<Material>(shader);
@@ -31,9 +32,9 @@ void RenderComponent::serialize(nlohmann::json& j) const {
 }
 
 void RenderComponent::deserialize(const nlohmann::json& j) {
-    m_modelPath = j.value("model", "");
-    m_vertPath = j.value("vert", "assets/shaders/vert.glsl");
-    m_fragPath = j.value("frag", "assets/shaders/frag.glsl");
+    m_modelPath = Path::toAssetsRelative(j.value("model", ""));
+    m_vertPath = Path::toAssetsRelative(j.value("vert", "assets/shaders/vert.glsl"));
+    m_fragPath = Path::toAssetsRelative(j.value("frag", "assets/shaders/frag.glsl"));
 
     if (!m_modelPath.empty()) {
         m_model = ResourceManager::instance().getModel(m_modelPath);
@@ -43,7 +44,7 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
 }
 
 void RenderComponent::setModelPath(const std::string& modelPath) {
-    m_modelPath = modelPath;
+    m_modelPath = Path::toAssetsRelative(modelPath);
 
     if (m_modelPath.empty()) {
         m_model.reset();
@@ -54,13 +55,13 @@ void RenderComponent::setModelPath(const std::string& modelPath) {
 }
 
 void RenderComponent::setVertPath(const std::string& vertPath) {
-    m_vertPath = vertPath;
+    m_vertPath = Path::toAssetsRelative(vertPath);
     auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
     m_material = std::make_unique<Material>(shader);
 }
 
 void RenderComponent::setFragPath(const std::string& fragPath) {
-    m_fragPath = fragPath;
+    m_fragPath = Path::toAssetsRelative(fragPath);
     auto shader = ResourceManager::instance().getShader(m_vertPath, m_fragPath);
     m_material = std::make_unique<Material>(shader);
 }

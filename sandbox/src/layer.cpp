@@ -178,7 +178,7 @@ void Layer::OnUIRender() {
 
 void Layer::OpenScene() {
     std::string path = Dialog::openFile({ "Scene Files", "*.json" });
-    if (!path.empty()) {
+    if (!path.empty() && path != m_CurrentSceneInfo.scene.string()) {
         m_CurrentSceneInfo = GetSceneContext(path);
         Path::setBase(m_CurrentSceneInfo.root);
         if (m_CurrentSceneInfo.scene.empty()) {
@@ -248,6 +248,20 @@ void Layer::DrawMenuBar() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Scene")) {
+            char sceneBuffer[256] = "";
+            if (m_SceneManager.getActiveScene()) {
+                strncpy(sceneBuffer, m_SceneManager.getActiveScene()->name.c_str(), 255);
+            }
+
+            if (!m_SceneManager.getActiveScene()) ImGui::BeginDisabled();
+            ImGui::TextUnformatted("Scene Name");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(200.0f);
+            if (ImGui::InputText("##sceneName", sceneBuffer, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+                if (m_SceneManager.getActiveScene()) m_SceneManager.getActiveScene()->name = sceneBuffer;
+            }
+            if (!m_SceneManager.getActiveScene()) ImGui::EndDisabled();
+            ImGui::Separator();
             if (ImGui::MenuItem("Add Entity", "Ctrl+Shift+A", false, m_SceneManager.getActiveScene() != nullptr)) {
                 Entity* newEntity = m_SceneManager.getActiveScene()->createEntity("Entity");
                 if (m_SelectedEntity) {

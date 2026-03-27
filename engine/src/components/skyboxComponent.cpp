@@ -29,10 +29,18 @@ namespace {
         }
         return true;
     }
+
+    std::vector<std::string> normalizeFaces(const std::vector<std::string>& faces) {
+        std::vector<std::string> normalized = faces;
+        for (auto& face : normalized) {
+            face = Path::toAssetsRelative(face);
+        }
+        return normalized;
+    }
 }
 
 SkyboxComponent::SkyboxComponent(const std::vector<std::string>& faces) 
-    : m_facePaths(faces.empty() ? std::vector<std::string>(6) : faces) {
+    : m_facePaths(faces.empty() ? std::vector<std::string>(6) : normalizeFaces(faces)) {
     m_shader = std::make_unique<Shader>("assets/shaders/skybox/skybox_vert.glsl", "assets/shaders/skybox/skybox_frag.glsl");
     setupMesh();
     loadCubemap(m_facePaths);
@@ -78,7 +86,7 @@ bool SkyboxComponent::setFacePath(size_t index, const std::string& path) {
         return false;
     }
 
-    m_facePaths[index] = path;
+    m_facePaths[index] = Path::toAssetsRelative(path);
     loadCubemap(m_facePaths);
     return true;
 }
@@ -136,7 +144,7 @@ void SkyboxComponent::serialize(nlohmann::json& j) const {
 
 void SkyboxComponent::deserialize(const nlohmann::json& j) {
     if (j.contains("faces") && j["faces"].is_array()) {
-        m_facePaths = j["faces"].get<std::vector<std::string>>();
+        m_facePaths = normalizeFaces(j["faces"].get<std::vector<std::string>>());
         if (m_facePaths.size() != 6) {
             m_facePaths = std::vector<std::string>(6);
         }
