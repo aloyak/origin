@@ -36,10 +36,14 @@ int main() {
     player->addComponent<CameraComponent>(60.0f, engine.getWindow().getAspectRatio(), 0.1f, 10000.0f); // fov, aspect ratio, near, far
     player->transform.position = Vec3(0.0f, 150.0f, 0.0f);
 
-    Entity* directionalLight = engine.createEntity("Directional Light");
-    directionalLight->addComponent<DirectionalLightComponent>(Vec3(-1, -1, -1), Vec3(1, 1, 1), 0.5f);
+    engine.getRenderer().setMinimumAmbientLight(0.4f);
 
-    engine.getRenderer().setMinimumAmbientLight(0.2f);
+    Entity* lightObj = sm.getActiveScene()->createEntity("Light");
+    lightObj->transform.position = Vec3(0.0f, 200.0f, 0.0f);
+    auto* light = lightObj->addComponent<PointLightComponent>();
+    light->setColor(Vec3(0.93f, 0.43f, 0.15f));
+    light->setIntensity(1.5f);
+    light->setRadius(1300.0f);
 
     float sensitivity = 0.035f;
     Vec3 allowedMove = {1, 0, 1};
@@ -58,12 +62,17 @@ int main() {
             player->transform.position += direction * speed;
         }
 
+        lightObj->transform.position.x += cosf(engine.getTime()) * 500.0f * engine.getDeltaTime();
+        Vec3 dynamicColor(
+            0.5f + 0.5f * sinf(engine.getTime() * 0.8f),
+            0.5f + 0.5f * sinf(engine.getTime() * 0.8f + 2.094f),
+            0.5f + 0.5f * sinf(engine.getTime() * 0.8f + 4.188f)
+        );
+        light->setColor(dynamicColor);
+
         Vec2 delta = input.getMouseDelta();
         player->transform.rotation.y += delta.x * sensitivity;
         player->transform.rotation.x -= delta.y * sensitivity;
-
-        if (input.isKeyPressed(KEY_ESCAPE))
-            engine.stop();
 
         if (input.isKeyPressed(KEY_E))
             engine.getRenderer().setLightingEnabled(!engine.getRenderer().isLightingEnabled());
