@@ -23,6 +23,10 @@ if [ "$WEB_BUILD" = true ]; then
 
     mkdir -p build-web && cd build-web
     emcmake cmake ..
+
+    # Force repack
+    rm -f game/game.data game/game.js game/game.wasm game/game.html
+
     emmake make -j$(nproc)
 
     echo ""

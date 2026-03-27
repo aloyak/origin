@@ -39,10 +39,10 @@ uniform bool u_LightingEnabled;
 uniform float u_MinAmbientLight;
 
 // Material properties
-uniform float u_AmbientStrength = 0.5;
-uniform float u_SpecularStrength = 1.0;
-uniform float u_Shininess = 32.0;
-uniform vec3 u_BaseColor = vec3(1.0, 1.0, 1.0);
+uniform float u_AmbientStrength;
+uniform float u_SpecularStrength;
+uniform float u_Shininess;
+uniform vec3 u_BaseColor;
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 diffuseColor, vec3 specularColor) {
     vec3 lightDir = normalize(-light.direction);  // negative because direction points FROM light
