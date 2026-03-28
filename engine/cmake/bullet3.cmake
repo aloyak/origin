@@ -1,0 +1,17 @@
+include(FetchContent)
+
+set(BUILD_BULLET2_DEMOS OFF CACHE INTERNAL "")
+set(BUILD_CPU_DEMOS OFF CACHE INTERNAL "")
+set(BUILD_OPENGL3_DEMOS OFF CACHE INTERNAL "")
+set(BUILD_EXTRAS OFF CACHE INTERNAL "")
+set(BUILD_UNIT_TESTS OFF CACHE INTERNAL "")
+set(INSTALL_LIBS OFF CACHE INTERNAL "")
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+
+FetchContent_Declare(
+    bullet3
+    GIT_REPOSITORY https://github.com/bulletphysics/bullet3
+    GIT_TAG        3.25
+)
+
+FetchContent_MakeAvailable(bullet3)

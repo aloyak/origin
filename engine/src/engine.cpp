@@ -21,6 +21,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     m_window = std::make_unique<Window>(width, height, title);
     m_renderer = std::make_unique<Renderer>(*m_window);
     m_input = std::make_unique<Input>(m_window->getHandle());
+    m_physicsWorld = std::make_unique<PhysicsWorld>();
     m_sceneManager = std::make_unique<SceneManager>();
 
     m_lastSceneAmbient = m_renderer->getMinimumAmbientLight();
@@ -156,6 +157,8 @@ void Engine::moveToScene(Entity* entity) {
 
 // Scene update + render
 void Engine::updateScene() {
+    m_physicsWorld->stepSimulation(m_deltaTime);
+
     for (auto& entity : m_entities)
         entity->update(m_deltaTime);
 

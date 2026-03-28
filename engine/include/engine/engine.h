@@ -3,6 +3,7 @@
 #include "engine/core/transform.h"
 #include "engine/core/window.h"
 #include "engine/input/input.h"
+#include "engine/physics/world.h"
 #include "engine/render/render.h"
 #include "engine/scene/sceneManager.h"
 
@@ -37,6 +38,7 @@ public:
     SceneManager& getSceneManager() { return *m_sceneManager; }
     Window& getWindow() { return *m_window; }
     Renderer& getRenderer() { return *m_renderer; }
+    PhysicsWorld& getPhysicsWorld() { return *m_physicsWorld; }
 
     // Entity management
     Entity* createEntity(std::string name = "Entity");
@@ -63,6 +65,7 @@ public:
 private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Input> m_input;
+    std::unique_ptr<PhysicsWorld> m_physicsWorld;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<SceneManager> m_sceneManager;
 

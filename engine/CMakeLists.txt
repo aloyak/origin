@@ -13,13 +13,16 @@ if(EMSCRIPTEN)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/stb.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/bullet3.cmake)
+
+    target_include_directories(engine PRIVATE ${bullet3_SOURCE_DIR}/src)
 
     # SDL2 and OpenGL come with Emscripten
     target_compile_options(engine PUBLIC -sUSE_SDL=2 -fexceptions)
 
     target_link_libraries(engine 
-        PRIVATE glm::glm spdlog::spdlog stb_image assimp::assimp 
-        PUBLIC  nlohmann_json::nlohmann_json
+        PRIVATE glm::glm spdlog::spdlog stb_image assimp::assimp BulletDynamics BulletCollision LinearMath
+        PUBLIC  nlohmann_json::nlohmann_json 
     )
 
 else()
@@ -31,9 +34,12 @@ else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imgui.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/bullet3.cmake)
+
+    target_include_directories(engine PRIVATE ${bullet3_SOURCE_DIR}/src)
 
     target_link_libraries(engine 
-        PRIVATE glad glm::glm spdlog::spdlog stb_image assimp::assimp
-        PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui
+        PRIVATE glad glm::glm spdlog::spdlog stb_image assimp::assimp BulletDynamics BulletCollision LinearMath
+        PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui 
     )
 endif()
