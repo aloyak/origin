@@ -18,6 +18,7 @@ public:
 
     void setNear(float near) { m_near = near; }
     float getNear() const { return m_near; }
+    
     void setFar(float far) { m_far = far; }
     float getFar() const { return m_far; }
 private:

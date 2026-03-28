@@ -99,6 +99,7 @@ void SceneManager::save(const std::string& scenePath) {
 
     json j;
     j["name"] = m_activeScene->name;
+    j["ambientStrength"] = m_activeScene->getAmbientStrength();
     j["entities"] = json::array();
 
     for (const auto& entity : m_activeScene->getEntities()) {
@@ -154,6 +155,10 @@ Scene* SceneManager::load(const std::string& scenePath) {
 
     auto loadedScene = std::make_unique<Scene>();
     loadedScene->name = j.value("name", "New Scene");
+
+    if (j.contains("ambientStrength")) {
+        loadedScene->setAmbientStrength(j["ambientStrength"].get<float>());
+    }
 
     if (j.contains("entities") && j["entities"].is_array()) {
         for (const auto& jEnt : j["entities"]) {

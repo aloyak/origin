@@ -8,6 +8,7 @@ public:
     unsigned int ID;
 
     Shader(std::string vertexPath, std::string fragmentPath);
+    ~Shader();
     void use();
 
     void setBool(const std::string& name, bool value) const;

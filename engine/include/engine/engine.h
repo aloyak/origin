@@ -75,6 +75,9 @@ private:
 
     std::vector<std::unique_ptr<Entity>> m_entities;
     Entity* m_activeCamera = nullptr;
+    
+    Scene* m_lastActiveScene = nullptr;
+    float m_lastSceneAmbient = -1.0f;
 
     bool m_running = true;
 };

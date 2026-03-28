@@ -1,4 +1,5 @@
 {
+    "ambientStrength": 0.25,
     "entities": [
         {
             "components": [

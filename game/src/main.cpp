@@ -19,7 +19,6 @@ int main() {
     engine.getRenderer().setupRenderTarget(400, 225); // Creates the offscreen framebuffer (used for pixelart or special post-processing effects, like the sandbox viewport!)
     engine.getRenderer().setPixelArt(true, 8);
     engine.getRenderer().setLightingEnabled(true);
-    engine.getRenderer().setMinimumAmbientLight(0.1f);
     //engine.getRenderer().setVertexSnap(true, 100.0f); // Higher values give a less noticeable effect
 
     Input& input = engine.getInput();

@@ -22,6 +22,9 @@ public:
     std::unique_ptr<Entity>& getEntity(size_t index) { return m_entities[index]; }
     std::unique_ptr<Entity>& getEntityByName(const std::string name);
 
+    void setAmbientStrength(float strength) { m_ambientStrength = strength; }
+    float getAmbientStrength() const { return m_ambientStrength; }
 private:
+    float m_ambientStrength = 0.25f;
     std::vector<std::unique_ptr<Entity>> m_entities;
 };

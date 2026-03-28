@@ -157,6 +157,23 @@ void Engine::updateScene() {
 void Engine::renderScene() {
     Camera* activeCamera = nullptr;
     const Transform* activeCameraTransform = nullptr;
+    Scene* scene = m_sceneManager->getActiveScene();
+
+    if (scene != m_lastActiveScene) {
+        m_lastActiveScene = scene;
+        m_lastSceneAmbient = scene ? scene->getAmbientStrength() : -1.0f;
+        if (scene) {
+            m_renderer->setMinimumAmbientLight(scene->getAmbientStrength());
+        }
+    }
+    
+    if (scene) {
+        float currentAmbient = m_renderer->getMinimumAmbientLight();
+        if (currentAmbient != m_lastSceneAmbient) {
+            scene->setAmbientStrength(currentAmbient);
+            m_lastSceneAmbient = currentAmbient;
+        }
+    }
 
     auto isTrackedEntity = [this](Entity* entity) {
         if (!entity) return false;
@@ -204,8 +221,8 @@ void Engine::renderScene() {
     }
 
     // First camera in active scene
-    if (!activeCamera && m_sceneManager->getActiveScene()) {
-        for (auto& entity : m_sceneManager->getActiveScene()->getEntities()) {
+    if (!activeCamera && scene) {
+        for (auto& entity : scene->getEntities()) {
             if (tryUseCameraEntity(entity.get())) {
                 break;
             }
@@ -218,8 +235,8 @@ void Engine::renderScene() {
     std::vector<Entity*> allEntities;
     for (auto& entity : m_entities)
         allEntities.push_back(entity.get());
-    if (m_sceneManager->getActiveScene()) {
-        for (auto& entity : m_sceneManager->getActiveScene()->getEntities())
+    if (scene) {
+        for (auto& entity : scene->getEntities())
             allEntities.push_back(entity.get());
     }
     LightingManager::instance().updateLights(allEntities);
@@ -227,8 +244,8 @@ void Engine::renderScene() {
     for (auto& entity : m_entities)
         entity->render(*m_renderer, *activeCamera, *activeCameraTransform);
 
-    if (m_sceneManager->getActiveScene())
-        m_sceneManager->getActiveScene()->render(*m_renderer, *activeCamera, *activeCameraTransform);
+    if (scene)
+        scene->render(*m_renderer, *activeCamera, *activeCameraTransform);
 }
 
 
