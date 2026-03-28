@@ -36,7 +36,7 @@ void Model::loadModel(std::string path) {
     path = Path::resolve(path).string();
 
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         spdlog::error(import.GetErrorString());
@@ -68,12 +68,22 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
         if (mesh->HasNormals()) {
             vertex.Normal = Vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+        } else {
+            vertex.Normal = Vec3(0.0f, 0.0f, 1.0f);
         }
 
         if(mesh->mTextureCoords[0]) {
             vertex.TexCoords = Vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
         } else {
             vertex.TexCoords = Vec2(0.0f, 0.0f);
+        }
+
+        if (mesh->HasTangentsAndBitangents()) {
+            vertex.Tangent = Vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            vertex.Bitangent = Vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        } else {
+            vertex.Tangent = Vec3(1.0f, 0.0f, 0.0f);
+            vertex.Bitangent = Vec3(0.0f, 1.0f, 0.0f);
         }
         vertices.push_back(vertex);
     }
@@ -91,6 +101,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
     std::vector<MeshTexture> specularMaps = loadMaterialTextures(material, (int)aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+    std::vector<MeshTexture> normalMaps = loadMaterialTextures(material, (int)aiTextureType_NORMALS, "texture_normal");
+    if (normalMaps.empty()) {
+        normalMaps = loadMaterialTextures(material, (int)aiTextureType_HEIGHT, "texture_normal");
+    }
+    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
     return Mesh(vertices, indices, textures);
 }

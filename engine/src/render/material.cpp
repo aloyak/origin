@@ -40,11 +40,14 @@ bool Material::hasTexture(const std::string& slot) const {
 }
 
 std::string Material::normalizeSlot(const std::string& slot) {
-    if (slot == "diffuse" || slot == "texture_diffuse" || slot == "texture_diffuse1") {
-        return "texture_diffuse1";
+    if (slot == "diffuse" || slot == "texture_diffuse") {
+        return "texture_diffuse";
     }
-    if (slot == "specular" || slot == "texture_specular" || slot == "texture_specular1") {
-        return "texture_specular1";
+    if (slot == "specular" || slot == "texture_specular") {
+        return "texture_specular";
+    }
+    if (slot == "normal" || slot == "texture_normal") {
+        return "texture_normal";
     }
 
     return slot;

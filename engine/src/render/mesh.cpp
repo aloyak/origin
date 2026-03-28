@@ -39,6 +39,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+
     glBindVertexArray(0);
 }
 
@@ -115,9 +121,21 @@ void Mesh::draw(const Material& material,
         ++textureUnit;
     };
 
-    bindTextureSlot("texture_diffuse1", "texture_diffuse");
-    bindTextureSlot("texture_specular1", "texture_specular");
-    
+    bindTextureSlot("texture_diffuse", "texture_diffuse");
+    bindTextureSlot("texture_specular", "texture_specular");
+    bindTextureSlot("texture_normal", "texture_normal");
+
+    bool hasNormalMap = material.hasTexture("texture_normal");
+    if (!hasNormalMap) {
+        for (const auto& meshTexture : textures) {
+            if (meshTexture.type == "texture_normal" && meshTexture.texture) {
+                hasNormalMap = true;
+                break;
+            }
+        }
+    }
+    shader.setBool("u_HasNormalMap", hasNormalMap);
+
     // Bind material properties
     shader.setFloat("u_AmbientStrength", material.getAmbientStrength());
     shader.setFloat("u_SpecularStrength", material.getSpecularStrength());

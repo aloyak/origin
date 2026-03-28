@@ -121,6 +121,14 @@ void registerDefaultInspectors() {
                 [&](const std::string& path) { c->setSpecularTexturePath(path); }
             );
 
+            DrawFilePicker(
+                "Normal Texture",
+                "normal_path",
+                c->getNormalTexturePath(),
+                { "Image Files", "*.png *.jpg *.jpeg *.bmp *.tga *.hdr", "All Files", "*" },
+                [&](const std::string& path) { c->setNormalTexturePath(path); }
+            );
+
             ImGui::SeparatorText("Material");
             Vec3 baseColor = c->getBaseColor();
             if (ImGui::ColorEdit3("Base Color", &baseColor.x)) {

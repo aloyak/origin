@@ -8,6 +8,7 @@ out vec4 FragColor;
 in vec3 vNormal;
 in vec3 vWorldPos;
 in vec2 TexCoord;
+in mat3 vTBN;
 
 struct DirLight { 
     vec3 direction; 
@@ -23,8 +24,15 @@ struct PointLight {
 };
 
 struct Material {
-    sampler2D texture_diffuse1;
-    sampler2D texture_specular1;
+    sampler2D texture_diffuse;
+    sampler2D texture_specular;
+    sampler2D texture_normal;
+    // TODO (ideas):
+    // sampler2D texture_roughness;
+    // sampler2D texture_metallic;
+    // sampler2D texture_ao;
+    // sampler2D texture_emissive;
+    // sampler2D texture_height;
 };
 
 uniform Material material;
@@ -44,6 +52,7 @@ uniform float u_SpecularStrength;
 uniform float u_Shininess;
 uniform vec3 u_BaseColor;
 uniform vec2 u_UVScale;
+uniform bool u_HasNormalMap;
 
 vec3 srgbToLinear(vec3 color) {
     return pow(max(color, vec3(0.0)), vec3(2.2));
@@ -84,8 +93,8 @@ vec3 calcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec
 
 void main() {
     vec2 tiledTexCoord = TexCoord * u_UVScale;
-    vec4 diffuseTexture = texture(material.texture_diffuse1, tiledTexCoord);
-    vec4 specularTexture = texture(material.texture_specular1, tiledTexCoord);
+    vec4 diffuseTexture = texture(material.texture_diffuse, tiledTexCoord);
+    vec4 specularTexture = texture(material.texture_specular, tiledTexCoord);
 
     vec3 diffuseColor = srgbToLinear(diffuseTexture.rgb) * u_BaseColor;
     vec3 specularColor = specularTexture.rgb;
@@ -96,6 +105,11 @@ void main() {
     }
     
     vec3 norm = normalize(vNormal);
+    if (u_HasNormalMap) {
+        vec3 sampled = texture(material.texture_normal, tiledTexCoord).rgb;
+        sampled = sampled * 2.0 - 1.0;
+        norm = normalize(vTBN * sampled);
+    }
     vec3 viewDir = normalize(u_ViewPos - vWorldPos);
     
     // Global ambient floor keeps objects visible even with no active directional lights.

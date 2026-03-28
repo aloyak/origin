@@ -18,6 +18,9 @@ public:
     std::string name = "Entity";
     Transform transform;
 
+    //bool enabled = true;
+    //std::string tag = "Untagged";
+
     Entity* get() { return this; }
 
     template<typename T, typename... Args>

@@ -30,6 +30,7 @@ void RenderComponent::serialize(nlohmann::json& j) const {
     j["frag"] = m_fragPath;
     j["diffuse"] = m_diffusePath;
     j["specular"] = m_specularPath;
+    j["normal"] = m_normalPath;
 
     if (m_material) {
         j["ambientStrength"] = m_material->getAmbientStrength();
@@ -50,6 +51,7 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     m_fragPath = Path::toAssetsRelative(j.value("frag", "assets/shaders/frag.glsl"));
     m_diffusePath = Path::toAssetsRelative(j.value("diffuse", ""));
     m_specularPath = Path::toAssetsRelative(j.value("specular", ""));
+    m_normalPath = Path::toAssetsRelative(j.value("normal", ""));
 
     ensureMaterial();
 
@@ -64,6 +66,9 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     }
     if (!m_specularPath.empty()) {
         setTexture(m_specularPath, "specular");
+    }
+    if (!m_normalPath.empty()) {
+        setTexture(m_normalPath, "normal");
     }
 
     setAmbientStrength(j.value("ambientStrength", getAmbientStrength()));
@@ -116,10 +121,12 @@ void RenderComponent::setTexture(const std::string& path, const std::string& typ
         return;
     }
 
-    if (type == "diffuse" || type == "texture_diffuse" || type == "texture_diffuse1") {
+    if (type == "diffuse" || type == "texture_diffuse") {
         m_diffusePath = normalizedPath;
-    } else if (type == "specular" || type == "texture_specular" || type == "texture_specular1") {
+    } else if (type == "specular" || type == "texture_specular") {
         m_specularPath = normalizedPath;
+    } else if (type == "normal" || type == "texture_normal") {
+        m_normalPath = normalizedPath;
     }
 
     m_material->setTexture(type, ResourceManager::instance().getTexture(normalizedPath));
@@ -141,6 +148,15 @@ void RenderComponent::setSpecularTexturePath(const std::string& path) {
     }
 
     setTexture(m_specularPath, "specular");
+}
+
+void RenderComponent::setNormalTexturePath(const std::string& path) {
+    m_normalPath = Path::toAssetsRelative(path);
+    if (m_normalPath.empty()) {
+        return;
+    }
+
+    setTexture(m_normalPath, "normal");
 }
 
 void RenderComponent::setAmbientStrength(float strength) {

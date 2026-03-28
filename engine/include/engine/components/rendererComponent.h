@@ -20,8 +20,10 @@ public:
 
     void setDiffuseTexturePath(const std::string& path);
     void setSpecularTexturePath(const std::string& path);
+    void setNormalTexturePath(const std::string& path);
     std::string getDiffuseTexturePath() const { return m_diffusePath; }
     std::string getSpecularTexturePath() const { return m_specularPath; }
+    std::string getNormalTexturePath() const { return m_normalPath; }
 
     void setAmbientStrength(float strength);
     float getAmbientStrength() const;
@@ -54,4 +56,5 @@ private:
     std::string m_fragPath;
     std::string m_diffusePath;
     std::string m_specularPath;
+    std::string m_normalPath;
 };

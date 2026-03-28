@@ -17,6 +17,8 @@ struct Vertex {
     Vec3 Position;
     Vec3 Normal;
     Vec2 TexCoords;
+    Vec3 Tangent;
+    Vec3 Bitangent;
 };
 
 struct MeshTexture {
