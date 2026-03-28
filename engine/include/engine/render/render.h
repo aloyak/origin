@@ -2,6 +2,7 @@
 
 #include "engine/core/transform.h"
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -40,8 +41,14 @@ public:
     }
     bool isVertexSnapEnabled() const { return m_vertexSnap; }
 
-    void beginFrame();
+    void setGammaCorrection(float gamma) { m_gamma = std::max(0.01f, gamma); }
+    float getGammaCorrection() const { return m_gamma; }
+    void setGammaCorrectionEnabled(bool enabled) { m_gammaCorrectionEnabled = enabled; }
+    bool isGammaCorrectionEnabled() const { return m_gammaCorrectionEnabled; }
+    void setExposure(float exposure) { m_exposure = std::max(0.0f, exposure); }
+    float getExposure() const { return m_exposure; }
 
+    void beginFrame();
     void resolveFrame();
 
     void render(Model& model, Material& material,
@@ -75,4 +82,9 @@ private:
     bool  m_lightingEnabled = true;
     float m_minAmbientLight = 0.05f;
     std::function<void(float)> m_onMinimumAmbientLightChanged;
+
+    // Gamma correction
+    float m_gamma = 2.2f;
+    bool m_gammaCorrectionEnabled = true;
+    float m_exposure = 1.0f;
 };

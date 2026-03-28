@@ -159,6 +159,9 @@ void Renderer::resolveFrame() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_screenShader->use();
+    m_screenShader->setBool("u_GammaEnabled", m_gammaCorrectionEnabled);
+    m_screenShader->setFloat("u_Gamma", m_gamma);
+    m_screenShader->setFloat("u_Exposure", m_exposure);
 
     float levels = 0.0f;
     if (m_pixelArtEnabled) {
