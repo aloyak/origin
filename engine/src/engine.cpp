@@ -22,6 +22,15 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     m_renderer = std::make_unique<Renderer>(*m_window);
     m_input = std::make_unique<Input>(m_window->getHandle());
     m_sceneManager = std::make_unique<SceneManager>();
+
+    m_lastSceneAmbient = m_renderer->getMinimumAmbientLight();
+    m_renderer->setAmbientLightChangedCallback([this](float value) {
+        Scene* scene = m_sceneManager ? m_sceneManager->getActiveScene() : nullptr;
+        if (scene) {
+            scene->setAmbientStrength(value);
+        }
+        m_lastSceneAmbient = value;
+    });
 }
 
 Engine::~Engine() {

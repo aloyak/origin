@@ -2,6 +2,7 @@
 
 #include "engine/core/transform.h"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -27,8 +28,11 @@ public:
     void setLightingEnabled(bool enabled) { m_lightingEnabled = enabled; }
     bool isLightingEnabled() const { return m_lightingEnabled; }
 
-    void setMinimumAmbientLight(float value) { m_minAmbientLight = value; }
+    void setMinimumAmbientLight(float value);
     float getMinimumAmbientLight() const { return m_minAmbientLight; }
+    void setAmbientLightChangedCallback(std::function<void(float)> callback) {
+        m_onMinimumAmbientLightChanged = std::move(callback);
+    }
 
     void setVertexSnap(bool enabled, float intensity = 40.0f) {
         m_vertexSnap   = enabled;
@@ -70,4 +74,5 @@ private:
 
     bool  m_lightingEnabled = true;
     float m_minAmbientLight = 0.05f;
+    std::function<void(float)> m_onMinimumAmbientLightChanged;
 };

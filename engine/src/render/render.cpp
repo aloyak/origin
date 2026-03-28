@@ -18,6 +18,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <spdlog/spdlog.h>
+#include <cmath>
 
 Renderer::Renderer(Window& window)
     : m_window(window)
@@ -119,6 +120,17 @@ void Renderer::setPixelArt(bool enabled, int colorDepth) {
     }
     m_pixelArtEnabled = enabled;
     m_colorDepth      = colorDepth;
+}
+
+void Renderer::setMinimumAmbientLight(float value) {
+    if (std::abs(m_minAmbientLight - value) <= 0.0001f) {
+        return;
+    }
+
+    m_minAmbientLight = value;
+    if (m_onMinimumAmbientLightChanged) {
+        m_onMinimumAmbientLightChanged(value);
+    }
 }
 
 // Frame pipeline: begin, reslolve, end (called from engine::run)
