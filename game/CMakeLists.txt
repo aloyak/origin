@@ -2,7 +2,7 @@ set(GAME_NAME "game")
 
 add_executable(${GAME_NAME} src/main.cpp)
 
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/${GAME_NAME}/)
+#file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR}/${GAME_NAME}/)
 
 target_include_directories(${GAME_NAME}
     PUBLIC  include

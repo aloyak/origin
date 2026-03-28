@@ -188,7 +188,6 @@ void Renderer::resolveFrame() {
 }
 
 // Rendering
-// This would need to be a lot more complex when adding lighting
 void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,

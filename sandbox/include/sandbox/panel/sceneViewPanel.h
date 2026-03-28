@@ -29,8 +29,11 @@ public:
 
         ImGui::Image((ImTextureID)(intptr_t)m_Engine.getRenderer().getRenderTexture(), available, ImVec2(0, 1), ImVec2(1, 0));
 
-        DrawRenderStatsOverlay();
-        DrawGizmos();
+        ImVec2 viewportMin = ImGui::GetItemRectMin();
+        ImVec2 viewportSize = ImGui::GetItemRectSize();
+
+        DrawRenderStatsOverlay(viewportMin, viewportSize);
+        DrawGizmos(viewportMin, viewportSize);
 
         static bool cameraLookActive = false;
         if (!cameraLookActive && ImGui::IsWindowHovered() && m_Engine.getInput().isMouseButtonPressed(MOUSE_RIGHT)) {
@@ -54,11 +57,15 @@ public:
                 ImGui::PopFont();
             }
 
+        if (!cameraLookActive && ImGui::IsWindowHovered() && m_Engine.getInput().isMouseButtonPressed(MOUSE_LEFT) && !ImGuizmo::IsUsing()) {
+            HandleSceneClick(viewportMin, viewportSize);
+        }
+
         ImGui::End();
         ImGui::PopStyleVar();
     }
 
-    void DrawGizmos() {
+    void DrawGizmos(const ImVec2& viewportMin, const ImVec2& viewportSize) {
         if (!m_EditorCamera) return;
 
         CameraComponent* cameraComp = m_EditorCamera->getComponent<CameraComponent>();
@@ -67,8 +74,6 @@ public:
         const Camera& camera = cameraComp->getCamera();
         const Transform& cameraTransform = m_EditorCamera->transform;
 
-        ImVec2 viewportMin = ImGui::GetItemRectMin();
-        ImVec2 viewportSize = ImGui::GetItemRectSize();
         if (viewportSize.x <= 0.0f || viewportSize.y <= 0.0f) return;
 
         ImGuizmo::SetOrthographic(false);
@@ -105,11 +110,9 @@ public:
         }
     }
 
-    void DrawRenderStatsOverlay() {
+    void DrawRenderStatsOverlay(const ImVec2& viewportMin, const ImVec2& viewportSize) {
         if (!m_ShowRenderStats) return;
 
-        ImVec2 viewportMin = ImGui::GetItemRectMin();
-        ImVec2 viewportSize = ImGui::GetItemRectSize();
         if (viewportSize.x <= 0.0f || viewportSize.y <= 0.0f) return;
 
         const float padding = 12.0f;
@@ -190,6 +193,35 @@ private:
         Vec2 delta = input.getMouseDelta();
         m_EditorCamera->transform.rotation.y += delta.x * sensitivity;
         m_EditorCamera->transform.rotation.x -= delta.y * sensitivity;
+    }
+
+    void HandleSceneClick(const ImVec2& viewportMin, const ImVec2& viewportSize) {
+        if (!m_EditorCamera || viewportSize.x <= 0.0f || viewportSize.y <= 0.0f) {
+            return;
+        }
+
+        CameraComponent* cameraComp = m_EditorCamera->getComponent<CameraComponent>();
+        if (!cameraComp) {
+            return;
+        }
+
+        Scene* scene = m_Engine.getSceneManager().getActiveScene();
+        if (!scene) {
+            m_SelectedEntity = nullptr;
+            return;
+        }
+
+        ImVec2 mousePos = ImGui::GetMousePos();
+        const float localX = mousePos.x - viewportMin.x;
+        const float localY = mousePos.y - viewportMin.y;
+
+        m_SelectedEntity = m_Engine.getPhysicsWorld().raycastScreenPoint(
+            Vec2(localX, localY),
+            Vec2(viewportSize.x, viewportSize.y),
+            cameraComp->getCamera(),
+            m_EditorCamera->transform,
+            *scene
+        );
     }
 
     Engine& m_Engine;
