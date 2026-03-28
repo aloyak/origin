@@ -18,6 +18,17 @@ public:
             Entity* entity = m_Engine.createEntity("Entity");
             m_Engine.moveToScene(entity);
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Delete Entity") && m_SelectedEntity) {
+            scene->destroyEntity(m_SelectedEntity);
+            m_SelectedEntity = nullptr;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Duplicate Entity") && m_SelectedEntity) {
+            Entity* newEntity = scene->createEntity(m_SelectedEntity->name + " Copy");
+            newEntity->transform = m_SelectedEntity->transform;
+            // TODO! Duplication (also in layer.cpp)
+        }
 
         if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth)) {
             if (scene) {

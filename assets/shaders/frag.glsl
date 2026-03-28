@@ -43,6 +43,7 @@ uniform float u_AmbientStrength;
 uniform float u_SpecularStrength;
 uniform float u_Shininess;
 uniform vec3 u_BaseColor;
+uniform vec2 u_UVScale;
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 diffuseColor, vec3 specularColor) {
     vec3 lightDir = normalize(-light.direction);  // negative because direction points FROM light
@@ -78,8 +79,9 @@ vec3 calcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec
 }
 
 void main() {
-    vec4 diffuseTexture = texture(material.texture_diffuse1, TexCoord);
-    vec4 specularTexture = texture(material.texture_specular1, TexCoord);
+    vec2 tiledTexCoord = TexCoord * u_UVScale;
+    vec4 diffuseTexture = texture(material.texture_diffuse1, tiledTexCoord);
+    vec4 specularTexture = texture(material.texture_specular1, tiledTexCoord);
     
     vec3 diffuseColor = diffuseTexture.rgb * u_BaseColor;
     vec3 specularColor = specularTexture.rgb;

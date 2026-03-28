@@ -35,6 +35,10 @@ public:
     void setBaseColor(Vec3 color) { m_baseColor = color; }
     Vec3 getBaseColor() const { return m_baseColor; }
 
+    // UV tiling
+    void setUVScale(Vec2 uvScale) { m_uvScale = uvScale; }
+    Vec2 getUVScale() const { return m_uvScale; }
+
 private:
     static std::string normalizeSlot(const std::string& slot);
 
@@ -46,4 +50,5 @@ private:
     float m_specularStrength = 1.0f;
     float m_shininess = 32.0f;
     Vec3 m_baseColor = Vec3(1.0f, 1.0f, 1.0f);
+    Vec2 m_uvScale = Vec2(1.0f, 1.0f);
 };

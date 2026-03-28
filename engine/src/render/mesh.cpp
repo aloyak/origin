@@ -123,6 +123,7 @@ void Mesh::draw(const Material& material,
     shader.setFloat("u_SpecularStrength", material.getSpecularStrength());
     shader.setFloat("u_Shininess", material.getShininess());
     shader.setVec3("u_BaseColor", material.getBaseColor());
+    shader.setVec2("u_UVScale", material.getUVScale());
     
     // Bind directional light uniforms
     for (size_t i = 0; i < directionalLights.size() && i < m_maxDirectionalLights; ++i) {

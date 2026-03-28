@@ -50,11 +50,9 @@ namespace {
     Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
         if (type == "RenderComponent") {
             const std::string modelPath = jComp.value("model", "");
-            if (modelPath.empty()) {
-                spdlog::warn("Skipping RenderComponent on entity '{}' due to missing model path.", entity->name);
-                return nullptr;
-            }
-            return entity->addComponent<RenderComponent>(modelPath);
+            const std::string vertPath = jComp.value("vert", "assets/shaders/vert.glsl");
+            const std::string fragPath = jComp.value("frag", "assets/shaders/frag.glsl");
+            return entity->addComponent<RenderComponent>(modelPath, vertPath, fragPath);
         }
 
         if (type == "CameraComponent") {

@@ -18,6 +18,22 @@ public:
 
     void setTexture(const std::string& path, const std::string& type = "diffuse");
 
+    void setDiffuseTexturePath(const std::string& path);
+    void setSpecularTexturePath(const std::string& path);
+    std::string getDiffuseTexturePath() const { return m_diffusePath; }
+    std::string getSpecularTexturePath() const { return m_specularPath; }
+
+    void setAmbientStrength(float strength);
+    float getAmbientStrength() const;
+    void setSpecularStrength(float strength);
+    float getSpecularStrength() const;
+    void setShininess(float shininess);
+    float getShininess() const;
+    void setBaseColor(const Vec3& color);
+    Vec3 getBaseColor() const;
+    void setUVScale(const Vec2& uvScale);
+    Vec2 getUVScale() const;
+
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     void setModelPath(const std::string& modelPath);
@@ -28,10 +44,14 @@ public:
     std::string getVertPath() const { return m_vertPath; }
     std::string getFragPath() const { return m_fragPath; }
 private:
+    void ensureMaterial();
+
     std::shared_ptr<Model>  m_model;
     std::unique_ptr<Material> m_material;
 
     std::string m_modelPath;
     std::string m_vertPath;
     std::string m_fragPath;
+    std::string m_diffusePath;
+    std::string m_specularPath;
 };
