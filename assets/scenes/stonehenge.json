@@ -1,0 +1,117 @@
+{
+    "ambientStrength": 0.25,
+    "entities": [
+        {
+            "components": [
+                {
+                    "faces": [
+                        "assets/textures/skybox/left.png",
+                        "assets/textures/skybox/right.png",
+                        "assets/textures/skybox/up.png",
+                        "assets/textures/skybox/down.png",
+                        "assets/textures/skybox/front.png",
+                        "assets/textures/skybox/back.png"
+                    ],
+                    "type": "SkyboxComponent"
+                }
+            ],
+            "name": "Skybox",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/grass.png",
+                    "frag": "assets/shaders/frag.glsl",
+                    "model": "assets/models/plane.obj",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        40.0,
+                        40.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Base",
+            "transform": {
+                "pos": [
+                    0.0,
+                    -50.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "sca": [
+                    500.0,
+                    500.0,
+                    500.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "color": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "direction": [
+                        0.0,
+                        -0.6581386923789978,
+                        0.752896785736084
+                    ],
+                    "intensity": 1.0,
+                    "type": "DirectionalLightComponent"
+                }
+            ],
+            "name": "Sun",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
+    "name": "Stonehenge"
+}
