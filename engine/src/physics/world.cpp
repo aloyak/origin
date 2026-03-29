@@ -8,7 +8,10 @@
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
+
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 #include <LinearMath/btVector3.h>
 
@@ -19,6 +22,8 @@
 #include <cmath>
 
 namespace {
+PhysicsWorld* g_activeWorld = nullptr;
+
 float dot(const Vec3& a, const Vec3& b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -80,17 +85,19 @@ struct PhysicsWorld::Data {
 
 PhysicsWorld::PhysicsWorld() {
     m_data = new Data();
+    g_activeWorld = this;
 }
 
 PhysicsWorld::~PhysicsWorld() {
+    if (g_activeWorld == this) g_activeWorld = nullptr;
     delete m_data;
 }
 
 void PhysicsWorld::stepSimulation(float deltaTime) {
-    if (!m_data) {
+    if (!m_data || !m_enabled) {
         return;
     }
-    m_data->world.stepSimulation(deltaTime, 4, 1.0f / 60.0f);
+    m_data->world.stepSimulation(deltaTime, 4, 1.0f / 60.0f); // 60 FPS, max 4 substeps for better accuracy
 }
 
 void PhysicsWorld::setGravity(const Vec3& gravity) {
@@ -98,6 +105,33 @@ void PhysicsWorld::setGravity(const Vec3& gravity) {
         return;
     }
     m_data->world.setGravity(btVector3(gravity.x, gravity.y, gravity.z));
+}
+
+Vec3 PhysicsWorld::getGravity() const {
+    if (!m_data) {
+        return Vec3(0.0f, -9.81f, 0.0f);
+    }
+
+    const btVector3 gravity = m_data->world.getGravity();
+    return Vec3(gravity.x(), gravity.y(), gravity.z());
+}
+
+void PhysicsWorld::addRigidBody(btRigidBody* body) {
+    if (!m_data || !body) {
+        return;
+    }
+    m_data->world.addRigidBody(body);
+}
+
+void PhysicsWorld::removeRigidBody(btRigidBody* body) {
+    if (!m_data || !body) {
+        return;
+    }
+    m_data->world.removeRigidBody(body);
+}
+
+PhysicsWorld* PhysicsWorld::getActive() {
+    return g_activeWorld;
 }
 
 Entity* PhysicsWorld::raycastEntities(const Vec3& origin,
