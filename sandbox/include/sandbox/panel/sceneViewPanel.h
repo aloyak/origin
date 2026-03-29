@@ -10,8 +10,9 @@
 
 class SceneViewPanel : public Panel {
 public:
-    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef)
-        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef) {}
+    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef, float& cameraSensRef)
+        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef),
+          m_CameraSens(cameraSensRef) {}
 
     void OnUIRender() override {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -189,10 +190,9 @@ private:
         if (input.isKeyDown(KEY_A)) m_EditorCamera->transform.position += m_EditorCamera->transform.right() * speed;
         if (input.isKeyDown(KEY_D)) m_EditorCamera->transform.position -= m_EditorCamera->transform.right() * speed;
 
-        float sensitivity = 0.15f;
         Vec2 delta = input.getMouseDelta();
-        m_EditorCamera->transform.rotation.y += delta.x * sensitivity;
-        m_EditorCamera->transform.rotation.x -= delta.y * sensitivity;
+        m_EditorCamera->transform.rotation.y += delta.x * m_CameraSens;
+        m_EditorCamera->transform.rotation.x -= delta.y * m_CameraSens;
     }
 
     void HandleSceneClick(const ImVec2& viewportMin, const ImVec2& viewportSize) {
@@ -236,4 +236,5 @@ private:
     float m_StatsUpdateInterval = 0.12f;
     float m_DisplayedFps = 0.0f;
     float m_DisplayedFrameMs = 0.0f;
+    float& m_CameraSens;
 };

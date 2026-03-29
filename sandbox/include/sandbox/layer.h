@@ -3,12 +3,14 @@
 
 #include "sandbox/panel/panel.h"
 #include "sandbox/panel/aboutPanel.h"
+#include "sandbox/styles.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <filesystem>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace fs = std::filesystem;
 
@@ -23,10 +25,41 @@ public:
     void OnUIRender();
 
 private:
+    struct Shortcut {
+        int key = 0;
+        bool ctrl = false;
+        bool shift = false;
+        bool alt = false;
+    };
+
+    enum class ActionSection {
+        File,
+        Window,
+        Scene,
+        Rendering,
+        Gizmos,
+        Help,
+    };
+
+    struct ActionDef {
+        ActionSection section;
+        const char* label;
+        const char* shortcutLabel;
+        Shortcut shortcut;
+        std::function<void()> execute;
+        std::function<bool()> enabled;
+        std::function<bool()> checked;
+    };
+
+    using ActionList = std::vector<ActionDef>;
+
     void DrawMenuBar();
     void DrawDockspace();
     ScenePathInfo GetSceneContext(const std::string& inputPath);
 
+    ActionList BuildActions();
+    void DrawActionItem(const ActionDef& action);
+    bool IsShortcutPressed(const Shortcut& shortcut) const;
     void HandleShortcuts();
 
     Engine& m_Engine;
@@ -38,6 +71,7 @@ private:
     Entity* m_SelectedEntity = nullptr;
     Entity* m_EditorCamera = nullptr;
     float m_CameraSpeed = 1.0f;
+    float m_CameraSens = 0.15f;
     ImGuizmo::OPERATION m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
     
     std::vector<std::unique_ptr<Panel>> m_Panels;
