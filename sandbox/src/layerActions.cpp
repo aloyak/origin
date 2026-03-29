@@ -98,7 +98,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SelectedEntity != nullptr; },
             nullptr },
-
+            
         { ActionSection::Rendering, "Toggle Pixelart", nullptr, { 0, false, false, false },
             [this]() {
                 if (!m_Renderer.isPixelArtEnabled()) {
@@ -243,6 +243,7 @@ void Layer::DrawMenuBar() {
                 if (m_SceneManager.getActiveScene()) m_SceneManager.getActiveScene()->name = sceneBuffer;
             }
             if (!m_SceneManager.getActiveScene()) ImGui::EndDisabled();
+            
             ImGui::Separator();
             for (const ActionDef& action : actions) {
                 if (action.section == ActionSection::Scene) {
@@ -281,6 +282,22 @@ void Layer::DrawMenuBar() {
                     DrawActionItem(action);
                 }
             }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Physics")) {
+            if (ImGui::MenuItem("Toggle Physics", "", false, m_SceneManager.getActiveScene() != nullptr)) 
+                m_Engine.getPhysicsWorld().setEnabled(!m_Engine.getPhysicsWorld().isEnabled());
+            
+            ImGui::Separator();
+
+            Vec3 gravity = m_Engine.getPhysicsWorld().getGravity();
+            ImGui::TextUnformatted("Gravity");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(140.0f);
+            if (ImGui::DragFloat3("##Gravity", &gravity.x, 0.1f)) {
+                m_Engine.getPhysicsWorld().setGravity(gravity);
+            }
+            
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Help")) {

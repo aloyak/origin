@@ -7,6 +7,7 @@
 #include "engine/components/skyboxComponent.h"
 #include "engine/components/directionalLightComponent.h"
 #include "engine/components/pointLightComponent.h"
+#include "engine/components/rigidbodyComponent.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -54,11 +55,6 @@ namespace {
             const std::string fragPath = jComp.value("frag", "assets/shaders/frag.glsl");
             return entity->addComponent<RenderComponent>(modelPath, vertPath, fragPath);
         }
-
-        if (type == "CameraComponent") {
-            return entity->addComponent<CameraComponent>(60.0f, 1.0f, 0.1f, 100.0f);
-        }
-
         if (type == "SkyboxComponent") {
             const std::vector<std::string> faces = readStringArray(jComp, "faces");
             if (faces.size() != 6) {
@@ -67,15 +63,11 @@ namespace {
             }
             return entity->addComponent<SkyboxComponent>(faces);
         }
-
-        if (type == "DirectionalLightComponent") {
-            return entity->addComponent<DirectionalLightComponent>();
-        }
-
-        if (type == "PointLightComponent") {
-            return entity->addComponent<PointLightComponent>();
-        }
-
+        if (type == "CameraComponent") return entity->addComponent<CameraComponent>(60.0f, 1.0f, 0.1f, 100.0f);
+        if (type == "DirectionalLightComponent") return entity->addComponent<DirectionalLightComponent>();
+        if (type == "PointLightComponent") return entity->addComponent<PointLightComponent>();
+        if (type == "RigidbodyComponent") return entity->addComponent<RigidbodyComponent>();
+        
         spdlog::warn("Unknown component type '{}' on entity '{}'.", type, entity->name);
         return nullptr;
     }

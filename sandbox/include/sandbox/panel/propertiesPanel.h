@@ -11,6 +11,7 @@
 #include "engine/components/skyboxComponent.h"
 #include "engine/components/directionalLightComponent.h"
 #include "engine/components/pointLightComponent.h"
+#include "engine/components/rigidbodyComponent.h"
 
 class PropertiesPanel : public Panel {
 public:
@@ -88,6 +89,11 @@ public:
                     m_SelectedEntity->addComponent<SkyboxComponent>();
                     ImGui::CloseCurrentPopup();
                 }
+                if (!m_SelectedEntity->getComponent<RigidbodyComponent>() && ImGui::MenuItem("Rigidbody")) {
+                    m_SelectedEntity->addComponent<RigidbodyComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+
                 ImGui::EndPopup();
             }
         } else {

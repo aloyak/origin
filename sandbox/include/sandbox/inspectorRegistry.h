@@ -27,3 +27,5 @@ public:
 private:
     inline static std::unordered_map<std::type_index, std::function<void(void*)>> s_drawers;
 };
+
+void registerDefaultInspectors();

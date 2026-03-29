@@ -88,6 +88,8 @@ private:
     void SaveSceneAs();
     void UnloadScene();
 
+    void registerDefaultInspectors();
+
     ScenePathInfo m_CurrentSceneInfo;
 
     // Closeable panels
