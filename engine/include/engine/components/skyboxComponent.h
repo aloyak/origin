@@ -20,12 +20,17 @@ public:
 
     std::vector<std::string> getFaces() const { return m_facePaths; }
     bool setFacePath(size_t index, const std::string& path);
+
+    void setRotation(float rotation) { m_rotation = rotation; }
+    float getRotation() const { return m_rotation;}
 private:
     unsigned int m_cubemapID = 0;
     unsigned int m_skyboxVAO = 0;
     unsigned int m_skyboxVBO = 0;
     std::unique_ptr<Shader> m_shader;
     std::vector<std::string> m_facePaths;
+
+    float m_rotation = 0.0f; 
 
     void loadCubemap(const std::vector<std::string>& faces);
     void setupMesh();

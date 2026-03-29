@@ -123,7 +123,10 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
     glDepthFunc(GL_LEQUAL); 
     m_shader->use();
 
-    glm::mat4 view = glm::mat4(glm::mat3(*(glm::mat4*)camera.getViewMatrix(cameraTransform))); // Thanks Claude
+    glm::mat4 view = glm::mat4(glm::mat3(*(glm::mat4*)camera.getViewMatrix(cameraTransform)));
+    if (m_rotation != 0.0f) {
+        view = glm::rotate(view, glm::radians(m_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+    }
     
     m_shader->setMat4("u_View", &view[0][0]);
     m_shader->setMat4("u_Projection", camera.getProjectionMatrix());
@@ -140,9 +143,14 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
 void SkyboxComponent::serialize(nlohmann::json& j) const {
     j["type"] = "SkyboxComponent";
     j["faces"] = m_facePaths;
+    j["rotation"] = m_rotation;
 }
 
 void SkyboxComponent::deserialize(const nlohmann::json& j) {
+    if (j.contains("rotation") && j["rotation"].is_number()) {
+        m_rotation = j["rotation"].get<float>();
+    }
+
     if (j.contains("faces") && j["faces"].is_array()) {
         m_facePaths = normalizeFaces(j["faces"].get<std::vector<std::string>>());
         if (m_facePaths.size() != 6) {

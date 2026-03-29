@@ -19,7 +19,9 @@ public:
     Transform transform;
 
     //bool enabled = true;
-    //std::string tag = "Untagged";
+
+    void setTag(const std::string& newTag) { tag = newTag; }
+    const std::string& getTag() const { return tag; }
 
     Entity* get() { return this; }
 
@@ -92,4 +94,6 @@ public:
 private:
     std::unordered_map<std::type_index, std::unique_ptr<Component>> m_components;
     std::vector<std::type_index> m_componentOrder;
+
+    std::string tag = "Untagged";
 };
