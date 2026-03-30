@@ -103,6 +103,12 @@ void RigidbodyComponent::update(float /*dt*/) {
     if (!m_world) return;
     
     if (m_dirty || !m_body) rebuildBody();
+
+    if (!m_world->isEnabled()) {
+        syncBodyFromTransform();
+        return;
+    }
+
     if (m_bodyType == BodyType::Static) {
         syncBodyFromTransform();
     } else {

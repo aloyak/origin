@@ -13,6 +13,8 @@
 #include "engine/components/pointLightComponent.h"
 #include "engine/components/rigidbodyComponent.h"
 
+#include <cctype>
+
 class PropertiesPanel : public Panel {
 public:
     PropertiesPanel(Engine& engine, Entity*& selectedRef) 
@@ -48,7 +50,13 @@ public:
             }
 
             for (const auto& [type, comp] : m_SelectedEntity->getComponents()) {
-                if (ImGui::CollapsingHeader(type.name(), ImGuiTreeNodeFlags_DefaultOpen)) {
+                const char* displayName = type.name();
+                while (*displayName && std::isdigit(static_cast<unsigned char>(*displayName))) {
+                    ++displayName;
+                }
+
+                const std::string headerLabel = std::string(displayName) + "##" + std::to_string(type.hash_code());
+                if (ImGui::CollapsingHeader(headerLabel.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                     ImGui::PushID(type.hash_code());
                     ImGui::Checkbox("Enabled", &comp->isEnabled);
                     ImGui::SameLine();
