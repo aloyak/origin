@@ -122,6 +122,14 @@ void Layer::registerDefaultInspectors() {
 			[&](const std::string& path) { c->setNormalTexturePath(path); }
 		);
 
+		DrawFilePicker(
+			"Metallic Texture",
+			"metallic_path",
+			c->getMetallicTexturePath(),
+			{ "Image Files", "*.png *.jpg *.jpeg *.bmp *.tga *.hdr", "All Files", "*" },
+			[&](const std::string& path) { c->setMetallicTexturePath(path); }
+		);
+
 		ImGui::SeparatorText("Material");
 		Vec3 baseColor = c->getBaseColor();
 		if (ImGui::ColorEdit3("Base Color", &baseColor.x)) {

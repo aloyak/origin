@@ -108,6 +108,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     }
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
+    std::vector<MeshTexture> metallicMaps = loadMaterialTextures(material, (int)aiTextureType_METALNESS, "texture_metallic");
+    textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
+
     return Mesh(vertices, indices, textures);
 }
 

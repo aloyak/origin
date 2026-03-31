@@ -27,9 +27,9 @@ struct Material {
     sampler2D texture_diffuse;
     sampler2D texture_specular;
     sampler2D texture_normal;
+    sampler2D texture_metallic;
     // TODO (ideas):
     // sampler2D texture_roughness;
-    // sampler2D texture_metallic;
     // sampler2D texture_ao;
     // sampler2D texture_emissive;
     // sampler2D texture_height;
@@ -52,7 +52,9 @@ uniform float u_SpecularStrength;
 uniform float u_Shininess;
 uniform vec3 u_BaseColor;
 uniform vec2 u_UVScale;
-uniform bool u_HasNormalMap;
+
+uniform bool u_NormalMap;
+uniform bool u_MetallicMap;
 
 vec3 srgbToLinear(vec3 color) {
     return pow(max(color, vec3(0.0)), vec3(2.2));
@@ -97,7 +99,13 @@ void main() {
     vec4 specularTexture = texture(material.texture_specular, tiledTexCoord);
 
     vec3 diffuseColor = srgbToLinear(diffuseTexture.rgb) * u_BaseColor;
-    vec3 specularColor = specularTexture.rgb;
+    float metallic = 0.0;
+    if (u_MetallicMap) {
+        metallic = clamp(texture(material.texture_metallic, tiledTexCoord).r, 0.0, 1.0);
+    }
+
+    vec3 specularColor = mix(specularTexture.rgb, diffuseColor, metallic);
+    diffuseColor *= (1.0 - metallic);
 
     if (!u_LightingEnabled) {
         FragColor = vec4(diffuseColor, diffuseTexture.a);
@@ -105,7 +113,7 @@ void main() {
     }
     
     vec3 norm = normalize(vNormal);
-    if (u_HasNormalMap) {
+    if (u_NormalMap) {
         vec3 sampled = texture(material.texture_normal, tiledTexCoord).rgb;
         sampled = sampled * 2.0 - 1.0;
         norm = normalize(vTBN * sampled);

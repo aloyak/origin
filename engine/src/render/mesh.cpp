@@ -124,6 +124,7 @@ void Mesh::draw(const Material& material,
     bindTextureSlot("texture_diffuse", "texture_diffuse");
     bindTextureSlot("texture_specular", "texture_specular");
     bindTextureSlot("texture_normal", "texture_normal");
+    bindTextureSlot("texture_metallic", "texture_metallic");
 
     bool hasNormalMap = material.hasTexture("texture_normal");
     if (!hasNormalMap) {
@@ -134,7 +135,18 @@ void Mesh::draw(const Material& material,
             }
         }
     }
-    shader.setBool("u_HasNormalMap", hasNormalMap);
+    shader.setBool("u_NormalMap", hasNormalMap);
+
+    bool hasMetallicMap = material.hasTexture("texture_metallic");
+    if (!hasMetallicMap) {
+        for (const auto& meshTexture : textures) {
+            if (meshTexture.type == "texture_metallic" && meshTexture.texture) {
+                hasMetallicMap = true;
+                break;
+            }
+        }
+    }
+    shader.setBool("u_MetallicMap", hasMetallicMap);
 
     // Bind material properties
     shader.setFloat("u_AmbientStrength", material.getAmbientStrength());

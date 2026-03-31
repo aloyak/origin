@@ -31,6 +31,7 @@ void RenderComponent::serialize(nlohmann::json& j) const {
     j["diffuse"] = m_diffusePath;
     j["specular"] = m_specularPath;
     j["normal"] = m_normalPath;
+    j["metallic"] = m_metallicPath;
 
     if (m_material) {
         j["ambientStrength"] = m_material->getAmbientStrength();
@@ -52,6 +53,7 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     m_diffusePath = Path::toAssetsRelative(j.value("diffuse", ""));
     m_specularPath = Path::toAssetsRelative(j.value("specular", ""));
     m_normalPath = Path::toAssetsRelative(j.value("normal", ""));
+    m_metallicPath = Path::toAssetsRelative(j.value("metallic", ""));
 
     ensureMaterial();
 
@@ -69,6 +71,9 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     }
     if (!m_normalPath.empty()) {
         setTexture(m_normalPath, "normal");
+    }
+    if (!m_metallicPath.empty()) {
+        setTexture(m_metallicPath, "metallic");
     }
 
     setAmbientStrength(j.value("ambientStrength", getAmbientStrength()));
@@ -117,9 +122,7 @@ void RenderComponent::setTexture(const std::string& path, const std::string& typ
     ensureMaterial();
 
     const std::string normalizedPath = Path::toAssetsRelative(path);
-    if (normalizedPath.empty()) {
-        return;
-    }
+    const bool clearTexture = normalizedPath.empty();
 
     if (type == "diffuse" || type == "texture_diffuse") {
         m_diffusePath = normalizedPath;
@@ -127,36 +130,32 @@ void RenderComponent::setTexture(const std::string& path, const std::string& typ
         m_specularPath = normalizedPath;
     } else if (type == "normal" || type == "texture_normal") {
         m_normalPath = normalizedPath;
+    } else if (type == "metallic" || type == "texture_metallic") {
+        m_metallicPath = normalizedPath;
+    }
+
+    if (clearTexture) {
+        m_material->setTexture(type, nullptr);
+        return;
     }
 
     m_material->setTexture(type, ResourceManager::instance().getTexture(normalizedPath));
 }
 
 void RenderComponent::setDiffuseTexturePath(const std::string& path) {
-    m_diffusePath = Path::toAssetsRelative(path);
-    if (m_diffusePath.empty()) {
-        return;
-    }
-
-    setTexture(m_diffusePath, "diffuse");
+    setTexture(path, "diffuse");
 }
 
 void RenderComponent::setSpecularTexturePath(const std::string& path) {
-    m_specularPath = Path::toAssetsRelative(path);
-    if (m_specularPath.empty()) {
-        return;
-    }
-
-    setTexture(m_specularPath, "specular");
+    setTexture(path, "specular");
 }
 
 void RenderComponent::setNormalTexturePath(const std::string& path) {
-    m_normalPath = Path::toAssetsRelative(path);
-    if (m_normalPath.empty()) {
-        return;
-    }
+    setTexture(path, "normal");
+}
 
-    setTexture(m_normalPath, "normal");
+void RenderComponent::setMetallicTexturePath(const std::string& path) {
+    setTexture(path, "metallic");
 }
 
 void RenderComponent::setAmbientStrength(float strength) {

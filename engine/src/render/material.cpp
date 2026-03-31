@@ -21,7 +21,13 @@ Shader& Material::getShader() const {
 }
 
 void Material::setTexture(const std::string& slot, std::shared_ptr<Texture> texture) {
-    m_textures[normalizeSlot(slot)] = std::move(texture);
+    const auto key = normalizeSlot(slot);
+    if (!texture) {
+        m_textures.erase(key);
+        return;
+    }
+
+    m_textures[key] = std::move(texture);
 }
 
 std::shared_ptr<Texture> Material::getTexture(const std::string& slot) const {
@@ -36,7 +42,8 @@ std::shared_ptr<Texture> Material::getTexture(const std::string& slot) const {
 
 bool Material::hasTexture(const std::string& slot) const {
     const auto key = normalizeSlot(slot);
-    return m_textures.find(key) != m_textures.end();
+    auto it = m_textures.find(key);
+    return it != m_textures.end() && static_cast<bool>(it->second);
 }
 
 std::string Material::normalizeSlot(const std::string& slot) {
@@ -48,6 +55,9 @@ std::string Material::normalizeSlot(const std::string& slot) {
     }
     if (slot == "normal" || slot == "texture_normal") {
         return "texture_normal";
+    }
+    if (slot == "metallic" || slot == "texture_metallic") {
+        return "texture_metallic";
     }
 
     return slot;
