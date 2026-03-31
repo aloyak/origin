@@ -159,25 +159,68 @@ void Layer::registerDefaultInspectors() {
 	});
 
 	InspectorRegistry::registerComponent<SkyboxComponent>([](SkyboxComponent* c) {
-		const std::vector<std::string> faces = c->getFaces();
-		for (int i = 0; i < (int)faces.size(); i++) {
-			ImGui::PushID(i);
-			const std::string faceLabel = "Face " + std::to_string(i);
+		std::vector<std::string> faces = c->getFaces();
+		const char* faceLabels[6] = { "Right", "Left", "Top", "Bottom", "Front", "Back" };
+		const char* faceIds[6] = { "px", "nx", "py", "ny", "pz", "nz" };
+
+		int moveFrom = -1;
+		int moveTo = -1;
+
+		ImGui::SeparatorText("Cubemap Faces");
+		
+		for (size_t i = 0; i < faces.size() && i < 6; ++i) {
+			ImGui::PushID(static_cast<int>(i));
+			
+			ImGui::BeginGroup();
+			
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+			ImGui::TextUnformatted(":::"); 
+			ImGui::PopStyleColor();
+			
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+				int sourceIdx = static_cast<int>(i);
+				ImGui::SetDragDropPayload("DND_SKYBOX_FACE", &sourceIdx, sizeof(int));
+				ImGui::Text("Moving %s", faceLabels[i]);
+				ImGui::EndDragDropSource();
+			}
+
+			ImGui::SameLine();
+
+			const std::string pickerId = std::string("##face_") + faceIds[i];
 			DrawFilePicker(
-				faceLabel.c_str(),
-				"face_path",
+				faceLabels[i],
+				pickerId.c_str(),
 				faces[i],
 				{ "Image Files", "*.png *.jpg *.jpeg *.bmp *.tga *.hdr", "All Files", "*" },
-				[&](const std::string& path) { c->setFacePath((size_t)i, path); },
+				[&, i](const std::string& path) { c->setFacePath((size_t)i, path); },
 				false // no clear button
 			);
+			
+			ImGui::EndGroup();
+
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_SKYBOX_FACE")) {
+					moveFrom = *(const int*)payload->Data;
+					moveTo = static_cast<int>(i);
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			ImGui::PopID();
 		}
-        ImGui::Separator();
-        float rotation = c->getRotation();
-        if (ImGui::DragFloat("Rotation", &rotation, 0.1f, 0.0f, 360.0f)) {
-            c->setRotation(rotation);
-        }
+
+		if (moveFrom != -1 && moveTo != -1 && moveFrom != moveTo) {
+			std::string moved = faces[moveFrom];
+			faces.erase(faces.begin() + moveFrom);
+			faces.insert(faces.begin() + moveTo, moved);
+			c->setFaces(faces);
+		}
+
+		ImGui::Separator();
+		float rotation = c->getRotation();
+		if (ImGui::DragFloat("Rotation", &rotation, 0.1f, 0.0f, 360.0f)) {
+			c->setRotation(rotation);
+		}
 	});
 
 	InspectorRegistry::registerComponent<PointLightComponent>([](PointLightComponent* c) {
@@ -192,7 +235,7 @@ void Layer::registerDefaultInspectors() {
 		}
 
 		float radius = c->getRadius();
-		if (ImGui::DragFloat("Radius", &radius, 1.0f, 0.0f, 1000.0f)) {
+		if (ImGui::DragFloat("Radius", &radius, 1.0f, 0.0f, 2500.0f)) {
 			c->setRadius(radius);
 		}
 	});

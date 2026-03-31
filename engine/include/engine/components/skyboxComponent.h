@@ -19,6 +19,7 @@ public:
     void deserialize(const nlohmann::json& j) override;
 
     std::vector<std::string> getFaces() const { return m_facePaths; }
+    bool setFaces(const std::vector<std::string>& faces);
     bool setFacePath(size_t index, const std::string& path);
 
     void setRotation(float rotation) { m_rotation = rotation; }

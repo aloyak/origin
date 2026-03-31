@@ -82,11 +82,21 @@ void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
 }
 
 bool SkyboxComponent::setFacePath(size_t index, const std::string& path) {
-    if (index >= m_facePaths.size() || path.empty()) {
+    if (index >= m_facePaths.size()) {
         return false;
     }
 
     m_facePaths[index] = Path::toAssetsRelative(path);
+    loadCubemap(m_facePaths);
+    return true;
+}
+
+bool SkyboxComponent::setFaces(const std::vector<std::string>& faces) {
+    if (faces.size() != m_facePaths.size()) {
+        return false;
+    }
+
+    m_facePaths = normalizeFaces(faces);
     loadCubemap(m_facePaths);
     return true;
 }
