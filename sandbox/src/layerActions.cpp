@@ -127,7 +127,10 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { m_ShowRenderStats = !m_ShowRenderStats; },
             nullptr,
             [this]() { return m_ShowRenderStats; } },
-
+        /*{ ActionSection::Rendering, "Show Grid", "Ctrl+G", { KEY_G, true, false, false },
+            [this]() { ; },
+            nullptr,
+            [this]() { return} },*/
         { ActionSection::Gizmos, "Translate", "1", { KEY_1, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE; },
             nullptr,
@@ -250,7 +253,15 @@ void Layer::DrawMenuBar() {
                     DrawActionItem(action);
                 }
             }
-            if (ImGui::MenuItem("Duplicate Entity", "", false, m_SelectedEntity != nullptr)) {}
+            if (ImGui::MenuItem("Duplicate Entity", "", false, m_SelectedEntity != nullptr)) {
+                // Duplicated implementation from HierarchyPanel!
+                Entity* newEntity = m_SceneManager.getActiveScene()->createEntity(m_SelectedEntity->name + " Copy");
+                newEntity->transform = m_SelectedEntity->transform;
+                for (const auto& [typeId, component] : m_SelectedEntity->getComponents()) {
+                    newEntity->addComponentCopy(typeId, component);
+                }
+                m_SelectedEntity = newEntity;
+            }
             ImGui::Separator();
             for (const ActionDef& action : actions) {
                 if (action.section == ActionSection::Gizmos) {
