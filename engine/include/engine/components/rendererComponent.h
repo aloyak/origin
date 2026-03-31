@@ -38,6 +38,8 @@ public:
     void setUVScale(const Vec2& uvScale);
     Vec2 getUVScale() const;
 
+    std::unique_ptr<Component> clone() const override;
+
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     void setModelPath(const std::string& modelPath);

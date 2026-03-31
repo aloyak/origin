@@ -20,6 +20,8 @@ public:
     const PointLight& getLight() const { return m_light; }
     PointLight& getLight() { return m_light; }
 
+    std::unique_ptr<Component> clone() const override;
+
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
 

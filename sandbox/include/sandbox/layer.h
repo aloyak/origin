@@ -26,7 +26,7 @@ public:
 
 private:
     struct Shortcut {
-        int key = 0;
+        int key = KEY_NONE;
         bool ctrl = false;
         bool shift = false;
         bool alt = false;

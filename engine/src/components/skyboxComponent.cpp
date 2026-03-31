@@ -46,6 +46,13 @@ SkyboxComponent::SkyboxComponent(const std::vector<std::string>& faces)
     loadCubemap(m_facePaths);
 }
 
+std::unique_ptr<Component> SkyboxComponent::clone() const {
+    auto copy = std::make_unique<SkyboxComponent>(m_facePaths);
+    copy->setRotation(m_rotation);
+    copy->isEnabled = isEnabled;
+    return copy;
+}
+
 void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
     if (m_cubemapID != 0) {
         glDeleteTextures(1, &m_cubemapID);

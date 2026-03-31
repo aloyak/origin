@@ -97,6 +97,15 @@ RigidbodyComponent::~RigidbodyComponent() {
     destroyBody();
 }
 
+std::unique_ptr<Component> RigidbodyComponent::clone() const {
+    auto copy = std::make_unique<RigidbodyComponent>(m_world);
+    nlohmann::json j;
+    serialize(j);
+    copy->deserialize(j);
+    copy->isEnabled = isEnabled;
+    return copy;
+}
+
 void RigidbodyComponent::update(float /*dt*/) {
     if (!entity) return;
     if (!m_world) m_world = PhysicsWorld::getActive();

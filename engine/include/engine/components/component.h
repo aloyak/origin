@@ -2,6 +2,7 @@
 
 #include "engine/core/transform.h"
 #include <nlohmann/json_fwd.hpp>
+#include <memory>
 
 class Entity;
 class Engine;
@@ -18,6 +19,8 @@ public:
 
     virtual void update(float dt) {}
     virtual void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {}
+
+    virtual std::unique_ptr<Component> clone() const = 0;
 
     virtual void serialize(nlohmann::json& j) const {}
     virtual void deserialize(const nlohmann::json& j) {}

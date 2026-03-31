@@ -5,6 +5,12 @@ DirectionalLightComponent::DirectionalLightComponent(Vec3 direction, Vec3 color,
     : m_light(direction, color, intensity)
 {}
 
+std::unique_ptr<Component> DirectionalLightComponent::clone() const {
+    auto copy = std::make_unique<DirectionalLightComponent>(m_light.getDirection(), m_light.getColor(), m_light.getIntensity());
+    copy->isEnabled = isEnabled;
+    return copy;
+}
+
 void DirectionalLightComponent::serialize(nlohmann::json& j) const {
     j["type"] = "DirectionalLightComponent";
     j["direction"] = {m_light.getDirection().x, m_light.getDirection().y, m_light.getDirection().z};

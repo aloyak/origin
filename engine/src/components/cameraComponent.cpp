@@ -12,6 +12,12 @@ CameraComponent::CameraComponent(float fov, float aspect, float zNear, float zFa
     m_far = zFar;
 }
 
+std::unique_ptr<Component> CameraComponent::clone() const {
+    auto copy = std::make_unique<CameraComponent>(m_fov, m_aspect, m_near, m_far);
+    copy->isEnabled = isEnabled;
+    return copy;
+}
+
 void CameraComponent::serialize(nlohmann::json& j) const {
     j["type"] = "CameraComponent";
     j["fov"] = m_fov;

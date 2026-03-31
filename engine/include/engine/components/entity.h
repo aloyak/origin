@@ -40,6 +40,22 @@ public:
         return ptr;
     }
 
+    void addComponentCopy(std::type_index type, const std::unique_ptr<Component>& component) {
+        if (m_components.find(type) != m_components.end()) {
+            return;
+        }
+
+        if (!component) return;
+
+        std::unique_ptr<Component> copy = component->clone();
+        if (!copy) return;
+
+        copy->entity = this;
+
+        m_componentOrder.push_back(type);
+        m_components[type] = std::move(copy);
+    }
+
     template<typename T>
     T* getComponent() {
         auto it = m_components.find(std::type_index(typeid(T)));

@@ -19,23 +19,24 @@ public:
             m_Engine.moveToScene(entity);
         }
         ImGui::SameLine();
+        if (ImGui::Button("Duplicate Entity") && m_SelectedEntity) {
+            Entity* newEntity = scene->createEntity(m_SelectedEntity->name + " Copy");
+            newEntity->transform = m_SelectedEntity->transform;
+            for (const auto& [typeId, component] : m_SelectedEntity->getComponents()) {
+                newEntity->addComponentCopy(typeId, component);
+            }
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Delete Entity") && m_SelectedEntity) {
             scene->destroyEntity(m_SelectedEntity);
             m_SelectedEntity = nullptr;
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Duplicate Entity") && m_SelectedEntity) {
-            Entity* newEntity = scene->createEntity(m_SelectedEntity->name + " Copy");
-            newEntity->transform = m_SelectedEntity->transform;
-            // TODO! Duplication (also in layer.cpp)
-        }
-
         if (ImGui::TreeNodeEx(label, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth)) {
             if (scene) {
                 for (auto& entity : scene->getEntities()) {
                     bool selected = (m_SelectedEntity == entity.get());
                     if (ImGui::Selectable(entity->name.c_str(), selected))
-                        m_SelectedEntity = entity.get();
+                    m_SelectedEntity = entity.get();
                 }
             }
             ImGui::TreePop();

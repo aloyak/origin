@@ -13,6 +13,8 @@ class SkyboxComponent : public Component {
 public:
     SkyboxComponent(const std::vector<std::string>& faces = {});
 
+    std::unique_ptr<Component> clone() const override;
+
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     void serialize(nlohmann::json& j) const override;

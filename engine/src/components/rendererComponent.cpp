@@ -23,6 +23,15 @@ RenderComponent::RenderComponent(const std::string& modelPath,
     }
 }
 
+std::unique_ptr<Component> RenderComponent::clone() const {
+    auto copy = std::make_unique<RenderComponent>();
+    nlohmann::json j;
+    serialize(j);
+    copy->deserialize(j);
+    copy->isEnabled = isEnabled;
+    return copy;
+}
+
 void RenderComponent::serialize(nlohmann::json& j) const {
     j["type"] = "RenderComponent";
     j["model"] = m_modelPath;

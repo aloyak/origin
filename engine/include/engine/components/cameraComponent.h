@@ -11,6 +11,8 @@ public:
 
     Camera& getCamera() { return *m_camera; }
 
+    std::unique_ptr<Component> clone() const override;
+
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
 

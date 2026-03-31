@@ -1,5 +1,7 @@
 #pragma once
 
+#define KEY_NONE       0
+
 #define KEY_A          4
 #define KEY_B          5
 #define KEY_C          6
