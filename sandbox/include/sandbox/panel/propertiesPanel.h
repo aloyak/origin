@@ -28,6 +28,10 @@ public:
             char nameBuf[256];
             strncpy(nameBuf, m_SelectedEntity->name.c_str(), sizeof(nameBuf) - 1);
             nameBuf[sizeof(nameBuf) - 1] = '\0';
+
+            float labelWidth = ImGui::CalcTextSize("Name").x + ImGui::GetStyle().ItemInnerSpacing.x;
+            ImGui::SetNextItemWidth(-labelWidth);
+
             if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
                 m_SelectedEntity->name = nameBuf;
                 
