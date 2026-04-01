@@ -13,7 +13,15 @@
 
 #include "sandbox/styles.h"
 
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <fstream>
 #include <iostream>
+
+namespace {
+constexpr std::size_t kMaxRecentScenes = 5;
+}
 
 Layer::Layer(Engine& engine) 
     : m_Engine(engine) {
@@ -21,6 +29,8 @@ Layer::Layer(Engine& engine)
     ImGuiIO& io = m_Engine.getIO();
     static std::string layout = Path::resolve("resources/layout.ini").string();
     io.IniFilename = layout.c_str();
+    m_UserPreferencesPath = Path::resolve("resources/user.json");
+    LoadUserPreferences();
 
     // Styles
     ImGui::StyleColorsDark();
@@ -68,25 +78,23 @@ void Layer::OnUIRender() {
 void Layer::OpenScene() {
     std::string path = Dialog::openFile({ "Scene Files", "*.json" });
     if (!path.empty() && path != m_CurrentSceneInfo.scene.string()) {
-        ScenePathInfo candidateContext = GetSceneContext(path);
+        OpenSceneFromPath(path);
+    }
+}
 
-        if (candidateContext.scene.empty()) {
-            Logger::error("Failed to load scene: Invalid path.");
-            return; 
-        }
+void Layer::OpenSceneRecent() {
+    if (m_RecentScenes.empty()) {
+        Logger::warn("No recent scenes in user preferences.");
+        return;
+    }
 
-        std::string oldBase = Path::getBase();
-        Path::setBase(candidateContext.root);
-
-        Scene* loaded = m_Engine.getSceneManager().load(candidateContext.scene.string());
-        if (loaded) {
-            m_CurrentSceneInfo = candidateContext;
-            m_SelectedEntity = nullptr; 
-        } else {
-            Logger::error("Failed to load scene: " + candidateContext.scene.string());
-            Path::setBase(oldBase); 
+    for (const std::string& recentPath : m_RecentScenes) {
+        if (OpenSceneFromPath(recentPath)) {
+            return;
         }
     }
+
+    Logger::error("Failed to load any scene from recent list.");
 }
 
 void Layer::SaveScene() {
@@ -101,6 +109,7 @@ void Layer::SaveScene() {
     }
     
     m_Engine.getSceneManager().save(m_CurrentSceneInfo.scene.string());
+    AddRecentScene(m_CurrentSceneInfo.scene);
 }
 
 void Layer::SaveSceneAs() {
@@ -120,6 +129,7 @@ void Layer::SaveSceneAs() {
         m_CurrentSceneInfo = { chosenPath.parent_path(), chosenPath };
 
         m_Engine.getSceneManager().save(chosenPath.string());
+        AddRecentScene(chosenPath);
     }
 }
 
@@ -127,6 +137,122 @@ void Layer::UnloadScene() {
     m_Engine.getSceneManager().unload();
     m_SelectedEntity = nullptr;
     m_CurrentSceneInfo = { {}, {} };
+}
+
+bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
+    ScenePathInfo candidateContext = GetSceneContext(inputPath.string());
+
+    if (candidateContext.scene.empty()) {
+        Logger::error("Failed to load scene: Invalid path.");
+        return false;
+    }
+
+    std::string oldBase = Path::getBase();
+    Path::setBase(candidateContext.root);
+
+    Scene* loaded = m_Engine.getSceneManager().load(candidateContext.scene.string());
+    if (!loaded) {
+        Logger::error("Failed to load scene: " + candidateContext.scene.string());
+        Path::setBase(oldBase);
+        return false;
+    }
+
+    m_CurrentSceneInfo = candidateContext;
+    m_SelectedEntity = nullptr;
+    AddRecentScene(candidateContext.scene);
+    return true;
+}
+
+void Layer::LoadUserPreferences() {
+    m_RecentScenes.clear();
+
+    if (!fs::exists(m_UserPreferencesPath)) {
+        SaveUserPreferences();
+        return;
+    }
+
+    std::ifstream in(m_UserPreferencesPath);
+    if (!in.is_open()) {
+        Logger::warn("Could not open user preferences file for reading.");
+        return;
+    }
+
+    try {
+        nlohmann::json data;
+        in >> data;
+
+        if (data.contains("camera_sensitivity") && data["camera_sensitivity"].is_number()) {
+            m_CameraSens = data["camera_sensitivity"].get<float>();
+        }
+        if (data.contains("camera_speed") && data["camera_speed"].is_number()) {
+            m_CameraSpeed = data["camera_speed"].get<float>();
+        }
+
+        if (data.contains("recent_scenes") && data["recent_scenes"].is_array()) {
+            for (const auto& scene : data["recent_scenes"]) {
+                if (!scene.is_string()) {
+                    continue;
+                }
+
+                fs::path scenePath(scene.get<std::string>());
+                m_RecentScenes.push_back(scenePath.generic_string());
+                if (m_RecentScenes.size() >= kMaxRecentScenes) {
+                    break;
+                }
+            }
+        }
+    } catch (const std::exception& ex) {
+        Logger::warn("Invalid user preferences JSON, using defaults: " + std::string(ex.what()));
+    }
+}
+
+void Layer::SaveUserPreferences() const {
+    try {
+        fs::create_directories(m_UserPreferencesPath.parent_path());
+    } catch (const std::exception& ex) {
+        Logger::error("Failed to create preferences directory: " + std::string(ex.what()));
+        return;
+    }
+
+    nlohmann::json data = {
+        { "camera_sensitivity", m_CameraSens },
+        { "camera_speed", m_CameraSpeed },
+        { "recent_scenes", m_RecentScenes }
+    };
+
+    std::ofstream out(m_UserPreferencesPath);
+    if (!out.is_open()) {
+        Logger::error("Could not open user preferences file for writing.");
+        return;
+    }
+
+    out << data.dump(4);
+}
+
+void Layer::ClearUserPreferences() {
+    m_CameraSens = 0.15f;
+    m_CameraSpeed = 1.0f;
+    m_RecentScenes.clear();
+
+    std::error_code ec;
+    fs::remove(m_UserPreferencesPath, ec);
+    if (ec) {
+        Logger::warn("Failed to remove user preferences file: " + ec.message());
+    }
+
+    SaveUserPreferences();
+}
+
+void Layer::AddRecentScene(const fs::path& scenePath) {
+    const std::string normalizedPath = fs::absolute(scenePath).lexically_normal().generic_string();
+    m_RecentScenes.erase(std::remove(m_RecentScenes.begin(), m_RecentScenes.end(), normalizedPath), m_RecentScenes.end());
+    m_RecentScenes.insert(m_RecentScenes.begin(), normalizedPath);
+
+    if (m_RecentScenes.size() > kMaxRecentScenes) {
+        m_RecentScenes.resize(kMaxRecentScenes);
+    }
+
+    SaveUserPreferences();
 }
 
 void Layer::DrawDockspace() {

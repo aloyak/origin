@@ -52,8 +52,10 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { OpenScene(); },
             nullptr,
             nullptr },
-
-        // Keep this before Save Scene so Ctrl+Shift+S resolves to Save As.
+        { ActionSection::File, "Open Recent", "Ctrl+Shift+O", { KEY_O, true, true, false }, // TODO
+            [this]() { OpenSceneRecent(); },
+            nullptr,
+            nullptr },
         { ActionSection::File, "Save Scene As", "Ctrl+Shift+S", { KEY_S, true, true, false },
             [this]() { SaveSceneAs(); },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
@@ -131,10 +133,14 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { m_ShowRenderStats = !m_ShowRenderStats; },
             nullptr,
             [this]() { return m_ShowRenderStats; } },
-        /*{ ActionSection::Preferences, "Show Grid", "Ctrl+G", { KEY_G, true, false, false },
+        /*{ ActionSection::Preferences, "Show Grid", "F2", { KEY_G, true, false, false },
             [this]() { ; },
             nullptr,
             [this]() { return} },*/
+        { ActionSection::Preferences, "Clear User Preferences", nullptr, { 0, false, false, false },
+            [this]() { ClearUserPreferences(); },
+            nullptr,
+            nullptr },
         { ActionSection::Gizmos, "Translate", "1", { KEY_1, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE; },
             nullptr,
@@ -191,32 +197,52 @@ void Layer::DrawMenuBar() {
 
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::File && std::string(action.label) == "New Scene") {
-                    DrawActionItem(action);
+            auto drawFileAction = [&](const char* label) {
+                for (const ActionDef& action : actions) {
+                    if (action.section == ActionSection::File && std::string(action.label) == label) {
+                        DrawActionItem(action);
+                        return;
+                    }
                 }
-            }
-            ImGui::Separator();
-
-            for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::File && std::string(action.label) != "New Scene" && std::string(action.label) != "Quit") {
-                    DrawActionItem(action);
-                }
-            }
+            };
+            
+            drawFileAction("New Scene");
 
             ImGui::Separator();
-            for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::File && std::string(action.label) == "Quit") {
-                    DrawActionItem(action);
+
+            drawFileAction("Open Scene");
+
+            if (ImGui::BeginMenu("Open Recent")) {
+                if (m_RecentScenes.empty()) {
+                    ImGui::TextUnformatted("No recent scenes");
+                } else {
+                    for (const std::string& recentPath : m_RecentScenes) {
+                        if (ImGui::MenuItem(recentPath.c_str())) {
+                            OpenSceneFromPath(recentPath);
+                        }
+                    }
                 }
+                ImGui::EndMenu();
             }
+
+            ImGui::Separator();
+
+            drawFileAction("Save Scene");
+            drawFileAction("Save Scene As");
+            drawFileAction("Unload Scene");
+
+            ImGui::Separator();
+
+            drawFileAction("Quit");
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Preferences")) {
             ImGui::TextUnformatted("Camera Sensitivity");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(90.0f);
-            ImGui::DragFloat("##Sensitivity", &m_CameraSens, 0.005f, 0.01f, 1.0f, "%.3f");
+            if (ImGui::DragFloat("##Sensitivity", &m_CameraSens, 0.005f, 0.01f, 1.0f, "%.3f")) {
+                SaveUserPreferences();
+            }
 
             if (ImGui::BeginMenu("Color Theme")) {
                 if (ImGui::MenuItem("Dark (Default)")) {
@@ -228,13 +254,19 @@ void Layer::DrawMenuBar() {
                 ImGui::EndMenu();
             }
             for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::Preferences) {
+                if (action.section == ActionSection::Preferences && std::string(action.label) != "Clear User Preferences") {
                     DrawActionItem(action);
                 }
             }
-            ImGui::SeparatorText("Window");
+            ImGui::Separator();
             for (const ActionDef& action : actions) {
                 if (action.section == ActionSection::Window) {
+                    DrawActionItem(action);
+                }
+            }
+            ImGui::Separator();
+            for (const ActionDef& action : actions) {
+                if (action.section == ActionSection::Preferences && std::string(action.label) == "Clear User Preferences") {
                     DrawActionItem(action);
                 }
             }
@@ -278,7 +310,9 @@ void Layer::DrawMenuBar() {
             }
             ImGui::Separator();
             ImGui::SetNextItemWidth(150.0f);
-            ImGui::SliderFloat("Editor Camera Speed", &m_CameraSpeed, 0.1f, 10.0f);
+            if (ImGui::SliderFloat("Editor Camera Speed", &m_CameraSpeed, 0.1f, 10.0f)) {
+                SaveUserPreferences();
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Rendering")) {

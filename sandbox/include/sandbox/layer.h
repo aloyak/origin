@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <string>
 
 namespace fs = std::filesystem;
 
@@ -85,13 +86,24 @@ private:
 
     // Scene management
     void OpenScene();
+    void OpenSceneRecent();
     void SaveScene();
     void SaveSceneAs();
     void UnloadScene();
 
+    bool OpenSceneFromPath(const fs::path& inputPath);
+
+    // User preferences
+    void LoadUserPreferences();
+    void SaveUserPreferences() const;
+    void ClearUserPreferences();
+    void AddRecentScene(const fs::path& scenePath);
+
     void registerDefaultInspectors();
 
     ScenePathInfo m_CurrentSceneInfo;
+    fs::path m_UserPreferencesPath;
+    std::vector<std::string> m_RecentScenes;
 
     // Closeable panels
     AboutPanel* m_AboutPanel = nullptr;
