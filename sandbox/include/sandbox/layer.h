@@ -34,6 +34,7 @@ private:
 
     enum class ActionSection {
         File,
+        Preferences,
         Window,
         Scene,
         Rendering,

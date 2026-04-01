@@ -68,12 +68,23 @@ void Layer::OnUIRender() {
 void Layer::OpenScene() {
     std::string path = Dialog::openFile({ "Scene Files", "*.json" });
     if (!path.empty() && path != m_CurrentSceneInfo.scene.string()) {
-        m_CurrentSceneInfo = GetSceneContext(path);
-        Path::setBase(m_CurrentSceneInfo.root);
-        if (m_CurrentSceneInfo.scene.empty()) {
+        ScenePathInfo candidateContext = GetSceneContext(path);
+
+        if (candidateContext.scene.empty()) {
             Logger::error("Failed to load scene: Invalid path.");
+            return; 
+        }
+
+        std::string oldBase = Path::getBase();
+        Path::setBase(candidateContext.root);
+
+        Scene* loaded = m_Engine.getSceneManager().load(candidateContext.scene.string());
+        if (loaded) {
+            m_CurrentSceneInfo = candidateContext;
+            m_SelectedEntity = nullptr; 
         } else {
-            m_Engine.getSceneManager().load(m_CurrentSceneInfo.scene.string());
+            Logger::error("Failed to load scene: " + candidateContext.scene.string());
+            Path::setBase(oldBase); 
         }
     }
 }
@@ -83,6 +94,12 @@ void Layer::SaveScene() {
         Logger::error("No active scene to save.");
         return;
     }
+    
+    if (m_CurrentSceneInfo.scene.empty()) { 
+        SaveSceneAs();
+        return;
+    }
+    
     m_Engine.getSceneManager().save(m_CurrentSceneInfo.scene.string());
 }
 
@@ -108,6 +125,8 @@ void Layer::SaveSceneAs() {
 
 void Layer::UnloadScene() {
     m_Engine.getSceneManager().unload();
+    m_SelectedEntity = nullptr;
+    m_CurrentSceneInfo = { {}, {} };
 }
 
 void Layer::DrawDockspace() {

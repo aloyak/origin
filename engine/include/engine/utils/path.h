@@ -19,6 +19,10 @@ public:
         s_base = base;
     }
 
+    static std::filesystem::path getBase() {
+        return s_base;
+    }
+
     static std::filesystem::path resolve(const std::string& relative) {
         return s_base / relative;
     }

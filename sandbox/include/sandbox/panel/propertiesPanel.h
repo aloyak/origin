@@ -23,14 +23,24 @@ public:
     void OnUIRender() override {
         ImGui::Begin("Properties");
         if (m_SelectedEntity) {
+            auto* scene = m_Engine.getSceneManager().getActiveScene();
+            
             char nameBuf[256];
-            strncpy(nameBuf, m_SelectedEntity->name.c_str(), sizeof(nameBuf));
+            strncpy(nameBuf, m_SelectedEntity->name.c_str(), sizeof(nameBuf) - 1);
+            nameBuf[sizeof(nameBuf) - 1] = '\0';
             if (ImGui::InputText("Name", nameBuf, sizeof(nameBuf)))
                 m_SelectedEntity->name = nameBuf;
                 
+            char tagBuf[256];
+            strncpy(tagBuf, m_SelectedEntity->getTag().c_str(), sizeof(tagBuf) - 1);
+            tagBuf[sizeof(tagBuf) - 1] = '\0';
+            ImGui::SetNextItemWidth(150.0f);
+            if (ImGui::InputText("Tag", tagBuf, sizeof(tagBuf))) {
+                m_SelectedEntity->setTag(tagBuf);
+            }
             ImGui::SameLine();
-            if (ImGui::Button("Delete Entity")) {
-                m_Engine.getSceneManager().getActiveScene()->destroyEntity(m_SelectedEntity);
+            if (ImGui::Button("Delete Entity") && scene) {
+                scene->destroyEntity(m_SelectedEntity);
                 m_SelectedEntity = nullptr;
                 ImGui::End();
                 return;

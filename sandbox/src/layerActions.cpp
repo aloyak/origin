@@ -40,7 +40,11 @@ bool Layer::IsShortcutPressed(const Shortcut& shortcut) const {
 Layer::ActionList Layer::BuildActions() {
     return {
         { ActionSection::File, "New Scene", "Ctrl+N", { KEY_N, true, false, false },
-            [this]() { m_Engine.getSceneManager().createScene("Empty Scene"); },
+            [this]() { 
+                m_Engine.getSceneManager().createScene("Empty Scene");
+                m_SelectedEntity = nullptr; 
+                m_CurrentSceneInfo = { {}, {} }; 
+            },
             nullptr,
             nullptr },
 
@@ -123,11 +127,11 @@ Layer::ActionList Layer::BuildActions() {
             nullptr,
             [this]() { return m_Renderer.isLightingEnabled(); } },
 
-        { ActionSection::Rendering, "Show Render Stats", "F1", { KEY_F1, false, false, false },
+        { ActionSection::Preferences, "Show Render Stats", "F1", { KEY_F1, false, false, false },
             [this]() { m_ShowRenderStats = !m_ShowRenderStats; },
             nullptr,
             [this]() { return m_ShowRenderStats; } },
-        /*{ ActionSection::Rendering, "Show Grid", "Ctrl+G", { KEY_G, true, false, false },
+        /*{ ActionSection::Preferences, "Show Grid", "Ctrl+G", { KEY_G, true, false, false },
             [this]() { ; },
             nullptr,
             [this]() { return} },*/
@@ -214,8 +218,8 @@ void Layer::DrawMenuBar() {
             ImGui::SetNextItemWidth(90.0f);
             ImGui::DragFloat("##Sensitivity", &m_CameraSens, 0.005f, 0.01f, 1.0f, "%.3f");
 
-            if (ImGui::BeginMenu("Themes")) {
-                if (ImGui::MenuItem("Dark")) {
+            if (ImGui::BeginMenu("Color Theme")) {
+                if (ImGui::MenuItem("Dark (Default)")) {
                     Styles::setupDarkTheme();
                 }
                 if (ImGui::MenuItem("Light")) {
@@ -223,7 +227,11 @@ void Layer::DrawMenuBar() {
                 }
                 ImGui::EndMenu();
             }
-
+            for (const ActionDef& action : actions) {
+                if (action.section == ActionSection::Preferences) {
+                    DrawActionItem(action);
+                }
+            }
             ImGui::SeparatorText("Window");
             for (const ActionDef& action : actions) {
                 if (action.section == ActionSection::Window) {
