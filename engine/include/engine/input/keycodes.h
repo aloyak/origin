@@ -17,11 +17,11 @@
 #define KEY_M          16
 #define KEY_N          17
 #define KEY_O          18
-#define KEY_P          23
+#define KEY_P          19
 #define KEY_Q          20
 #define KEY_R          21
 #define KEY_S          22
-#define KEY_T          19
+#define KEY_T          23
 #define KEY_U          24
 #define KEY_V          25
 #define KEY_W          26
