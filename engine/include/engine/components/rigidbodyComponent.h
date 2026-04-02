@@ -60,6 +60,8 @@ public:
     void setColliderSize(const Vec3& size);
     Vec3 getColliderSize() const { return m_colliderSize; }
 
+    void resetMotion();
+
 private:
     void markDirty();
     void rebuildBody();

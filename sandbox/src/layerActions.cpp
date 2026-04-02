@@ -71,7 +71,7 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
 
-        { ActionSection::File, "Quit", nullptr, { 0, false, false, false },
+        { ActionSection::File, "Quit", "Alt+F4", { 0, false, false, false },
             [this]() { m_Engine.stop(); },
             nullptr,
             nullptr },
@@ -105,7 +105,7 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { return m_SelectedEntity != nullptr; },
             nullptr },
             
-        { ActionSection::Rendering, "Toggle Pixelart", nullptr, { 0, false, false, false },
+        { ActionSection::Rendering, "Toggle Pixelart", "Ctrl+P", { KEY_P, true, false, false },
             [this]() {
                 if (!m_Renderer.isPixelArtEnabled()) {
                     m_Renderer.setupRenderTarget(350, 200);
@@ -160,7 +160,49 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::UNIVERSAL; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::UNIVERSAL; } },
+        { ActionSection::Physics, m_Engine.getPhysicsWorld().isEnabled() ? "Stop Physics" : "Play Physics", "P", { KEY_P, false, false, false },
+            [this]() { 
+                const bool wasEnabled = m_Engine.getPhysicsWorld().isEnabled();
 
+                if (!wasEnabled) {
+                    m_PhysicsEntities.clear();
+
+                    for (auto& entityPtr : m_SceneManager.getActiveScene()->getEntities()) {
+                        Entity* entity = entityPtr.get();
+                        if (!entity->hasComponent<RigidbodyComponent>()) continue;
+                        if (entity->getComponent<RigidbodyComponent>()->getBodyType() != RigidbodyComponent::BodyType::Dynamic) continue;
+                        
+                        m_PhysicsEntities.push_back({ entity, entity->transform.position, entity->transform.rotation });
+                    }
+                }
+
+                m_Engine.getPhysicsWorld().setEnabled(!wasEnabled); 
+            },
+            [this]() { return m_SceneManager.getActiveScene() != nullptr; },
+            [this]() { return m_Engine.getPhysicsWorld().isEnabled(); } },
+        { ActionSection::Physics, "Reset Simulation", "R", { KEY_R, false, false, false },
+            [this]() {
+                m_Engine.getPhysicsWorld().setEnabled(false); // TODO: For now, check later
+                for (const PhysicsEntityInfo& info : m_PhysicsEntities) {
+                    info.entity->transform.position = info.initialPosition;
+                    info.entity->transform.rotation = info.initialRotation;
+
+                    if (info.entity->hasComponent<RigidbodyComponent>()) {
+                        info.entity->getComponent<RigidbodyComponent>()->resetMotion();
+                    }
+                }
+            },
+            [this]() { return m_SceneManager.getActiveScene() != nullptr; },
+            nullptr },
+        { ActionSection::Physics, "Keep Simulation", "K", { KEY_K, false, false, false },
+            [this]() { 
+                for (PhysicsEntityInfo& info : m_PhysicsEntities) {
+                    info.initialPosition = info.entity->transform.position;
+                    info.initialRotation = info.entity->transform.rotation;
+                }
+            },
+            [this]() { return m_SceneManager.getActiveScene() != nullptr; },
+            nullptr },
         { ActionSection::Help, "About", nullptr, { 0, false, false, false },
             [this]() {
                 if (!m_AboutPanel) {
@@ -329,18 +371,15 @@ void Layer::DrawMenuBar() {
             if (ImGui::DragFloat("##AmbientLight", &ambient, 0.01f, 0.0f)) {
                 m_Renderer.setMinimumAmbientLight(ambient);
             }
-            ImGui::Separator();
-            for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::Rendering && std::string(action.label) == "Show Render Stats") {
-                    DrawActionItem(action);
-                }
-            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Physics")) {
-            if (ImGui::MenuItem("Toggle Physics", "", false, m_SceneManager.getActiveScene() != nullptr)) 
-                m_Engine.getPhysicsWorld().setEnabled(!m_Engine.getPhysicsWorld().isEnabled());
-            
+            for (const ActionDef& action : actions) {
+                if (action.section == ActionSection::Physics) {
+                    DrawActionItem(action);
+                }
+            }
+
             ImGui::Separator();
 
             Vec3 gravity = m_Engine.getPhysicsWorld().getGravity();

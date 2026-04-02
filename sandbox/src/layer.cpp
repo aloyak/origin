@@ -77,7 +77,7 @@ void Layer::OnUIRender() {
 
 void Layer::OpenScene() {
     std::string path = Dialog::openFile({ "Scene Files", "*.json" });
-    if (!path.empty() && path != m_CurrentSceneInfo.scene.string()) {
+    if (!path.empty()) {
         OpenSceneFromPath(path);
     }
 }
@@ -108,7 +108,7 @@ void Layer::SaveScene() {
         return;
     }
     
-    m_Engine.getSceneManager().save(m_CurrentSceneInfo.scene.string());
+    m_SceneManager.save(m_CurrentSceneInfo.scene.string());
     AddRecentScene(m_CurrentSceneInfo.scene);
 }
 
@@ -128,13 +128,13 @@ void Layer::SaveSceneAs() {
         chosenPath = fs::absolute(chosenPath).lexically_normal();
         m_CurrentSceneInfo = { chosenPath.parent_path(), chosenPath };
 
-        m_Engine.getSceneManager().save(chosenPath.string());
+        m_SceneManager.save(chosenPath.string());
         AddRecentScene(chosenPath);
     }
 }
 
 void Layer::UnloadScene() {
-    m_Engine.getSceneManager().unload();
+    m_SceneManager.unload();
     m_SelectedEntity = nullptr;
     m_CurrentSceneInfo = { {}, {} };
 }
@@ -150,7 +150,10 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
     std::string oldBase = Path::getBase();
     Path::setBase(candidateContext.root);
 
-    Scene* loaded = m_Engine.getSceneManager().load(candidateContext.scene.string());
+    // Disable Physics before loading
+    m_Engine.getPhysicsWorld().setEnabled(false);
+
+    Scene* loaded = m_SceneManager.load(candidateContext.scene.string());
     if (!loaded) {
         Logger::error("Failed to load scene: " + candidateContext.scene.string());
         Path::setBase(oldBase);

@@ -236,6 +236,17 @@ void RigidbodyComponent::setColliderSize(const Vec3& size) {
     markDirty();
 }
 
+void RigidbodyComponent::resetMotion() {
+    if (!m_body) return;
+
+    m_body->clearForces();
+    m_body->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+    m_body->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+    m_body->setInterpolationLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+    m_body->setInterpolationAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+    m_body->activate(true);
+}
+
 void RigidbodyComponent::markDirty() {
     m_dirty = true;
 }

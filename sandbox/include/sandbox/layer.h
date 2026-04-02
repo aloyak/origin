@@ -1,5 +1,9 @@
 #pragma once
+
 #include "engine/engine.h"
+#include "engine/core/math.h"
+#include "engine/utils/logger.h"
+#include "engine/components/rigidbodyComponent.h"
 
 #include "sandbox/panel/panel.h"
 #include "sandbox/panel/aboutPanel.h"
@@ -40,6 +44,7 @@ private:
         Scene,
         Rendering,
         Gizmos,
+        Physics,
         Help,
     };
 
@@ -100,6 +105,14 @@ private:
     void AddRecentScene(const fs::path& scenePath);
 
     void registerDefaultInspectors();
+
+    // Physics (play/reset simulation)
+    struct PhysicsEntityInfo {
+        Entity* entity;
+        Vec3 initialPosition;
+        Vec3 initialRotation;
+    };
+    std::vector<PhysicsEntityInfo> m_PhysicsEntities;
 
     ScenePathInfo m_CurrentSceneInfo;
     fs::path m_UserPreferencesPath;
