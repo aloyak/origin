@@ -12,6 +12,7 @@ public:
     enum class BodyType {
         Dynamic,
         Static,
+        Kinematic,
     };
 
     enum class ColliderType {
@@ -59,6 +60,9 @@ public:
 
     void setColliderSize(const Vec3& size);
     Vec3 getColliderSize() const { return m_colliderSize; }
+
+    
+    btRigidBody* getRigidBody() const { return m_body; }
 
     void resetMotion();
 

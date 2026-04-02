@@ -1,11 +1,13 @@
 #include "engine/physics/world.h"
 
 #include "engine/components/entity.h"
+#include "engine/components/rigidbodyComponent.h" 
 #include "engine/render/camera.h"
 #include "engine/scene/scene.h"
 #include "engine/core/transform.h"
 
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 
@@ -39,34 +41,6 @@ Vec3 normalize(const Vec3& v) {
     }
     return Vec3(v.x / len, v.y / len, v.z / len);
 }
-
-bool intersectSphere(const Vec3& origin,
-                     const Vec3& direction,
-                     const Vec3& center,
-                     float radius,
-                     float maxDistance,
-                     float& outDistance) {
-    const Vec3 oc = origin - center;
-    const float b = dot(oc, direction);
-    const float c = dot(oc, oc) - radius * radius;
-    const float discriminant = b * b - c;
-    if (discriminant < 0.0f) {
-        return false;
-    }
-
-    const float sqrtDisc = std::sqrt(discriminant);
-    float t = -b - sqrtDisc;
-    if (t < 0.0f) {
-        t = -b + sqrtDisc;
-    }
-
-    if (t < 0.0f || t > maxDistance) {
-        return false;
-    }
-
-    outDistance = t;
-    return true;
-}
 } // namespace
 
 struct PhysicsWorld::Data {
@@ -97,7 +71,8 @@ void PhysicsWorld::stepSimulation(float deltaTime) {
     if (!m_data || !m_enabled) {
         return;
     }
-    m_data->world.stepSimulation(deltaTime, 4, 1.0f / 60.0f); // 60 FPS, max 4 substeps for better accuracy
+    const float clampedDt = std::min(deltaTime, 0.1f);
+    m_data->world.stepSimulation(clampedDt, 10, 1.0f / 60.0f);
 }
 
 void PhysicsWorld::setGravity(const Vec3& gravity) {
@@ -130,6 +105,12 @@ void PhysicsWorld::removeRigidBody(btRigidBody* body) {
     m_data->world.removeRigidBody(body);
 }
 
+void PhysicsWorld::updateSingleAabb(btRigidBody* body) {
+    if (m_data && body) {
+        m_data->world.updateSingleAabb(body);
+    }
+}
+
 PhysicsWorld* PhysicsWorld::getActive() {
     return g_activeWorld;
 }
@@ -139,31 +120,33 @@ Entity* PhysicsWorld::raycastEntities(const Vec3& origin,
                                       const Vec3& direction,
                                       const std::vector<Entity*>& entities,
                                       float maxDistance) const {
-    const Vec3 rayDir = normalize(direction);
+    if (!m_data) return nullptr;
 
-    Entity* nearestEntity = nullptr;
-    float nearestDistance = maxDistance;
+    const Vec3 dir = normalize(direction);
+    const btVector3 from(origin.x, origin.y, origin.z);
+    const btVector3 to(
+        origin.x + dir.x * maxDistance,
+        origin.y + dir.y * maxDistance,
+        origin.z + dir.z * maxDistance);
 
+    btCollisionWorld::ClosestRayResultCallback callback(from, to);
+    m_data->world.rayTest(from, to, callback);
+
+    if (!callback.hasHit()) {
+        return nullptr;
+    }
+
+    // Match the hit Bullet object back to one of the provided entities.
+    const btCollisionObject* hitObj = callback.m_collisionObject;
     for (Entity* entity : entities) {
-        if (!entity) {
-            continue;
-        }
-
-        const Vec3 scale = entity->transform.scale;
-        const float maxScaleAxis = std::max(std::fabs(scale.x), std::max(std::fabs(scale.y), std::fabs(scale.z)));
-        // Use a more generous radius for better picking: min 1.0 unit
-        const float radius = std::max(1.0f, 0.6f * maxScaleAxis);
-
-        float hitDistance = 0.0f;
-        if (intersectSphere(origin, rayDir, entity->transform.position, radius, maxDistance, hitDistance)) {
-            if (hitDistance < nearestDistance) {
-                nearestDistance = hitDistance;
-                nearestEntity = entity;
-            }
+        if (!entity) continue;
+        auto* rb = entity->getComponent<RigidbodyComponent>();
+        if (rb && rb->getRigidBody() == hitObj) {
+            return entity;
         }
     }
 
-    return nearestEntity;
+    return nullptr;
 }
 
 Entity* PhysicsWorld::raycastScene(const Vec3& origin,
@@ -192,8 +175,7 @@ Entity* PhysicsWorld::raycastScreenPoint(const Vec2& screenPoint,
 
     const glm::mat4 view = *static_cast<const glm::mat4*>(camera.getViewMatrix(cameraTransform));
     const glm::mat4 projection = *static_cast<const glm::mat4*>(camera.getProjectionMatrix());
-    
-    // Construct ray manually using inverse matrices for better clarity
+
     const glm::mat4 viewInv = glm::inverse(view);
     const glm::mat4 projInv = glm::inverse(projection);
 
@@ -201,16 +183,13 @@ Entity* PhysicsWorld::raycastScreenPoint(const Vec2& screenPoint,
     const float normalizedX = (2.0f * screenPoint.x) / viewportSize.x - 1.0f;
     const float normalizedY = 1.0f - (2.0f * screenPoint.y) / viewportSize.y;  // Flip Y for OpenGL
 
-    // Construct ray in view space
     glm::vec4 rayClip(normalizedX, normalizedY, -1.0f, 1.0f);
     glm::vec4 rayView = projInv * rayClip;
     rayView = glm::vec4(rayView.x, rayView.y, -1.0f, 0.0f);  // Direction, not position
 
-    // Transform to world space
     glm::vec4 rayWorld = viewInv * rayView;
     glm::vec3 rayDirection = glm::normalize(glm::vec3(rayWorld.x, rayWorld.y, rayWorld.z));
-    
-    // Ray origin is camera position
+
     Vec3 rayOrigin(cameraTransform.position.x, cameraTransform.position.y, cameraTransform.position.z);
     Vec3 rayDir(rayDirection.x, rayDirection.y, rayDirection.z);
 

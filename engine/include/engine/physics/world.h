@@ -21,6 +21,8 @@ public:
     void addRigidBody(btRigidBody* body);
     void removeRigidBody(btRigidBody* body);
 
+    void updateSingleAabb(btRigidBody* body);
+
     static PhysicsWorld* getActive();
 
     Entity* raycastScene(const Vec3& origin,

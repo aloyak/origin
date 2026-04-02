@@ -48,6 +48,8 @@ std::string bodyTypeToString(RigidbodyComponent::BodyType type) {
     switch (type) {
     case RigidbodyComponent::BodyType::Static:
         return "Static";
+    case RigidbodyComponent::BodyType::Kinematic:
+        return "Kinematic";
     case RigidbodyComponent::BodyType::Dynamic:
     default:
         return "Dynamic";
@@ -55,9 +57,9 @@ std::string bodyTypeToString(RigidbodyComponent::BodyType type) {
 }
 
 RigidbodyComponent::BodyType bodyTypeFromString(const std::string& type) {
-    if (type == "Static") {
-        return RigidbodyComponent::BodyType::Static;
-    }
+    if (type == "Static") return RigidbodyComponent::BodyType::Static;
+    if (type == "Kinematic") return RigidbodyComponent::BodyType::Kinematic;
+    
     return RigidbodyComponent::BodyType::Dynamic;
 }
 
@@ -111,7 +113,7 @@ void RigidbodyComponent::update(float /*dt*/) {
     if (!entity) return;
     if (!m_world) m_world = PhysicsWorld::getActive();
     if (!m_world) return;
-    
+
     const Vec3 currentScale = entity->transform.scale;
     const float scaleEpsilon = 0.0001f;
     if (std::fabs(currentScale.x - m_lastTrackedScale.x) > scaleEpsilon ||
@@ -120,7 +122,7 @@ void RigidbodyComponent::update(float /*dt*/) {
         m_lastTrackedScale = currentScale;
         markDirty();
     }
-    
+
     if (m_dirty || !m_body) rebuildBody();
 
     if (!m_world->isEnabled()) {
@@ -128,7 +130,7 @@ void RigidbodyComponent::update(float /*dt*/) {
         return;
     }
 
-    if (m_bodyType == BodyType::Static) {
+    if (m_bodyType == BodyType::Static || m_bodyType == BodyType::Kinematic) {
         syncBodyFromTransform();
     } else {
         syncTransformFromBody();
@@ -230,7 +232,7 @@ void RigidbodyComponent::setUseGravity(bool useGravity) {
     if (m_body) {
         if (m_useGravity) {
             m_body->setFlags(m_body->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
-            const Vec3 worldGravity = m_world ? m_world->getGravity() : Vec3(0.0f, -10.0f, 0.0f);
+            const Vec3 worldGravity = m_world ? m_world->getGravity() : Vec3(0.0f, -9.81f, 0.0f);
             m_body->setGravity(btVector3(worldGravity.x, worldGravity.y, worldGravity.z));
         } else {
             m_body->setFlags(m_body->getFlags() | BT_DISABLE_WORLD_GRAVITY);
@@ -313,7 +315,9 @@ void RigidbodyComponent::rebuildBody() {
     m_motionState = new btDefaultMotionState(startTransform);
 
     const bool isStatic = m_bodyType == BodyType::Static;
-    const float usedMass = isStatic ? 0.0f : std::max(0.0f, m_mass);
+    const bool isKinematic = m_bodyType == BodyType::Kinematic;
+
+    const float usedMass = (isStatic || isKinematic) ? 0.0f : std::max(0.0f, m_mass);
 
     btVector3 localInertia(0.0f, 0.0f, 0.0f);
     if (usedMass > 0.0f) {
@@ -331,19 +335,27 @@ void RigidbodyComponent::rebuildBody() {
         m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
     }
 
+    if (isKinematic) {
+        m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+        m_body->setActivationState(DISABLE_DEACTIVATION);
+    }
+
     if (!m_useGravity) {
         m_body->setFlags(m_body->getFlags() | BT_DISABLE_WORLD_GRAVITY);
         m_body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
     }
 
+    if (!isStatic && !isKinematic) {
+        m_body->setSleepingThresholds(0.8f, 1.0f);
+    }
+
     m_world->addRigidBody(m_body);
     m_registered = true;
     m_dirty = false;
-    
-    if (entity) {
-        m_lastTrackedScale = entity->transform.scale;
-        syncBodyFromTransform();
-    }
+
+
+
+    m_lastTrackedScale = entity->transform.scale;
 }
 
 void RigidbodyComponent::destroyBody() {
@@ -394,5 +406,9 @@ void RigidbodyComponent::syncBodyFromTransform() const {
     m_body->setWorldTransform(worldTransform);
     if (m_body->getMotionState()) {
         m_body->getMotionState()->setWorldTransform(worldTransform);
+    }
+
+    if (m_world) {
+        m_world->updateSingleAabb(m_body);
     }
 }
