@@ -50,7 +50,7 @@ Layer::Layer(Engine& engine)
 
     Entity* cam = m_Engine.createEntity("Editor Camera");
     cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);
-    cam->transform.position = Vec3(0.0f, 150.0f, 0.0f);
+    cam->transform.position = Vec3(0.0f, 0.0f, 0.0f);
     m_EditorCamera = cam;
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
@@ -153,6 +153,7 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
 
     // Disable Physics before loading
     m_Engine.getPhysicsWorld().setEnabled(false);
+    m_EditorCamera->transform.position = Vec3(0.0f, 0.0f, 0.0f);
 
     Scene* loaded = m_SceneManager.load(candidateContext.scene.string());
     if (!loaded) {
