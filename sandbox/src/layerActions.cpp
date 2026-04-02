@@ -70,6 +70,17 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { UnloadScene(); },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
+            
+        { ActionSection::File, "Reload Scene", nullptr, { 0, false, false, false },
+            [this]() { 
+                if (m_CurrentSceneInfo.scene.empty()) {
+                    Logger::error("No scene to reload.");
+                    return;
+                }
+                OpenSceneFromPath(m_CurrentSceneInfo.scene);
+            },
+            [this]() { return m_SceneManager.getActiveScene() != nullptr; },
+            nullptr },
 
         { ActionSection::File, "Quit", "Alt+F4", { 0, false, false, false },
             [this]() { m_Engine.stop(); },
@@ -104,7 +115,6 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SelectedEntity != nullptr; },
             nullptr },
-            
         { ActionSection::Rendering, "Toggle Pixelart", "Ctrl+P", { KEY_P, true, false, false },
             [this]() {
                 if (!m_Renderer.isPixelArtEnabled()) {
@@ -268,9 +278,11 @@ void Layer::DrawMenuBar() {
             }
 
             ImGui::Separator();
-
             drawFileAction("Save Scene");
             drawFileAction("Save Scene As");
+
+            ImGui::Separator();
+            drawFileAction("Reload Scene");
             drawFileAction("Unload Scene");
 
             ImGui::Separator();

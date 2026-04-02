@@ -4,14 +4,19 @@
 
 #include "engine/engine.h"
 #include "engine/components/cameraComponent.h"
+#include "engine/components/rigidbodyComponent.h"
 #include <imgui.h>
 
 #include <ImGuizmo.h>
 
+#include <algorithm>
+#include <cmath>
+#include <unordered_set>
+
 class SceneViewPanel : public Panel {
 public:
-    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef, float& cameraSensRef)
-        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef),
+    SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, std::unordered_set<Entity*>& colliderDebugEntitiesRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef, float& cameraSensRef)
+        : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_ColliderDebugEntities(colliderDebugEntitiesRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef),
           m_CameraSens(cameraSensRef) {}
 
     void OnUIRender() override {
@@ -90,6 +95,8 @@ public:
 
         float model[16];
         BuildTransformMatrix(m_SelectedEntity->transform, model);
+
+        DrawColliderBounds(view, projection);
 
         ImGuizmo::Manipulate(
             view,
@@ -177,6 +184,63 @@ private:
         ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, outMatrix);
     }
 
+    void DrawColliderBounds(const float* view, const float* projection) const {
+        if (!m_SelectedEntity || m_ColliderDebugEntities.find(m_SelectedEntity) == m_ColliderDebugEntities.end()) {
+            return;
+        }
+
+        if (!m_SelectedEntity->hasComponent<RigidbodyComponent>()) {
+            return;
+        }
+
+        RigidbodyComponent* rigidbody = m_SelectedEntity->getComponent<RigidbodyComponent>();
+        if (!rigidbody) {
+            return;
+        }
+
+        const Vec3 colliderSize = rigidbody->getColliderSize();
+        Vec3 worldScale = m_SelectedEntity->transform.scale;
+
+        // Handle negative scales (match physics validation)
+        worldScale.x = std::fabs(worldScale.x);
+        worldScale.y = std::fabs(worldScale.y);
+        worldScale.z = std::fabs(worldScale.z);
+        if (worldScale.x < 0.01f) worldScale.x = 0.01f;
+        if (worldScale.y < 0.01f) worldScale.y = 0.01f;
+        if (worldScale.z < 0.01f) worldScale.z = 0.01f;
+
+        const Vec3 scaledSize(
+            std::max(0.01f, std::fabs(colliderSize.x * worldScale.x)),
+            std::max(0.01f, std::fabs(colliderSize.y * worldScale.y)),
+            std::max(0.01f, std::fabs(colliderSize.z * worldScale.z))
+        );
+
+        Vec3 boundsSize = scaledSize;
+        switch (rigidbody->getColliderType()) {
+        case RigidbodyComponent::ColliderType::Sphere: {
+            const float radius = std::max(0.01f, 0.5f * std::max(scaledSize.x, std::max(scaledSize.y, scaledSize.z)));
+            const float diameter = radius * 2.0f;
+            boundsSize = Vec3(diameter, diameter, diameter);
+            break;
+        }
+        case RigidbodyComponent::ColliderType::Capsule: {
+            const float radius = std::max(0.01f, 0.5f * std::max(scaledSize.x, scaledSize.z));
+            const float height = std::max(0.01f, scaledSize.y - 2.0f * radius);
+            boundsSize = Vec3(radius * 2.0f, height + radius * 2.0f, radius * 2.0f);
+            break;
+        }
+        case RigidbodyComponent::ColliderType::Box:
+        default:
+            break;
+        }
+
+        float boundsModel[16];
+        Transform boundsTransform = m_SelectedEntity->transform;
+        boundsTransform.scale = boundsSize;
+        BuildTransformMatrix(boundsTransform, boundsModel);
+        ImGuizmo::DrawCubes(view, projection, boundsModel, 1);
+    }
+
     void HandleCameraInput() {
         if (!m_EditorCamera) return;
 
@@ -228,6 +292,7 @@ private:
     Entity*& m_EditorCamera;
     float& m_CameraSpeed;
     Entity*& m_SelectedEntity;
+    std::unordered_set<Entity*>& m_ColliderDebugEntities;
     ImGuizmo::OPERATION& m_GizmoOperation;
     bool& m_ShowRenderStats;
     ImVec2 m_ViewportSize = { 0, 0 };

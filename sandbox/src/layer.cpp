@@ -55,7 +55,7 @@ Layer::Layer(Engine& engine)
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
-    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_GizmoOperation, m_ShowRenderStats, m_CameraSens));
+    m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_ColliderDebugEntities, m_GizmoOperation, m_ShowRenderStats, m_CameraSens));
 }
 
 void Layer::OnUIRender() {
@@ -134,6 +134,7 @@ void Layer::SaveSceneAs() {
 }
 
 void Layer::UnloadScene() {
+    m_ColliderDebugEntities.clear();
     m_SceneManager.unload();
     m_SelectedEntity = nullptr;
     m_CurrentSceneInfo = { {}, {} };
@@ -161,6 +162,7 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
     }
 
     m_CurrentSceneInfo = candidateContext;
+    m_ColliderDebugEntities.clear();
     m_SelectedEntity = nullptr;
     AddRecentScene(candidateContext.scene);
     return true;

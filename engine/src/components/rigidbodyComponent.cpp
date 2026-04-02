@@ -2,6 +2,7 @@
 
 #include "engine/components/entity.h"
 #include "engine/physics/world.h"
+#include "engine/utils/logger.h"
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
@@ -110,6 +111,15 @@ void RigidbodyComponent::update(float /*dt*/) {
     if (!entity) return;
     if (!m_world) m_world = PhysicsWorld::getActive();
     if (!m_world) return;
+    
+    const Vec3 currentScale = entity->transform.scale;
+    const float scaleEpsilon = 0.0001f;
+    if (std::fabs(currentScale.x - m_lastTrackedScale.x) > scaleEpsilon ||
+        std::fabs(currentScale.y - m_lastTrackedScale.y) > scaleEpsilon ||
+        std::fabs(currentScale.z - m_lastTrackedScale.z) > scaleEpsilon) {
+        m_lastTrackedScale = currentScale;
+        markDirty();
+    }
     
     if (m_dirty || !m_body) rebuildBody();
 
@@ -258,7 +268,22 @@ void RigidbodyComponent::rebuildBody() {
         return;
     }
 
-    const Vec3 scaledSize = scaledAbsSize(m_colliderSize, entity->transform.scale);
+    Vec3 safeScale = entity->transform.scale;
+    bool hasNegativeScale = false;
+    if (safeScale.x < 0.0f || safeScale.y < 0.0f || safeScale.z < 0.0f) {
+        hasNegativeScale = true;
+        safeScale.x = std::fabs(safeScale.x);
+        safeScale.y = std::fabs(safeScale.y);
+        safeScale.z = std::fabs(safeScale.z);
+    }
+    if (safeScale.x < 0.01f) safeScale.x = 0.01f;
+    if (safeScale.y < 0.01f) safeScale.y = 0.01f;
+    if (safeScale.z < 0.01f) safeScale.z = 0.01f;
+    if (hasNegativeScale) {
+        Logger::warn("RigidbodyComponent: Entity '" + entity->name + "' has negative scale. Flipping to absolute values for physics. Visual model will not match physics bounds.");
+    }
+
+    const Vec3 scaledSize = scaledAbsSize(m_colliderSize, safeScale);
 
     switch (m_colliderType) {
     case ColliderType::Sphere: {
@@ -314,6 +339,11 @@ void RigidbodyComponent::rebuildBody() {
     m_world->addRigidBody(m_body);
     m_registered = true;
     m_dirty = false;
+    
+    if (entity) {
+        m_lastTrackedScale = entity->transform.scale;
+        syncBodyFromTransform();
+    }
 }
 
 void RigidbodyComponent::destroyBody() {

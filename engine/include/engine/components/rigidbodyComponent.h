@@ -86,4 +86,5 @@ private:
     float m_angularDamping = 0.05f;
     bool m_useGravity = true;
     Vec3 m_colliderSize = Vec3(1.0f, 1.0f, 1.0f);
+    Vec3 m_lastTrackedScale = Vec3(1.0f, 1.0f, 1.0f);
 };

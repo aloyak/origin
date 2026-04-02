@@ -257,7 +257,7 @@ void Layer::registerDefaultInspectors() {
 		}
 	});
 
-    InspectorRegistry::registerComponent<RigidbodyComponent>([](RigidbodyComponent* c) {
+	InspectorRegistry::registerComponent<RigidbodyComponent>([this](RigidbodyComponent* c) {
         bool useGravity = c->getUseGravity();
         if (ImGui::Checkbox("Use Gravity", &useGravity)) {
             c->setUseGravity(useGravity);
@@ -281,6 +281,16 @@ void Layer::registerDefaultInspectors() {
             c->setColliderType(static_cast<RigidbodyComponent::ColliderType>(currentColliderType));
         }
 
+		const bool currentlyVisible = c->entity && m_ColliderDebugEntities.find(c->entity) != m_ColliderDebugEntities.end();
+		bool showCollider = currentlyVisible;
+		if (ImGui::Checkbox("Show Collider", &showCollider) && c->entity) {
+			if (showCollider) {
+				m_ColliderDebugEntities.insert(c->entity);
+			} else {
+				m_ColliderDebugEntities.erase(c->entity);
+			}
+		}
+
         ImGui::SeparatorText("Properties");
         float mass = c->getMass();
         if (ImGui::DragFloat("Mass", &mass, 0.1f, 0.0f, 1000.0f)) {
@@ -292,7 +302,6 @@ void Layer::registerDefaultInspectors() {
             c->setFriction(friction);
         }   
 
-        ImGui::Separator();
         float restitution = c->getRestitution();
         if (ImGui::DragFloat("Restitution", &restitution, 0.01f, 0.0f, 1.0f)) {
             c->setRestitution(restitution);

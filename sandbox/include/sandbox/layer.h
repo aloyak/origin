@@ -16,6 +16,7 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <unordered_set>
 
 namespace fs = std::filesystem;
 
@@ -106,6 +107,8 @@ private:
 
     void registerDefaultInspectors();
 
+    
+    std::unordered_set<Entity*> m_ColliderDebugEntities;
     // Physics (play/reset simulation)
     struct PhysicsEntityInfo {
         Entity* entity;
