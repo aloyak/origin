@@ -5,6 +5,7 @@
 #include "engine/engine.h"
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rigidbodyComponent.h"
+#include "engine/physics/raycast.h"
 #include <imgui.h>
 
 #include <ImGuizmo.h>
@@ -279,7 +280,8 @@ private:
         const float localX = mousePos.x - viewportMin.x;
         const float localY = mousePos.y - viewportMin.y;
 
-        m_SelectedEntity = m_Engine.getPhysicsWorld().raycastScreenPoint(
+        Raycast raycast;
+        m_SelectedEntity = raycast.raycastScreenPoint(
             Vec2(localX, localY),
             Vec2(viewportSize.x, viewportSize.y),
             cameraComp->getCamera(),

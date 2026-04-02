@@ -32,7 +32,7 @@ float toDegrees(float radians) {
 
 btQuaternion toBulletQuaternion(const Vec3& eulerDegrees) {
     btQuaternion q;
-    q.setEulerZYX(toRadians(eulerDegrees.y), toRadians(eulerDegrees.x), toRadians(eulerDegrees.z));
+    q.setEuler(toRadians(eulerDegrees.y), toRadians(eulerDegrees.x), toRadians(eulerDegrees.z));
     return q;
 }
 
@@ -130,9 +130,9 @@ void RigidbodyComponent::update(float /*dt*/) {
         return;
     }
 
-    if (m_bodyType == BodyType::Static || m_bodyType == BodyType::Kinematic) {
+    if (m_bodyType == BodyType::Kinematic) {
         syncBodyFromTransform();
-    } else {
+    } else if (m_bodyType == BodyType::Dynamic) {
         syncTransformFromBody();
     }
 }
@@ -303,6 +303,7 @@ void RigidbodyComponent::rebuildBody() {
     default: {
         const btVector3 halfExtents(0.5f * scaledSize.x, 0.5f * scaledSize.y, 0.5f * scaledSize.z);
         m_shape = new btBoxShape(halfExtents);
+        m_shape->setMargin(0.01f);
         break;
     }
     }
@@ -350,10 +351,13 @@ void RigidbodyComponent::rebuildBody() {
     }
 
     m_world->addRigidBody(m_body);
+    
+    m_body->setCcdMotionThreshold(1e-7);
+    m_body->setCcdSweptSphereRadius(m_colliderSize.x * 0.2f);
+
     m_registered = true;
     m_dirty = false;
-
-
+    
 
     m_lastTrackedScale = entity->transform.scale;
 }

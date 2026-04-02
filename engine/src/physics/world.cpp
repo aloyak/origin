@@ -7,6 +7,7 @@
 #include "engine/core/transform.h"
 
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
@@ -68,11 +69,8 @@ PhysicsWorld::~PhysicsWorld() {
 }
 
 void PhysicsWorld::stepSimulation(float deltaTime) {
-    if (!m_data || !m_enabled) {
-        return;
-    }
-    const float clampedDt = std::min(deltaTime, 0.1f);
-    m_data->world.stepSimulation(clampedDt, 10, 1.0f / 60.0f);
+    if (!m_data || !m_enabled) return;
+    m_data->world.stepSimulation(deltaTime, 10, 1.0f / 120.0f); // 120 FPS simulation
 }
 
 void PhysicsWorld::setGravity(const Vec3& gravity) {
@@ -111,18 +109,17 @@ void PhysicsWorld::updateSingleAabb(btRigidBody* body) {
     }
 }
 
-PhysicsWorld* PhysicsWorld::getActive() {
-    return g_activeWorld;
-}
+bool PhysicsWorld::rayTest(const Vec3& origin,
+                           const Vec3& direction,
+                           float maxDistance,
+                           btCollisionObject*& hitObject) const {
+    hitObject = nullptr;
 
-// Raycast
-Entity* PhysicsWorld::raycastEntities(const Vec3& origin,
-                                      const Vec3& direction,
-                                      const std::vector<Entity*>& entities,
-                                      float maxDistance) const {
-    if (!m_data) return nullptr;
+    if (!m_data || maxDistance <= 0.0f) {
+        return false;
+    }
 
-    const Vec3 dir = normalize(direction);
+    const Vec3 dir = direction.normalize();
     const btVector3 from(origin.x, origin.y, origin.z);
     const btVector3 to(
         origin.x + dir.x * maxDistance,
@@ -133,65 +130,13 @@ Entity* PhysicsWorld::raycastEntities(const Vec3& origin,
     m_data->world.rayTest(from, to, callback);
 
     if (!callback.hasHit()) {
-        return nullptr;
+        return false;
     }
 
-    // Match the hit Bullet object back to one of the provided entities.
-    const btCollisionObject* hitObj = callback.m_collisionObject;
-    for (Entity* entity : entities) {
-        if (!entity) continue;
-        auto* rb = entity->getComponent<RigidbodyComponent>();
-        if (rb && rb->getRigidBody() == hitObj) {
-            return entity;
-        }
-    }
-
-    return nullptr;
+    hitObject = const_cast<btCollisionObject*>(callback.m_collisionObject);
+    return hitObject != nullptr;
 }
 
-Entity* PhysicsWorld::raycastScene(const Vec3& origin,
-                                   const Vec3& direction,
-                                   Scene& scene,
-                                   float maxDistance) const {
-    std::vector<Entity*> entities;
-    entities.reserve(scene.getEntities().size());
-
-    for (const auto& entity : scene.getEntities()) {
-        entities.push_back(entity.get());
-    }
-
-    return raycastEntities(origin, direction, entities, maxDistance);
-}
-
-Entity* PhysicsWorld::raycastScreenPoint(const Vec2& screenPoint,
-                                         const Vec2& viewportSize,
-                                         const Camera& camera,
-                                         const Transform& cameraTransform,
-                                         Scene& scene,
-                                         float maxDistance) const {
-    if (viewportSize.x <= 0.0f || viewportSize.y <= 0.0f) {
-        return nullptr;
-    }
-
-    const glm::mat4 view = *static_cast<const glm::mat4*>(camera.getViewMatrix(cameraTransform));
-    const glm::mat4 projection = *static_cast<const glm::mat4*>(camera.getProjectionMatrix());
-
-    const glm::mat4 viewInv = glm::inverse(view);
-    const glm::mat4 projInv = glm::inverse(projection);
-
-    // Convert screen coordinates to normalized device coordinates [-1, 1]
-    const float normalizedX = (2.0f * screenPoint.x) / viewportSize.x - 1.0f;
-    const float normalizedY = 1.0f - (2.0f * screenPoint.y) / viewportSize.y;  // Flip Y for OpenGL
-
-    glm::vec4 rayClip(normalizedX, normalizedY, -1.0f, 1.0f);
-    glm::vec4 rayView = projInv * rayClip;
-    rayView = glm::vec4(rayView.x, rayView.y, -1.0f, 0.0f);  // Direction, not position
-
-    glm::vec4 rayWorld = viewInv * rayView;
-    glm::vec3 rayDirection = glm::normalize(glm::vec3(rayWorld.x, rayWorld.y, rayWorld.z));
-
-    Vec3 rayOrigin(cameraTransform.position.x, cameraTransform.position.y, cameraTransform.position.z);
-    Vec3 rayDir(rayDirection.x, rayDirection.y, rayDirection.z);
-
-    return raycastScene(rayOrigin, rayDir, scene, maxDistance);
+PhysicsWorld* PhysicsWorld::getActive() {
+    return g_activeWorld;
 }
