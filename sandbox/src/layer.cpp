@@ -36,13 +36,7 @@ Layer::Layer(Engine& engine)
     ImGui::StyleColorsDark();
     Styles::setupDarkTheme();
 
-    float fontSize = 15.0f;
-    m_RegularFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-Regular.ttf").string().c_str(), fontSize);
-    m_SemiBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-SemiBold.ttf").string().c_str(), fontSize + 2.0f);
-    m_ExtraBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-ExtraBold.ttf").string().c_str(), fontSize + 4.0f);
-
-    io.FontDefault = m_RegularFont;
-    io.Fonts->Build();
+    SetupFonts();
 
     registerDefaultInspectors();
 
@@ -56,6 +50,46 @@ Layer::Layer(Engine& engine)
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_ColliderDebugEntities, m_GizmoOperation, m_ShowRenderStats, m_CameraSens));
+}
+
+void Layer::SetupFonts() {
+    ImGuiIO& io = m_Engine.getIO();
+
+    float fontSize = 15.0f;
+    m_RegularFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-Regular.ttf").string().c_str(), fontSize);
+    m_SemiBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-SemiBold.ttf").string().c_str(), fontSize + 2.0f);
+    m_ExtraBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-ExtraBold.ttf").string().c_str(), fontSize + 4.0f);
+
+    float iconFontSize = fontSize * 1.0f;
+
+    static const ImWchar icons_ranges[] = { ICON_MIN_LC, ICON_MAX_16_LC, 0 };
+    auto mergeIconsInto = [&](ImFont* dstFont) {
+        if (!dstFont) {
+            return;
+        }
+
+        ImFontConfig icons_config;
+        icons_config.MergeMode = true;
+        icons_config.DstFont = dstFont;
+        icons_config.PixelSnapH = true;
+        icons_config.GlyphMinAdvanceX = iconFontSize;
+        icons_config.GlyphOffset.y = 0.0f;
+
+        io.Fonts->AddFontFromFileTTF(
+            Path::resolve("resources/lucide/" FONT_ICON_FILE_NAME_LC).string().c_str(),
+            iconFontSize,
+            &icons_config,
+            icons_ranges
+        );
+    };
+
+    mergeIconsInto(m_RegularFont);
+    mergeIconsInto(m_SemiBoldFont);
+    mergeIconsInto(m_ExtraBoldFont);
+
+    io.FontDefault = m_RegularFont;
+    
+    io.Fonts->Build();
 }
 
 void Layer::OnUIRender() {
@@ -281,7 +315,7 @@ ScenePathInfo Layer::GetSceneContext(const std::string& inputPath) {
     fs::path fullPath = fs::absolute(inputPath).lexically_normal();
     std::string pathStr = fullPath.generic_string();
 
-    size_t pos = pathStr.find("/assets/");
+    size_t pos = pathStr.find("/assets/"); // Windows problems?
     if (pos == std::string::npos) {
         Logger::error(std::format("Invalid scene path: '{}'. Must be inside the 'assets' directory.", inputPath)); 
         return { {}, {} };

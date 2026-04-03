@@ -7,7 +7,9 @@
 
 #include "sandbox/panel/panel.h"
 #include "sandbox/panel/aboutPanel.h"
+
 #include "sandbox/styles.h"
+#include "sandbox/icons.h"
 
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -89,6 +91,8 @@ private:
     ImFont* m_ExtraBoldFont = nullptr;
 
     bool m_ShowRenderStats = true;
+
+    void SetupFonts();
 
     // Scene management
     void OpenScene();

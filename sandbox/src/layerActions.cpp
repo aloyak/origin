@@ -52,7 +52,7 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { OpenScene(); },
             nullptr,
             nullptr },
-        { ActionSection::File, "Open Recent", "Ctrl+Shift+O", { KEY_O, true, true, false }, // TODO
+        { ActionSection::File, "Open Recent", "Ctrl+Shift+O", { KEY_O, true, true, false },
             [this]() { OpenSceneRecent(); },
             nullptr,
             nullptr },
@@ -247,17 +247,29 @@ void Layer::DrawMenuBar() {
     const ActionList actions = BuildActions();
     HandleShortcuts();
 
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            auto drawFileAction = [&](const char* label) {
+    auto labelEndsWith = [](const char* fullLabel, const char* suffix) {
+        const std::string label = fullLabel ? fullLabel : "";
+        const std::string needle = suffix ? suffix : "";
+
+        if (label.size() < needle.size()) {
+            return false;
+        }
+
+        return label.compare(label.size() - needle.size(), needle.size(), needle) == 0;
+    };
+
+    auto drawFileAction = [&](const char* label) {
                 for (const ActionDef& action : actions) {
-                    if (action.section == ActionSection::File && std::string(action.label) == label) {
+                    if (action.section == ActionSection::File && labelEndsWith(action.label, label)) {
                         DrawActionItem(action);
                         return;
                     }
                 }
             };
-            
+
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+        
             drawFileAction("New Scene");
 
             ImGui::Separator();
@@ -308,7 +320,7 @@ void Layer::DrawMenuBar() {
                 ImGui::EndMenu();
             }
             for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::Preferences && std::string(action.label) != "Clear User Preferences") {
+                if (action.section == ActionSection::Preferences && !labelEndsWith(action.label, "Clear User Preferences")) {
                     DrawActionItem(action);
                 }
             }
@@ -320,7 +332,7 @@ void Layer::DrawMenuBar() {
             }
             ImGui::Separator();
             for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::Preferences && std::string(action.label) == "Clear User Preferences") {
+                if (action.section == ActionSection::Preferences && labelEndsWith(action.label, "Clear User Preferences")) {
                     DrawActionItem(action);
                 }
             }
@@ -371,7 +383,7 @@ void Layer::DrawMenuBar() {
         }
         if (ImGui::BeginMenu("Rendering")) {
             for (const ActionDef& action : actions) {
-                if (action.section == ActionSection::Rendering && std::string(action.label) != "Show Render Stats") {
+                if (action.section == ActionSection::Rendering && !labelEndsWith(action.label, "Show Render Stats")) {
                     DrawActionItem(action);
                 }
             }
