@@ -19,10 +19,16 @@ public:
             ImGui::Text("Origin Sandbox");
             ImGui::PopFont();
 
-            ImGui::Separator();
+            ImGui::SeparatorText("About");
             ImGui::Text("By 4loyak!");
             ImGui::Text("Sandbox Scene Editor for the Origin Engine");
             ImGui::Text("More info: https://github.com/aloyak/origin");
+
+            ImGui::SeparatorText("Dependencies");
+            ImGui::Text("OpenGL — 4.1");
+            ImGui::Text("Bullet Physics — 3.25");
+            ImGui::Text("Assimp — 6.0.4");
+            ImGui::Text("SDL2 — 2.32.8");
         }
         ImGui::End();
     }

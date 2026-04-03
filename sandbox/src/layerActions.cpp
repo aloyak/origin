@@ -182,7 +182,7 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::UNIVERSAL; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::UNIVERSAL; } },
-        { ActionSection::Physics, m_Engine.getPhysicsWorld().isEnabled() ? ICON_LC_PAUSE " Stop Physics" : ICON_LC_PLAY " Play Physics", "P", { KEY_P, false, false, false },
+        { ActionSection::Physics, m_Engine.getPhysicsWorld().isEnabled() ? ICON_LC_PAUSE " Stop Physics" : ICON_LC_PLAY " Play Physics", "Alt+P", { KEY_P, false, false, true },
             [this]() { 
                 const bool wasEnabled = m_Engine.getPhysicsWorld().isEnabled();
 
@@ -202,7 +202,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             [this]() { return m_Engine.getPhysicsWorld().isEnabled(); } },
-        { ActionSection::Physics, ICON_LC_TIMER_RESET " Reset Simulation", "R", { KEY_R, false, false, false },
+        { ActionSection::Physics, ICON_LC_TIMER_RESET " Reset Simulation", "Alt+R", { KEY_R, false, false, true },
             [this]() {
                 m_Engine.getPhysicsWorld().setEnabled(false); // TODO: For now, check later
                 for (const PhysicsEntityInfo& info : m_PhysicsEntities) {
@@ -216,7 +216,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
-        { ActionSection::Physics, ICON_LC_SAVE " Keep Simulation", "K", { KEY_K, false, false, false },
+        { ActionSection::Physics, ICON_LC_SAVE " Keep Simulation", "Alt+K", { KEY_K, false, false, true },
             [this]() { 
                 for (PhysicsEntityInfo& info : m_PhysicsEntities) {
                     info.initialPosition = info.entity->transform.position;
