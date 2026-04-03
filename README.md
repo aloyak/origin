@@ -9,14 +9,18 @@
 ## General Information
 Origin is a true 3D pixel-art game engine written from scratch in modern C++. It uses OpenGL for rendering and is designed to be cross-platform, supporting Windows, MacOS, Linux, and Web Builds. Web builds are enabled through WebAssembly using Emscripten.
 
-## Screenshot
+The engine features a custom-built editor called the Sandbox, which allows for scene editing, entity management, and component manipulation. Moreover, it uses ImGui for the editor's user interface.
+
+Physics is handled by the Bullet3 Physics library, and the engine supports various effects and features such as dynamic lighting, and post-processing effects.
+
+## Showcase
 ![Screenshot](assets/demo.png)
 
-> Origin Engine 0.7 running on Linux. You can see a simple scene with the sponza model and a simple skybox.
+> Origin Engine 0.12.0 running on Linux. You can see a simple scene with the sponza model, a player with a camera component, and a dynamic point light.
 
 ![Sandbox Screenshot](assets/sandbox.png)
 
-> Sandbox Editor running on Linux. Featuring simple lighting & Gizmos.
+> Sandbox Editor running on Linux. Featuring the physics playground scene.
 
 ## Building
 
