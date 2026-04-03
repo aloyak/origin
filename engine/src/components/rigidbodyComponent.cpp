@@ -31,16 +31,16 @@ float toDegrees(float radians) {
 }
 
 btQuaternion toBulletQuaternion(const Vec3& eulerDegrees) {
-    btQuaternion q;
-    q.setEuler(toRadians(eulerDegrees.y), toRadians(eulerDegrees.x), toRadians(eulerDegrees.z));
-    return q;
+    btQuaternion qY, qX, qZ;
+    qY.setRotation(btVector3(0, 1, 0), toRadians(eulerDegrees.y));
+    qX.setRotation(btVector3(1, 0, 0), toRadians(eulerDegrees.x));
+    qZ.setRotation(btVector3(0, 0, 1), toRadians(eulerDegrees.z));
+    return qY * qX * qZ;
 }
 
 Vec3 toEulerDegrees(const btQuaternion& q) {
-    btScalar yaw = 0.0f;
-    btScalar pitch = 0.0f;
-    btScalar roll = 0.0f;
-    btMatrix3x3(q).getEulerYPR(yaw, pitch, roll);
+    btScalar yaw, pitch, roll;
+    btMatrix3x3(q).getEulerZYX(roll, pitch, yaw);
     return Vec3(toDegrees(pitch), toDegrees(yaw), toDegrees(roll));
 }
 
@@ -353,7 +353,7 @@ void RigidbodyComponent::rebuildBody() {
     m_world->addRigidBody(m_body);
     
     m_body->setCcdMotionThreshold(1e-7);
-    m_body->setCcdSweptSphereRadius(m_colliderSize.x * 0.2f);
+    m_body->setCcdSweptSphereRadius(scaledSize.x * 0.2f); // m_colliderSize before
 
     m_registered = true;
     m_dirty = false;
