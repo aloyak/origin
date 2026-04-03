@@ -22,7 +22,7 @@ public:
 
     void OnUIRender() override {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::Begin(ICON_LC_VIEW " Scene", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
         ImVec2 available = ImGui::GetContentRegionAvail();
 
@@ -56,11 +56,14 @@ public:
             HandleCameraInput();
         }
             if (!m_Engine.getSceneManager().getActiveScene()) {
-                ImGui::SetCursorPosX((available.x - ImGui::CalcTextSize("No Active Scene!").x) * 0.5f);
-                ImGui::SetCursorPosY((available.y - ImGui::CalcTextSize("No Active Scene!").y) * 0.5f);
+                const char* message = ICON_LC_FILE_WARNING " No Active Scene!";
+                ImGui::SetCursorPosX((available.x - ImGui::CalcTextSize(message).x) * 0.5f);
+                ImGui::SetCursorPosY((available.y - ImGui::CalcTextSize(message).y) * 0.5f);
 
                 ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-                ImGui::TextUnformatted("No Active Scene!");
+                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 100, 255));
+                ImGui::TextUnformatted(message);
+                ImGui::PopStyleColor();
                 ImGui::PopFont();
             }
 

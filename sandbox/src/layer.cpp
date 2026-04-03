@@ -54,32 +54,52 @@ Layer::Layer(Engine& engine)
 
 void Layer::SetupFonts() {
     ImGuiIO& io = m_Engine.getIO();
+    io.Fonts->Clear();
 
     float fontSize = 15.0f;
-    m_RegularFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-Regular.ttf").string().c_str(), fontSize);
-    m_SemiBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-SemiBold.ttf").string().c_str(), fontSize + 2.0f);
-    m_ExtraBoldFont = io.Fonts->AddFontFromFileTTF(Path::resolve("resources/Inter-4.1/Inter-ExtraBold.ttf").string().c_str(), fontSize + 4.0f);
+    const std::string iconFontPath = Path::resolve("resources/lucide/" FONT_ICON_FILE_NAME_LC).string();
 
-    float iconFontSize = fontSize * 1.0f;
+    static const ImWchar iconRange[] = { ICON_MIN_LC, ICON_MAX_16_LC, 0 };
 
-    static const ImWchar icons_ranges[] = { ICON_MIN_LC, ICON_MAX_16_LC, 0 };
+    ImFontConfig textConfig;
+    textConfig.GlyphExcludeRanges = iconRange;
+
+    m_RegularFont = io.Fonts->AddFontFromFileTTF(
+        Path::resolve("resources/Inter-4.1/Inter-Regular.ttf").string().c_str(),
+        fontSize,
+        &textConfig,
+        io.Fonts->GetGlyphRangesDefault()
+    );
+    m_SemiBoldFont = io.Fonts->AddFontFromFileTTF(
+        Path::resolve("resources/Inter-4.1/Inter-SemiBold.ttf").string().c_str(),
+        fontSize + 2.0f,
+        &textConfig,
+        io.Fonts->GetGlyphRangesDefault()
+    );
+    m_ExtraBoldFont = io.Fonts->AddFontFromFileTTF(
+        Path::resolve("resources/Inter-4.1/Inter-ExtraBold.ttf").string().c_str(),
+        fontSize + 4.0f,
+        &textConfig,
+        io.Fonts->GetGlyphRangesDefault()
+    );
+
+    float iconFontSize = fontSize * 0.8f;
     auto mergeIconsInto = [&](ImFont* dstFont) {
         if (!dstFont) {
             return;
         }
 
-        ImFontConfig icons_config;
-        icons_config.MergeMode = true;
-        icons_config.DstFont = dstFont;
-        icons_config.PixelSnapH = true;
-        icons_config.GlyphMinAdvanceX = iconFontSize;
-        icons_config.GlyphOffset.y = 0.0f;
+        ImFontConfig iconConfig;
+        iconConfig.MergeMode = true;
+        iconConfig.DstFont = dstFont;
+        iconConfig.PixelSnapH = true;
+        iconConfig.GlyphMinAdvanceX = iconFontSize;
 
         io.Fonts->AddFontFromFileTTF(
-            Path::resolve("resources/lucide/" FONT_ICON_FILE_NAME_LC).string().c_str(),
+            iconFontPath.c_str(),
             iconFontSize,
-            &icons_config,
-            icons_ranges
+            &iconConfig,
+            iconRange
         );
     };
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sandbox/icons.h"
+
 class Panel {
 public:
     virtual ~Panel() = default;

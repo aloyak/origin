@@ -21,7 +21,7 @@ public:
         : m_Engine(engine), m_SelectedEntity(selectedRef) {}
 
     void OnUIRender() override {
-        ImGui::Begin("Properties");
+        ImGui::Begin(ICON_LC_INFO " Properties");
         if (m_SelectedEntity) {
             auto* scene = m_Engine.getSceneManager().getActiveScene();
             

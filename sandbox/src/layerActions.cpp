@@ -39,7 +39,7 @@ bool Layer::IsShortcutPressed(const Shortcut& shortcut) const {
 
 Layer::ActionList Layer::BuildActions() {
     return {
-        { ActionSection::File, "New Scene", "Ctrl+N", { KEY_N, true, false, false },
+        { ActionSection::File, ICON_LC_FILE_BOX " New Scene", "Ctrl+N", { KEY_N, true, false, false },
             [this]() { 
                 m_Engine.getSceneManager().createScene("Empty Scene");
                 m_SelectedEntity = nullptr; 
@@ -48,7 +48,7 @@ Layer::ActionList Layer::BuildActions() {
             nullptr,
             nullptr },
 
-        { ActionSection::File, "Open Scene", "Ctrl+O", { KEY_O, true, false, false },
+        { ActionSection::File, ICON_LC_FOLDER_OPEN " Open Scene", "Ctrl+O", { KEY_O, true, false, false },
             [this]() { OpenScene(); },
             nullptr,
             nullptr },
@@ -56,22 +56,22 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { OpenSceneRecent(); },
             nullptr,
             nullptr },
-        { ActionSection::File, "Save Scene As", "Ctrl+Shift+S", { KEY_S, true, true, false },
+        { ActionSection::File, ICON_LC_SAVE " Save Scene As", "Ctrl+Shift+S", { KEY_S, true, true, false },
             [this]() { SaveSceneAs(); },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
 
-        { ActionSection::File, "Save Scene", "Ctrl+S", { KEY_S, true, false, false },
+        { ActionSection::File, ICON_LC_SAVE_ALL " Save Scene", "Ctrl+S", { KEY_S, true, false, false },
             [this]() { SaveScene(); },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
 
-        { ActionSection::File, "Unload Scene", nullptr, { 0, false, false, false },
+        { ActionSection::File, ICON_LC_FILE_X " Unload Scene", nullptr, { 0, false, false, false },
             [this]() { UnloadScene(); },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
             
-        { ActionSection::File, "Reload Scene", nullptr, { 0, false, false, false },
+        { ActionSection::File, ICON_LC_REFRESH_CCW " Reload Scene", nullptr, { 0, false, false, false },
             [this]() { 
                 if (m_CurrentSceneInfo.scene.empty()) {
                     Logger::error("No scene to reload.");
@@ -82,22 +82,22 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
 
-        { ActionSection::File, "Quit", "Alt+F4", { 0, false, false, false },
+        { ActionSection::File, ICON_LC_X " Quit", "Alt+F4", { 0, false, false, false },
             [this]() { m_Engine.stop(); },
             nullptr,
             nullptr },
 
-        { ActionSection::Window, "Set Fullscreen", "F11", { KEY_F11, false, false, false },
+        { ActionSection::Window, ICON_LC_FULLSCREEN " Set Fullscreen", "F11", { KEY_F11, false, false, false },
             [this]() { m_Window.setFullscreen(!m_Window.isFullscreen()); },
             nullptr,
             [this]() { return m_Window.isFullscreen(); } },
 
-        { ActionSection::Window, "Toggle VSync", nullptr, { 0, false, false, false },
+        { ActionSection::Window, ICON_LC_MONITOR " Toggle VSync", nullptr, { 0, false, false, false },
             [this]() { m_Window.enableVSync(!m_Window.isVSyncEnabled()); },
             nullptr,
             [this]() { return m_Window.isVSyncEnabled(); } },
 
-        { ActionSection::Scene, "Add Entity", "Ctrl+Shift+A", { KEY_A, true, true, false },
+        { ActionSection::Scene, ICON_LC_BOX " Add Entity", "Ctrl+Shift+A", { KEY_A, true, true, false },
             [this]() {
                 Entity* newEntity = m_SceneManager.getActiveScene()->createEntity("Entity");
                 if (m_SelectedEntity) {
@@ -107,15 +107,27 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
+        { ActionSection::Scene, ICON_LC_COPY_PLUS " Duplicate Entity", "Ctrl+Shift+D", { KEY_D, true, true, false },
+            [this]() {
+                if (!m_SelectedEntity) return;
 
-        { ActionSection::Scene, "Delete Entity", "Del", { KEY_DELETE, false, false, false },
+                Entity* newEntity = m_SceneManager.getActiveScene()->createEntity(m_SelectedEntity->name + " Copy");
+                newEntity->transform = m_SelectedEntity->transform;
+                for (const auto& [typeId, component] : m_SelectedEntity->getComponents()) {
+                    newEntity->addComponentCopy(typeId, component);
+                }
+                m_SelectedEntity = newEntity;
+            },
+            [this]() { return m_SelectedEntity != nullptr; },
+            nullptr },
+        { ActionSection::Scene, ICON_LC_TRASH " Delete Entity", "Del", { KEY_DELETE, false, false, false },
             [this]() {
                 m_SceneManager.getActiveScene()->destroyEntity(m_SelectedEntity);
                 m_SelectedEntity = nullptr;
             },
             [this]() { return m_SelectedEntity != nullptr; },
             nullptr },
-        { ActionSection::Rendering, "Toggle Pixelart", "Ctrl+P", { KEY_P, true, false, false },
+        { ActionSection::Rendering, ICON_LC_GRID_2_X_2 " Toggle Pixelart", "Ctrl+P", { KEY_P, true, false, false },
             [this]() {
                 if (!m_Renderer.isPixelArtEnabled()) {
                     m_Renderer.setupRenderTarget(350, 200);
@@ -129,17 +141,17 @@ Layer::ActionList Layer::BuildActions() {
             nullptr,
             [this]() { return m_Renderer.isPixelArtEnabled(); } },
 
-        { ActionSection::Rendering, "Toggle Vertex Snap", "Ctrl+V", { KEY_V, true, false, false },
+        { ActionSection::Rendering, ICON_LC_GRIP " Toggle Vertex Snap", "Ctrl+V", { KEY_V, true, false, false },
             [this]() { m_Renderer.setVertexSnap(!m_Renderer.isVertexSnapEnabled()); },
             nullptr,
             [this]() { return m_Renderer.isVertexSnapEnabled(); } },
 
-        { ActionSection::Rendering, "Toggle Lighting", "Ctrl+L", { KEY_L, true, false, false },
+        { ActionSection::Rendering, ICON_LC_LIGHTBULB " Toggle Lighting", "Ctrl+L", { KEY_L, true, false, false },
             [this]() { m_Renderer.setLightingEnabled(!m_Renderer.isLightingEnabled()); },
             nullptr,
             [this]() { return m_Renderer.isLightingEnabled(); } },
 
-        { ActionSection::Preferences, "Show Render Stats", "F1", { KEY_F1, false, false, false },
+        { ActionSection::Preferences, ICON_LC_EYE " Show Render Stats", "F1", { KEY_F1, false, false, false },
             [this]() { m_ShowRenderStats = !m_ShowRenderStats; },
             nullptr,
             [this]() { return m_ShowRenderStats; } },
@@ -147,30 +159,30 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { ; },
             nullptr,
             [this]() { return} },*/
-        { ActionSection::Preferences, "Clear User Preferences", nullptr, { 0, false, false, false },
+        { ActionSection::Preferences, ICON_LC_TRASH " Clear User Preferences", nullptr, { 0, false, false, false },
             [this]() { ClearUserPreferences(); },
             nullptr,
             nullptr },
-        { ActionSection::Gizmos, "Translate", "1", { KEY_1, false, false, false },
+        { ActionSection::Gizmos, ICON_LC_MOVE_3_D " Translate", "1", { KEY_1, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::TRANSLATE; } },
 
-        { ActionSection::Gizmos, "Rotate", "2", { KEY_2, false, false, false },
+        { ActionSection::Gizmos, ICON_LC_ROTATE_3_D " Rotate", "2", { KEY_2, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::ROTATE; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::ROTATE; } },
 
-        { ActionSection::Gizmos, "Scale", "3", { KEY_3, false, false, false },
+        { ActionSection::Gizmos, ICON_LC_SCALE_3_D " Scale", "3", { KEY_3, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::SCALE; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::SCALE; } },
 
-        { ActionSection::Gizmos, "Universal", "4", { KEY_4, false, false, false },
+        { ActionSection::Gizmos, ICON_LC_VIEW " Universal", "4", { KEY_4, false, false, false },
             [this]() { m_GizmoOperation = ImGuizmo::OPERATION::UNIVERSAL; },
             nullptr,
             [this]() { return m_GizmoOperation == ImGuizmo::OPERATION::UNIVERSAL; } },
-        { ActionSection::Physics, m_Engine.getPhysicsWorld().isEnabled() ? "Stop Physics" : "Play Physics", "P", { KEY_P, false, false, false },
+        { ActionSection::Physics, m_Engine.getPhysicsWorld().isEnabled() ? ICON_LC_PAUSE " Stop Physics" : ICON_LC_PLAY " Play Physics", "P", { KEY_P, false, false, false },
             [this]() { 
                 const bool wasEnabled = m_Engine.getPhysicsWorld().isEnabled();
 
@@ -190,7 +202,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             [this]() { return m_Engine.getPhysicsWorld().isEnabled(); } },
-        { ActionSection::Physics, "Reset Simulation", "R", { KEY_R, false, false, false },
+        { ActionSection::Physics, ICON_LC_TIMER_RESET " Reset Simulation", "R", { KEY_R, false, false, false },
             [this]() {
                 m_Engine.getPhysicsWorld().setEnabled(false); // TODO: For now, check later
                 for (const PhysicsEntityInfo& info : m_PhysicsEntities) {
@@ -204,7 +216,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
-        { ActionSection::Physics, "Keep Simulation", "K", { KEY_K, false, false, false },
+        { ActionSection::Physics, ICON_LC_SAVE " Keep Simulation", "K", { KEY_K, false, false, false },
             [this]() { 
                 for (PhysicsEntityInfo& info : m_PhysicsEntities) {
                     info.initialPosition = info.entity->transform.position;
@@ -213,7 +225,7 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
-        { ActionSection::Help, "About", nullptr, { 0, false, false, false },
+        { ActionSection::Help, ICON_LC_INFO " About", nullptr, { 0, false, false, false },
             [this]() {
                 if (!m_AboutPanel) {
                     m_AboutPanel = new AboutPanel();
@@ -224,7 +236,7 @@ Layer::ActionList Layer::BuildActions() {
             nullptr,
             nullptr },
 
-        { ActionSection::Help, "GitHub", nullptr, { 0, false, false, false },
+        { ActionSection::Help, ICON_LC_GLOBE " GitHub", nullptr, { 0, false, false, false },
             [this]() {
                 std::string url = "https://github.com/aloyak/origin";
 
@@ -358,15 +370,6 @@ void Layer::DrawMenuBar() {
                 if (action.section == ActionSection::Scene) {
                     DrawActionItem(action);
                 }
-            }
-            if (ImGui::MenuItem("Duplicate Entity", "", false, m_SelectedEntity != nullptr)) {
-                // Duplicated implementation from HierarchyPanel!
-                Entity* newEntity = m_SceneManager.getActiveScene()->createEntity(m_SelectedEntity->name + " Copy");
-                newEntity->transform = m_SelectedEntity->transform;
-                for (const auto& [typeId, component] : m_SelectedEntity->getComponents()) {
-                    newEntity->addComponentCopy(typeId, component);
-                }
-                m_SelectedEntity = newEntity;
             }
             ImGui::Separator();
             for (const ActionDef& action : actions) {

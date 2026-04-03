@@ -15,13 +15,13 @@ public:
         : m_Engine(engine), m_SelectedEntity(selectedRef) {}
 
     void OnUIRender() override {
-        ImGui::Begin("Hierarchy");
+        ImGui::Begin(ICON_LC_FOLDER " Hierarchy");
         auto* scene = m_Engine.getSceneManager().getActiveScene();
         const char* label = scene ? scene->name.c_str() : "No Active Scene";
 
         ImGui::BeginGroup();
 
-        if (ImGui::Button("+")) {
+        if (ImGui::Button(ICON_LC_PLUS)) {
             if (scene) {
                 Entity* entity = scene->createEntity("Entity");
                 m_SelectedEntity = entity;
@@ -31,18 +31,18 @@ public:
         if (ImGui::IsItemHovered()) ImGui::OpenPopup("EntityOptions");
 
         if (ImGui::BeginPopup("EntityOptions")) {
-            if (ImGui::MenuItem("Create Entity") && scene) {
+            if (ImGui::MenuItem(ICON_LC_BOX " Add Entity") && scene) {
                 Entity* entity = scene->createEntity("Entity");
                 m_SelectedEntity = entity;
             }
-            if (ImGui::MenuItem("Duplicate Entity") && m_SelectedEntity && scene) {
+            if (ImGui::MenuItem(ICON_LC_COPY_PLUS " Duplicate Entity") && m_SelectedEntity && scene) {
                 Entity* newEntity = scene->createEntity(m_SelectedEntity->name + " Copy");
                 newEntity->transform = m_SelectedEntity->transform;
                 for (const auto& [typeId, component] : m_SelectedEntity->getComponents()) {
                     newEntity->addComponentCopy(typeId, component);
                 }
             }
-            if (ImGui::MenuItem("Delete Entity") && m_SelectedEntity && scene) {
+            if (ImGui::MenuItem(ICON_LC_TRASH " Delete Entity") && m_SelectedEntity && scene) {
                 scene->destroyEntity(m_SelectedEntity);
                 m_SelectedEntity = nullptr;
             }
@@ -53,7 +53,7 @@ public:
 
         static char searchBuffer[256] = "";
         ImGui::SetNextItemWidth(-FLT_MIN);
-        ImGui::InputTextWithHint("##Search", "Search ...", searchBuffer, sizeof(searchBuffer));
+        ImGui::InputTextWithHint("##Search", ICON_LC_SEARCH " Search ...", searchBuffer, sizeof(searchBuffer));
 
             std::vector<Entity*> filteredEntities;
             if (scene) {
