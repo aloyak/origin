@@ -20,9 +20,12 @@ public:
 
     Vec2 getMousePos() const;
     Vec2 getMouseDelta();
+    Vec2 getScrollDelta();
 
     void accumulateMouseDelta(int x, int y);
+    void accumulateScrollDelta(float x, float y);
     void resetMouseDelta();
+    void resetScrollDelta();
 
 private:
     SDL_Window* m_window;
@@ -31,4 +34,7 @@ private:
     std::vector<uint8_t> m_currKeyState;
     int m_mouseDeltaX = 0;
     int m_mouseDeltaY = 0;
+    
+    float m_scrollDeltaX = 0.0f;
+    float m_scrollDeltaY = 0.0f;
 };

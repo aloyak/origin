@@ -79,6 +79,12 @@ Vec2 Input::getMouseDelta() {
 #endif
 }
 
+Vec2 Input::getScrollDelta() {
+    Vec2 delta(m_scrollDeltaX, m_scrollDeltaY);
+    resetScrollDelta();
+    return delta;
+}
+
 void Input::resetMouseDelta() {
     m_mouseDeltaX = 0;
     m_mouseDeltaY = 0;
@@ -87,6 +93,16 @@ void Input::resetMouseDelta() {
 void Input::accumulateMouseDelta(int x, int y) {
     m_mouseDeltaX += x;
     m_mouseDeltaY += y;
+}
+
+void Input::accumulateScrollDelta(float x, float y) {
+    m_scrollDeltaX += x;
+    m_scrollDeltaY += y;
+}
+
+void Input::resetScrollDelta() {
+    m_scrollDeltaX = 0.0f;
+    m_scrollDeltaY = 0.0f;
 }
 
 void Input::setCursorMode(bool locked) {

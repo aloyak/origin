@@ -90,6 +90,7 @@ void Engine::beginFrame() {
 
     m_input->update();
     m_input->resetMouseDelta();
+    m_input->resetScrollDelta();
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -106,6 +107,11 @@ void Engine::beginFrame() {
                 m_input->accumulateMouseDelta(event.motion.xrel, event.motion.yrel);
 #endif
                 break;
+            case SDL_MOUSEWHEEL: {
+                const float direction = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1.0f : 1.0f;
+                m_input->accumulateScrollDelta((float)event.wheel.x * direction, (float)event.wheel.y * direction);
+                break;
+            }
         }
     }
 

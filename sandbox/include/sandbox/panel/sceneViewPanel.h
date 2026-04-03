@@ -55,17 +55,26 @@ public:
         if (cameraLookActive) {
             HandleCameraInput();
         }
-            if (!m_Engine.getSceneManager().getActiveScene()) {
-                const char* message = ICON_LC_FILE_WARNING " No Active Scene!";
-                ImGui::SetCursorPosX((available.x - ImGui::CalcTextSize(message).x) * 0.5f);
-                ImGui::SetCursorPosY((available.y - ImGui::CalcTextSize(message).y) * 0.5f);
 
-                ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-                ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 100, 255));
-                ImGui::TextUnformatted(message);
-                ImGui::PopStyleColor();
-                ImGui::PopFont();
+        if (ImGui::IsWindowHovered()) {
+            const float scrollY = m_Engine.getInput().getScrollDelta().y;
+            if (scrollY != 0.0f) {
+                m_CameraSpeed *= std::pow(1.2f, scrollY);
+                m_CameraSpeed = std::clamp(m_CameraSpeed, 0.1f, 10.0f);
             }
+        }
+
+        if (!m_Engine.getSceneManager().getActiveScene()) {
+            const char* message = ICON_LC_FILE_WARNING " No Active Scene!";
+            ImGui::SetCursorPosX((available.x - ImGui::CalcTextSize(message).x) * 0.5f);
+            ImGui::SetCursorPosY((available.y - ImGui::CalcTextSize(message).y) * 0.5f);
+            
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 100, 255));
+            ImGui::TextUnformatted(message);
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+        }
 
         if (!cameraLookActive && ImGui::IsWindowHovered() && m_Engine.getInput().isMouseButtonPressed(MOUSE_LEFT) && !ImGuizmo::IsUsing()) {
             HandleSceneClick(viewportMin, viewportSize);
