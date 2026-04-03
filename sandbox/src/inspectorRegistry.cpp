@@ -263,7 +263,7 @@ void Layer::registerDefaultInspectors() {
             c->setUseGravity(useGravity);
         }
 
-		const char* bodyTypes[] = { "Dynamic", "Static" };
+		const char* bodyTypes[] = { "Dynamic", "Static", "Kinematic" };
 		int currentBodyType = static_cast<int>(c->getBodyType());
 		if (ImGui::Combo("Body Type", &currentBodyType, bodyTypes, IM_ARRAYSIZE(bodyTypes))) {
 			c->setBodyType(static_cast<RigidbodyComponent::BodyType>(currentBodyType));

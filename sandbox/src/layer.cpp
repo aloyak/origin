@@ -57,7 +57,7 @@ void Layer::SetupFonts() {
     io.Fonts->Clear();
 
     float fontSize = 15.0f;
-    const std::string iconFontPath = Path::resolve("resources/lucide/" FONT_ICON_FILE_NAME_LC).string();
+    const std::string iconFontPath = Path::resolve("resources/lucide-1.7.0/" FONT_ICON_FILE_NAME_LC).string();
 
     static const ImWchar iconRange[] = { ICON_MIN_LC, ICON_MAX_16_LC, 0 };
 
