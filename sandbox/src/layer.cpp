@@ -202,7 +202,7 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
         return false;
     }
 
-    std::string oldBase = Path::getBase();
+    fs::path oldBase = Path::getBase();
     Path::setBase(candidateContext.root);
 
     // Disable Physics before loading
@@ -212,7 +212,7 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
     Scene* loaded = m_SceneManager.load(candidateContext.scene.string());
     if (!loaded) {
         Logger::error("Failed to load scene: " + candidateContext.scene.string());
-        Path::setBase(oldBase);
+        Path::setBase(oldBase.string());
         return false;
     }
 

@@ -16,10 +16,10 @@ public:
     void setFov(float fov) { m_fov = fov; }
     float getFov() const { return m_fov; }
 
-    void setNear(float near) { m_near = near; }
+    void setNear(float nearPlane) { m_near = nearPlane; }
     float getNear() const { return m_near; }
     
-    void setFar(float far) { m_far = far; }
+    void setFar(float farPlane) { m_far = farPlane; }
     float getFar() const { return m_far; }
 private:
     struct CameraData;

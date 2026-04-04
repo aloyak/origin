@@ -11,6 +11,14 @@ target_include_directories(${GAME_NAME}
 
 target_link_libraries(${GAME_NAME} PRIVATE engine)
 
+if(WIN32)
+    add_custom_command(TARGET ${GAME_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL2::SDL2>
+            $<TARGET_FILE_DIR:${GAME_NAME}>
+    )
+endif()
+
 if(EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     target_link_options(${GAME_NAME} PRIVATE

@@ -1,5 +1,10 @@
 #include "sandbox/layer.h"
 
+#ifdef _WIN32
+    #include <windows.h>
+    #include <shellapi.h>
+#endif
+
 void Layer::DrawActionItem(const ActionDef& action) {
     const bool enabled = action.enabled ? action.enabled() : true;
     const bool checked = action.checked ? action.checked() : false;
