@@ -232,22 +232,22 @@
                     "useGravity": true
                 }
             ],
-            "name": "DynamicObject",
+            "name": "DynamicCube",
             "transform": {
                 "pos": [
-                    -3.206782102584839,
-                    8.744990348815918,
-                    3.1260969990398735e-05
+                    -3.4238147735595703,
+                    17.7398738861084,
+                    -0.32700487971305847
                 ],
                 "rot": [
-                    -4.7550678061725193e-08,
-                    0.04708430916070938,
-                    -5.439130479345522e-09
+                    -177.4576416015625,
+                    -89.99994659423828,
+                    0.00010427392408018932
                 ],
                 "sca": [
                     0.9999679923057556,
-                    1.0,
-                    0.9999679923057556
+                    0.9999999403953552,
+                    0.9999681115150452
                 ]
             }
         },
@@ -352,7 +352,7 @@
                     "vert": "assets/shaders/vert.glsl"
                 }
             ],
-            "name": "Slide 2 Copy",
+            "name": "Wall",
             "transform": {
                 "pos": [
                     -4.978067398071289,
@@ -368,6 +368,66 @@
                     14.998987197875977,
                     1.9999499320983887,
                     19.99959373474121
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Sphere",
+                    "friction": 0.5,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 40.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                },
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/sphere.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "DynamicSphere",
+            "transform": {
+                "pos": [
+                    -3.4238147735595703,
+                    16.176969528198242,
+                    -4.2072038650512695
+                ],
+                "rot": [
+                    -177.4576416015625,
+                    -89.99994659423828,
+                    0.00010427392408018932
+                ],
+                "sca": [
+                    0.9999679923057556,
+                    0.9999999403953552,
+                    0.9999681115150452
                 ]
             }
         }

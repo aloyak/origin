@@ -4,9 +4,25 @@
         {
             "components": [
                 {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "",
                     "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
                     "model": "assets/models/sponza/sponza.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
                     "type": "RenderComponent",
+                    "uvScale": [
+                        1.0,
+                        1.0
+                    ],
                     "vert": "assets/shaders/vert.glsl"
                 }
             ],
@@ -40,6 +56,7 @@
                         "assets/textures/skybox/front.png",
                         "assets/textures/skybox/back.png"
                     ],
+                    "rotation": 0.0,
                     "type": "SkyboxComponent"
                 }
             ],

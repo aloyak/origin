@@ -1,0 +1,701 @@
+{
+    "ambientStrength": 0.125,
+    "entities": [
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/sponza/sponza.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        1.0,
+                        1.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Sponza",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "faces": [
+                        "assets/textures/skybox/left.png",
+                        "assets/textures/skybox/right.png",
+                        "assets/textures/skybox/up.png",
+                        "assets/textures/skybox/down.png",
+                        "assets/textures/skybox/front.png",
+                        "assets/textures/skybox/back.png"
+                    ],
+                    "rotation": 0.0,
+                    "type": "SkyboxComponent"
+                }
+            ],
+            "name": "Skybox",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "aspect": 1.7777777910232544,
+                    "far": 10000.0,
+                    "fov": 60.0,
+                    "near": 0.10000000149011612,
+                    "type": "CameraComponent"
+                }
+            ],
+            "name": "Player Camera",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Kinematic",
+                    "colliderSize": [
+                        75.0,
+                        150.0,
+                        75.0
+                    ],
+                    "colliderType": "Capsule",
+                    "friction": 0.5,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 1.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Player Body",
+            "transform": {
+                "pos": [
+                    -250.0,
+                    75.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Static",
+                    "colliderSize": [
+                        3000.0,
+                        0.10000000149011612,
+                        1500.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 1.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Floor",
+            "transform": {
+                "pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Sphere",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                },
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/sphere.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Sphere",
+            "transform": {
+                "pos": [
+                    402.824462890625,
+                    507.0284423828125,
+                    -13.357014656066895
+                ],
+                "rot": [
+                    -16.173616409301758,
+                    29.285783767700195,
+                    -42.21688461303711
+                ],
+                "sca": [
+                    49.99989700317383,
+                    50.00004577636719,
+                    49.999977111816406
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                },
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Cube 2",
+            "transform": {
+                "pos": [
+                    451.3475646972656,
+                    500.88055419921875,
+                    71.38907623291016
+                ],
+                "rot": [
+                    33.92888259887695,
+                    21.924083709716797,
+                    20.103158950805664
+                ],
+                "sca": [
+                    49.9998893737793,
+                    50.000057220458984,
+                    49.99992752075195
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                },
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Cube 3",
+            "transform": {
+                "pos": [
+                    251.2766876220703,
+                    354.87469482421875,
+                    -7.4439544677734375
+                ],
+                "rot": [
+                    8.411981582641602,
+                    28.065841674804688,
+                    9.157096862792969
+                ],
+                "sca": [
+                    49.99986267089844,
+                    50.000057220458984,
+                    49.999935150146484
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                },
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Cube 4",
+            "transform": {
+                "pos": [
+                    334.2552795410156,
+                    438.2230529785156,
+                    59.88911819458008
+                ],
+                "rot": [
+                    51.41570281982422,
+                    29.700916290283203,
+                    -22.255573272705078
+                ],
+                "sca": [
+                    49.999855041503906,
+                    50.00008773803711,
+                    49.999996185302734
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                },
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Cube 5",
+            "transform": {
+                "pos": [
+                    334.2552795410156,
+                    636.7359008789063,
+                    -13.70175552368164
+                ],
+                "rot": [
+                    6.999322414398193,
+                    5.844932556152344,
+                    55.64338684082031
+                ],
+                "sca": [
+                    49.99988555908203,
+                    50.00008773803711,
+                    49.99995422363281
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                },
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Cube 6",
+            "transform": {
+                "pos": [
+                    413.8836364746094,
+                    508.55047607421875,
+                    -124.8713150024414
+                ],
+                "rot": [
+                    -56.78841018676758,
+                    21.279550552368164,
+                    -20.78760528564453
+                ],
+                "sca": [
+                    49.999847412109375,
+                    50.000064849853516,
+                    49.99992370605469
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Box",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                },
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/cube.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                }
+            ],
+            "name": "Cube 7",
+            "transform": {
+                "pos": [
+                    309.8080749511719,
+                    407.836181640625,
+                    -81.58589172363281
+                ],
+                "rot": [
+                    33.92888259887695,
+                    21.924083709716797,
+                    20.103158950805664
+                ],
+                "sca": [
+                    49.9998893737793,
+                    50.000057220458984,
+                    49.99992752075195
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "color": [
+                        1.0,
+                        0.7825835943222046,
+                        0.4313725233078003
+                    ],
+                    "intensity": 0.3499999940395355,
+                    "radius": 531.0,
+                    "type": "PointLightComponent"
+                }
+            ],
+            "name": "Light",
+            "transform": {
+                "pos": [
+                    394.4024963378906,
+                    171.66632080078125,
+                    0.0
+                ],
+                "rot": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "ambientStrength": 0.10000000149011612,
+                    "baseColor": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "diffuse": "assets/textures/crate.jpg",
+                    "frag": "assets/shaders/frag.glsl",
+                    "metallic": "",
+                    "model": "assets/models/primitive/sphere.obj",
+                    "normal": "",
+                    "shininess": 32.0,
+                    "specular": "",
+                    "specularStrength": 1.0,
+                    "type": "RenderComponent",
+                    "uvScale": [
+                        4.0,
+                        4.0
+                    ],
+                    "vert": "assets/shaders/vert.glsl"
+                },
+                {
+                    "angularDamping": 0.05000000074505806,
+                    "bodyType": "Dynamic",
+                    "colliderSize": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "colliderType": "Sphere",
+                    "friction": 10.0,
+                    "linearDamping": 0.019999999552965164,
+                    "mass": 10.0,
+                    "restitution": 0.0,
+                    "type": "RigidbodyComponent",
+                    "useGravity": true
+                }
+            ],
+            "name": "Sphere 2",
+            "transform": {
+                "pos": [
+                    279.8478088378906,
+                    536.758544921875,
+                    -22.110261917114258
+                ],
+                "rot": [
+                    33.92888259887695,
+                    21.924083709716797,
+                    20.103158950805664
+                ],
+                "sca": [
+                    49.9998893737793,
+                    50.000057220458984,
+                    49.99992752075195
+                ]
+            }
+        }
+    ],
+    "name": "Sponza Environment"
+}
