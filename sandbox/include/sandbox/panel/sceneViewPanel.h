@@ -242,6 +242,8 @@ private:
             boundsSize = Vec3(radius * 2.0f, height + radius * 2.0f, radius * 2.0f);
             break;
         }
+        case RigidbodyComponent::ColliderType::Mesh:
+            break;
         case RigidbodyComponent::ColliderType::Box:
         default:
             break;

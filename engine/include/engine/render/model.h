@@ -24,6 +24,8 @@ public:
               const std::vector<DirectionalLight>& directionalLights,
               const std::vector<PointLight>& pointLights);
 
+    const std::vector<Mesh>& getMeshes() const { return meshes; }
+
 private:
     std::vector<Mesh> meshes;
     std::string directory;

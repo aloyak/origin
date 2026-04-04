@@ -6,6 +6,7 @@ class PhysicsWorld;
 class btCollisionShape;
 class btDefaultMotionState;
 class btRigidBody;
+class btTriangleMesh;
 
 class RigidbodyComponent : public Component {
 public:
@@ -19,6 +20,7 @@ public:
         Box,
         Sphere,
         Capsule,
+        Mesh
     };
 
     explicit RigidbodyComponent(PhysicsWorld* world = nullptr);
@@ -78,8 +80,13 @@ private:
     btCollisionShape* m_shape = nullptr;
     btDefaultMotionState* m_motionState = nullptr;
     btRigidBody* m_body = nullptr;
+    btTriangleMesh* m_triangleMesh = nullptr;
     bool m_registered = false;
     bool m_dirty = true;
+
+    bool buildMeshColliderShape(const Vec3& safeScale);
+    bool m_missingMeshWarningLogged = false;
+    bool m_dynamicMeshWarningLogged = false;
 
     BodyType m_bodyType = BodyType::Dynamic;
     ColliderType m_colliderType = ColliderType::Box;

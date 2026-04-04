@@ -46,6 +46,7 @@ public:
     void setVertPath(const std::string& vertPath);
     void setFragPath(const std::string& fragPath);
 
+    std::shared_ptr<Model> getModel() const { return m_model; }
     std::string getModelPath() const { return m_modelPath; }
     std::string getVertPath() const { return m_vertPath; }
     std::string getFragPath() const { return m_fragPath; }

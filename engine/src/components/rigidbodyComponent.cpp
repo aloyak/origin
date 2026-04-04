@@ -1,12 +1,15 @@
 #include "engine/components/rigidbodyComponent.h"
-
+#include "engine/components/rendererComponent.h"
 #include "engine/components/entity.h"
+
 #include "engine/physics/world.h"
 #include "engine/utils/logger.h"
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
@@ -69,6 +72,8 @@ std::string colliderTypeToString(RigidbodyComponent::ColliderType type) {
         return "Sphere";
     case RigidbodyComponent::ColliderType::Capsule:
         return "Capsule";
+    case RigidbodyComponent::ColliderType::Mesh:
+        return "Mesh";
     case RigidbodyComponent::ColliderType::Box:
     default:
         return "Box";
@@ -76,12 +81,10 @@ std::string colliderTypeToString(RigidbodyComponent::ColliderType type) {
 }
 
 RigidbodyComponent::ColliderType colliderTypeFromString(const std::string& type) {
-    if (type == "Sphere") {
-        return RigidbodyComponent::ColliderType::Sphere;
-    }
-    if (type == "Capsule") {
-        return RigidbodyComponent::ColliderType::Capsule;
-    }
+    if (type == "Sphere") return RigidbodyComponent::ColliderType::Sphere;
+    if (type == "Capsule") return RigidbodyComponent::ColliderType::Capsule;
+    if (type == "Mesh") return RigidbodyComponent::ColliderType::Mesh;
+    
     return RigidbodyComponent::ColliderType::Box;
 }
 
@@ -175,7 +178,7 @@ void RigidbodyComponent::setPhysicsWorld(PhysicsWorld* world) {
 
     destroyBody();
     m_world = world;
-    m_dirty = true;
+    markDirty();
 }
 
 void RigidbodyComponent::setBodyType(BodyType type) {
@@ -183,6 +186,10 @@ void RigidbodyComponent::setBodyType(BodyType type) {
         return;
     }
     m_bodyType = type;
+
+    m_dynamicMeshWarningLogged = false;
+    m_missingMeshWarningLogged = false;
+
     markDirty();
 }
 
@@ -191,6 +198,10 @@ void RigidbodyComponent::setColliderType(ColliderType type) {
         return;
     }
     m_colliderType = type;
+
+    m_dynamicMeshWarningLogged = false;
+    m_missingMeshWarningLogged = false;
+
     markDirty();
 }
 
@@ -263,6 +274,85 @@ void RigidbodyComponent::markDirty() {
     m_dirty = true;
 }
 
+bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
+    if (!entity) return false;
+
+    RenderComponent* renderComponent = entity->getComponent<RenderComponent>();
+    if (!renderComponent) {
+        if (!m_missingMeshWarningLogged) {
+            Logger::warn("RigidbodyComponent: Mesh collider requested on entity '" + entity->name + "' but RenderComponent is missing.");
+            m_missingMeshWarningLogged = true;
+        }
+        return false;
+    }
+
+    std::shared_ptr<Model> model = renderComponent->getModel();
+    if (!model) {
+        if (!m_missingMeshWarningLogged) {
+            Logger::warn("RigidbodyComponent: Mesh collider requested on entity '" + entity->name + "' but model is not loaded.");
+            m_missingMeshWarningLogged = true;
+        }
+        return false;
+    }
+
+    const auto& meshes = model->getMeshes();
+    if (meshes.empty()) {
+        if (!m_missingMeshWarningLogged) {
+            Logger::warn("RigidbodyComponent: Mesh collider requested on entity '" + entity->name + "' but model has no meshes.");
+            m_missingMeshWarningLogged = true;
+        }
+        return false;
+    }
+
+    delete m_triangleMesh;
+    m_triangleMesh = new btTriangleMesh(true, true);
+
+    std::size_t triangleCount = 0;
+    for (const Mesh& mesh : meshes) {
+        const auto& vertices = mesh.vertices;
+        const auto& indices = mesh.indices;
+
+        if (vertices.empty() || indices.size() < 3) continue;
+
+        for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
+            const unsigned int i0 = indices[i];
+            const unsigned int i1 = indices[i + 1];
+            const unsigned int i2 = indices[i + 2];
+
+            if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
+                continue;
+            }
+
+            const Vec3& p0 = vertices[i0].Position;
+            const Vec3& p1 = vertices[i1].Position;
+            const Vec3& p2 = vertices[i2].Position;
+
+            const btVector3 v0(p0.x * safeScale.x, p0.y * safeScale.y, p0.z * safeScale.z);
+            const btVector3 v1(p1.x * safeScale.x, p1.y * safeScale.y, p1.z * safeScale.z);
+            const btVector3 v2(p2.x * safeScale.x, p2.y * safeScale.y, p2.z * safeScale.z);
+
+            m_triangleMesh->addTriangle(v0, v1, v2, true);
+            triangleCount++;
+        }
+    }
+
+    if (triangleCount == 0) {
+        delete m_triangleMesh;
+        m_triangleMesh = nullptr;
+
+        if (!m_missingMeshWarningLogged) {
+            Logger::warn("RigidbodyComponent: Mesh collider requested on entity '" + entity->name + "' but no valid triangles were found.");
+            m_missingMeshWarningLogged = true;
+        }
+        return false;
+    }
+
+    m_shape = new btBvhTriangleMeshShape(m_triangleMesh, true, true);
+
+    m_missingMeshWarningLogged = false;
+    return true;
+}
+
 void RigidbodyComponent::rebuildBody() {
     destroyBody();
 
@@ -299,13 +389,31 @@ void RigidbodyComponent::rebuildBody() {
         m_shape = new btCapsuleShape(radius, height);
         break;
     }
+    case ColliderType::Mesh: {
+        if (m_bodyType == BodyType::Dynamic) {
+            if (!m_dynamicMeshWarningLogged) {
+                Logger::warn("RigidbodyComponent: Dynamic Mesh collider is not supported on entity '" + entity->name + "'. Use Static or Kinematic.");
+                m_dynamicMeshWarningLogged = true;
+            }
+            break;
+        }
+
+        if (!buildMeshColliderShape(safeScale)) break;
+        
+        m_dynamicMeshWarningLogged = false;
+        break;
+    }
     case ColliderType::Box:
     default: {
         const btVector3 halfExtents(0.5f * scaledSize.x, 0.5f * scaledSize.y, 0.5f * scaledSize.z);
         m_shape = new btBoxShape(halfExtents);
-        m_shape->setMargin(0.01f);
         break;
     }
+    }
+
+    if (!m_shape) {
+        m_dirty = false;
+        return;
     }
 
     btTransform startTransform;
@@ -377,6 +485,9 @@ void RigidbodyComponent::destroyBody() {
 
     delete m_shape;
     m_shape = nullptr;
+
+    delete m_triangleMesh;
+    m_triangleMesh = nullptr;
 }
 
 void RigidbodyComponent::syncTransformFromBody() const {

@@ -275,7 +275,7 @@ void Layer::registerDefaultInspectors() {
             c->setColliderSize(colliderSize);
         }
 
-        const char* colliderTypes[] = { "Box", "Sphere", "Capsule" };
+		const char* colliderTypes[] = { "Box", "Sphere", "Capsule", "Mesh" };
         int currentColliderType = static_cast<int>(c->getColliderType());
         if (ImGui::Combo("Collider Type", &currentColliderType, colliderTypes, IM_ARRAYSIZE(colliderTypes))) {
             c->setColliderType(static_cast<RigidbodyComponent::ColliderType>(currentColliderType));
