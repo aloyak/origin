@@ -38,6 +38,8 @@ else()
 
     target_include_directories(engine PRIVATE ${bullet3_SOURCE_DIR}/src)
 
+    target_compile_definitions(engine PUBLIC SDL_MAIN_HANDLED)
+
     target_link_libraries(engine 
         PRIVATE glad glm::glm spdlog::spdlog stb_image assimp::assimp BulletDynamics BulletCollision LinearMath
         PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui 

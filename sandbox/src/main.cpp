@@ -13,4 +13,6 @@ int main() {
         layer.OnUIRender();
         engine.endUI();
     });
+
+    return 0;
 }

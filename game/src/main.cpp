@@ -76,4 +76,6 @@ int main() {
         if (input.isKeyPressed(KEY_E))
             engine.getRenderer().setLightingEnabled(!engine.getRenderer().isLightingEnabled());
     });
+
+    return 0;
 }
