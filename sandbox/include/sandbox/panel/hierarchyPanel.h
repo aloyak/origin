@@ -91,7 +91,8 @@ public:
         if (treeOpen) {
             for (Entity* entity : filteredEntities) {
                 bool selected = (m_SelectedEntity == entity);
-                if (ImGui::Selectable(entity->name.c_str(), selected))
+                const std::string entityLabel = std::string(ICON_LC_BOX " ") + entity->name;
+                if (ImGui::Selectable(entityLabel.c_str(), selected))
                     m_SelectedEntity = entity;
             }
             ImGui::TreePop();

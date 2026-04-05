@@ -2,6 +2,7 @@
 #include "sandbox/inspectorRegistry.h"
 
 #include "sandbox/dialog.h"
+#include "sandbox/icons.h"
 
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rendererComponent.h"
@@ -32,7 +33,7 @@ static void DrawFilePicker(
 		chooseButtonWidth = 80.0f;
 	}
 
-	const std::string chooseText = currentPath.empty() ? "Choose file..." : currentPath;
+	const std::string chooseText = currentPath.empty() ? ICON_LC_FILE_INPUT " Choose file..." : currentPath;
 	const std::string chooseLabel = chooseText + "##choose_" + id;
 	if (ImGui::Button(chooseLabel.c_str(), ImVec2(chooseButtonWidth, 0.0f))) {
 		std::string chosenPath = Dialog::openFile(filters);

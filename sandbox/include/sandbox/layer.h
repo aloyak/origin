@@ -96,6 +96,7 @@ private:
 
     // Scene management
     void OpenScene();
+    void OpenLastScene();
     void OpenSceneRecent();
     void SaveScene();
     void SaveSceneAs();

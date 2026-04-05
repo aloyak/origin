@@ -57,7 +57,11 @@ Layer::ActionList Layer::BuildActions() {
             [this]() { OpenScene(); },
             nullptr,
             nullptr },
-        { ActionSection::File, "Open Recent", "Ctrl+Shift+O", { KEY_O, true, true, false },
+        { ActionSection::File, ICON_LC_FOLDER_ROOT " Open Last", "Ctrl+Shift+O", { KEY_O, true, true, false },
+            [this]() { OpenLastScene(); },
+            nullptr,
+            nullptr },
+        { ActionSection::File, ICON_LC_CLOCK " Recent Scenes", "", { 0, false, false, false },
             [this]() { OpenSceneRecent(); },
             nullptr,
             nullptr },
@@ -292,8 +296,9 @@ void Layer::DrawMenuBar() {
             ImGui::Separator();
 
             drawFileAction("Open Scene");
+            drawFileAction("Open Last");
 
-            if (ImGui::BeginMenu("Open Recent")) {
+            if (ImGui::BeginMenu(ICON_LC_CLOCK " Recent Scenes")) {
                 if (m_RecentScenes.empty()) {
                     ImGui::TextUnformatted("No recent scenes");
                 } else {
@@ -320,18 +325,18 @@ void Layer::DrawMenuBar() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Preferences")) {
-            ImGui::TextUnformatted("Camera Sensitivity");
+            ImGui::TextUnformatted(ICON_LC_VIDEO " Camera Sensitivity");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(90.0f);
             if (ImGui::DragFloat("##Sensitivity", &m_CameraSens, 0.005f, 0.01f, 1.0f, "%.3f")) {
                 SaveUserPreferences();
             }
 
-            if (ImGui::BeginMenu("Color Theme")) {
-                if (ImGui::MenuItem("Dark (Default)")) {
+            if (ImGui::BeginMenu(ICON_LC_BRUSH " Color Theme")) {
+                if (ImGui::MenuItem(ICON_LC_MOON " Dark (Default)")) {
                     Styles::setupDarkTheme();
                 }
-                if (ImGui::MenuItem("Light")) {
+                if (ImGui::MenuItem(ICON_LC_SUN " Light")) {
                     ImGui::StyleColorsLight();
                 }
                 ImGui::EndMenu();
@@ -397,7 +402,7 @@ void Layer::DrawMenuBar() {
             }
             ImGui::Separator();
             float ambient = m_Renderer.getMinimumAmbientLight();
-            ImGui::TextUnformatted("Ambient Light");
+            ImGui::TextUnformatted(ICON_LC_SUN_MOON " Ambient Light");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(70.0f);
             if (ImGui::DragFloat("##AmbientLight", &ambient, 0.01f, 0.0f)) {

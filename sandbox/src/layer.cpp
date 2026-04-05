@@ -136,6 +136,15 @@ void Layer::OpenScene() {
     }
 }
 
+void Layer::OpenLastScene() {
+    if (m_RecentScenes.empty()) {
+        Logger::warn("No last scene in user preferences.");
+        return;
+    }
+
+    OpenSceneFromPath(m_RecentScenes.front());
+}
+
 void Layer::OpenSceneRecent() {
     if (m_RecentScenes.empty()) {
         Logger::warn("No recent scenes in user preferences.");

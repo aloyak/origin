@@ -52,7 +52,7 @@ public:
             
             ImGui::Separator();
 
-            if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::CollapsingHeader(ICON_LC_MOVE_3D " Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
                 float pos[3] = { m_SelectedEntity->transform.position.x, m_SelectedEntity->transform.position.y, m_SelectedEntity->transform.position.z };
                 if (ImGui::DragFloat3("Position", pos, 0.5f)) m_SelectedEntity->transform.position = Vec3(pos[0], pos[1], pos[2]);
 
@@ -74,7 +74,7 @@ public:
                     ImGui::PushID(type.hash_code());
                     ImGui::Checkbox("Enabled", &comp->isEnabled);
                     ImGui::SameLine();
-                    if (ImGui::Button(("Remove Component"))) {
+                    if (ImGui::Button("Remove Component")) {
                         m_SelectedEntity->removeComponent(type);
                         ImGui::PopID();
                         break;
@@ -86,32 +86,32 @@ public:
             }
             
             ImGui::Separator();
-            if (ImGui::Button("Add Component", ImVec2(-1, 0))) { 
+            if (ImGui::Button(ICON_LC_PLUS " Add Component", ImVec2(-1, 0))) { 
                 ImGui::OpenPopup("AddComponentPopup");
             }
 
             if (ImGui::BeginPopup("AddComponentPopup")) {
-                if (!m_SelectedEntity->getComponent<CameraComponent>() && ImGui::MenuItem("Camera")) {
+                if (!m_SelectedEntity->getComponent<CameraComponent>() && ImGui::MenuItem(ICON_LC_VIDEO " Camera")) {
                     m_SelectedEntity->addComponent<CameraComponent>(60.0f, m_Engine.getWindow().getAspectRatio(), 0.1f, 10000.0f);
                     ImGui::CloseCurrentPopup();
                 }
-                if (!m_SelectedEntity->getComponent<DirectionalLightComponent>() && ImGui::MenuItem("Directional Light")) {
+                if (!m_SelectedEntity->getComponent<DirectionalLightComponent>() && ImGui::MenuItem(ICON_LC_LIGHTBULB " Directional Light")) {
                     m_SelectedEntity->addComponent<DirectionalLightComponent>();
                     ImGui::CloseCurrentPopup();
                 }
-                if (!m_SelectedEntity->getComponent<PointLightComponent>() && ImGui::MenuItem("Point Light")) {
+                if (!m_SelectedEntity->getComponent<PointLightComponent>() && ImGui::MenuItem(ICON_LC_LIGHTBULB " Point Light")) {
                     m_SelectedEntity->addComponent<PointLightComponent>();
                     ImGui::CloseCurrentPopup();
                 }
-                if (!m_SelectedEntity->getComponent<RenderComponent>() && ImGui::MenuItem("Renderer")) {
+                if (!m_SelectedEntity->getComponent<RenderComponent>() && ImGui::MenuItem(ICON_LC_SCAN_EYE " Renderer")) {
                     m_SelectedEntity->addComponent<RenderComponent>();
                     ImGui::CloseCurrentPopup();
                 }
-                if (!m_SelectedEntity->getComponent<SkyboxComponent>() && ImGui::MenuItem("Skybox")) {
+                if (!m_SelectedEntity->getComponent<SkyboxComponent>() && ImGui::MenuItem(ICON_LC_CLOUD " Skybox")) {
                     m_SelectedEntity->addComponent<SkyboxComponent>();
                     ImGui::CloseCurrentPopup();
                 }
-                if (!m_SelectedEntity->getComponent<RigidbodyComponent>() && ImGui::MenuItem("Rigidbody")) {
+                if (!m_SelectedEntity->getComponent<RigidbodyComponent>() && ImGui::MenuItem(ICON_LC_ATOM " Rigidbody")) {
                     m_SelectedEntity->addComponent<RigidbodyComponent>();
                     ImGui::CloseCurrentPopup();
                 }
@@ -119,7 +119,7 @@ public:
                 ImGui::EndPopup();
             }
         } else {
-            ImGui::TextDisabled("No entity selected");
+            ImGui::TextDisabled(ICON_LC_FILE_WARNING " No entity selected");
         }
         ImGui::End();
     }
