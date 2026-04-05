@@ -28,7 +28,7 @@ int main() {
     engine.getWindow().setFullscreen(false);
     engine.getWindow().enableVSync(false);
 
-    sm.load("assets/scenes/sponza_physics.json");
+    sm.load("assets/scenes/sponza.json"); // Oops
 
     engine.getPhysicsWorld().setGravity(Vec3(0.0f, -980.0f, 0.0f)); // Scene is too big for normal gravity
 
