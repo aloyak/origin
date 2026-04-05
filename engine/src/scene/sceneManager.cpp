@@ -95,6 +95,7 @@ void SceneManager::save(const std::string& scenePath) {
     for (const auto& entity : m_activeScene->getEntities()) {
         json jEnt;
         jEnt["name"] = entity->name;
+        jEnt["tag"] = entity->getTag();
         jEnt["transform"] = {
             {"pos", {entity->transform.position.x, entity->transform.position.y, entity->transform.position.z}},
             {"rot", {entity->transform.rotation.x, entity->transform.rotation.y, entity->transform.rotation.z}},
@@ -158,6 +159,7 @@ Scene* SceneManager::load(const std::string& scenePath) {
             }
 
             Entity* ent = loadedScene->createEntity(jEnt.value("name", "Entity"));
+            ent->setTag(jEnt.value("tag", "Untagged"));
 
             if (jEnt.contains("transform") && jEnt["transform"].is_object()) {
                 const auto& t = jEnt["transform"];

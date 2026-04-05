@@ -99,6 +99,10 @@ void Window::setFullscreen(bool fullscreen) {
     SDL_SetWindowFullscreen(m_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
+void Window::setSize(unsigned int width, unsigned int height) {
+    SDL_SetWindowSize(m_window, (int)width, (int)height);
+}
+
 bool Window::isFullscreen() const {
     Uint32 flags = SDL_GetWindowFlags(m_window);
     return (flags & SDL_WINDOW_FULLSCREEN) || (flags & SDL_WINDOW_FULLSCREEN_DESKTOP);

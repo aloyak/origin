@@ -335,9 +335,13 @@ void Layer::DrawMenuBar() {
             if (ImGui::BeginMenu(ICON_LC_BRUSH " Color Theme")) {
                 if (ImGui::MenuItem(ICON_LC_MOON " Dark (Default)")) {
                     Styles::setupDarkTheme();
+                    m_ThemeStyle = "Dark";
+                    SaveUserPreferences();
                 }
                 if (ImGui::MenuItem(ICON_LC_SUN " Light")) {
                     ImGui::StyleColorsLight();
+                    m_ThemeStyle = "Light";
+                    SaveUserPreferences();
                 }
                 ImGui::EndMenu();
             }

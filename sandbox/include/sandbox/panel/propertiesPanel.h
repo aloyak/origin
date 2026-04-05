@@ -119,7 +119,7 @@ public:
                 ImGui::EndPopup();
             }
         } else {
-            ImGui::TextDisabled(ICON_LC_FILE_WARNING " No entity selected");
+            ImGui::TextDisabled("No entity selected!");
         }
         ImGui::End();
     }

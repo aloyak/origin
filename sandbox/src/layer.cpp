@@ -30,11 +30,16 @@ Layer::Layer(Engine& engine)
     static std::string layout = Path::resolve("resources/layout.ini").string();
     io.IniFilename = layout.c_str();
     m_UserPreferencesPath = Path::resolve("resources/user.json");
-    LoadUserPreferences();
+    m_WindowSize = m_Window.getSize();
 
     // Styles
     ImGui::StyleColorsDark();
     Styles::setupDarkTheme();
+
+    LoadUserPreferences();
+
+    m_Window.setSize((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
+    m_Renderer.setupRenderTarget((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
 
     SetupFonts();
 
@@ -50,6 +55,10 @@ Layer::Layer(Engine& engine)
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_ColliderDebugEntities, m_GizmoOperation, m_ShowRenderStats, m_CameraSens));
+}
+
+Layer::~Layer() {
+    SaveUserPreferences();
 }
 
 void Layer::SetupFonts() {
@@ -232,6 +241,7 @@ bool Layer::OpenSceneFromPath(const fs::path& inputPath) {
     return true;
 }
 
+// User Preferences
 void Layer::LoadUserPreferences() {
     m_RecentScenes.clear();
 
@@ -255,6 +265,23 @@ void Layer::LoadUserPreferences() {
         }
         if (data.contains("camera_speed") && data["camera_speed"].is_number()) {
             m_CameraSpeed = data["camera_speed"].get<float>();
+        }
+        if (data.contains("window_width") && data.contains("window_height") &&
+            data["window_width"].is_number() && data["window_height"].is_number()) {
+            m_WindowSize = Vec2(
+                data["window_width"].get<float>(),
+                data["window_height"].get<float>()
+            );
+        }
+        if (data.contains("style") && data["style"].is_string()) {
+            std::string style = data["style"].get<std::string>();
+            if (style == "Dark") {
+                Styles::setupDarkTheme();
+                m_ThemeStyle = "Dark";
+            } else if (style == "Light") {
+                ImGui::StyleColorsLight();
+                m_ThemeStyle = "Light";
+            }
         }
 
         if (data.contains("recent_scenes") && data["recent_scenes"].is_array()) {
@@ -283,9 +310,14 @@ void Layer::SaveUserPreferences() const {
         return;
     }
 
+    const Vec2 windowSize = m_Window.isFullscreen() ? m_WindowSize : m_Window.getSize();
+
     nlohmann::json data = {
         { "camera_sensitivity", m_CameraSens },
         { "camera_speed", m_CameraSpeed },
+        { "style", m_ThemeStyle },
+        { "window_width", windowSize.x },
+        { "window_height", windowSize.y },
         { "recent_scenes", m_RecentScenes }
     };
 

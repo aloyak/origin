@@ -12,7 +12,10 @@ public:
     void swapBuffers();
 
     void setFullscreen(bool fullscreen);
+    void setSize(unsigned int width, unsigned int height);
+
     void setWindowTitle(const char* title);
+    
     void enableVSync(bool enabled);
     bool isVSyncEnabled() const { return m_vsyncEnabled; }
 

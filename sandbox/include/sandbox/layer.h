@@ -30,6 +30,7 @@ struct ScenePathInfo {
 class Layer {
 public:
     Layer(Engine& engine);
+    ~Layer();
     void OnUIRender();
 
 private:
@@ -111,7 +112,7 @@ private:
     void AddRecentScene(const fs::path& scenePath);
 
     void registerDefaultInspectors();
-
+    std::string m_ThemeStyle = "Dark";
     
     std::unordered_set<Entity*> m_ColliderDebugEntities;
     // Physics (play/reset simulation)
@@ -125,6 +126,7 @@ private:
     ScenePathInfo m_CurrentSceneInfo;
     fs::path m_UserPreferencesPath;
     std::vector<std::string> m_RecentScenes;
+    Vec2 m_WindowSize = Vec2(1600.0f, 900.0f);
 
     // Closeable panels
     AboutPanel* m_AboutPanel = nullptr;
