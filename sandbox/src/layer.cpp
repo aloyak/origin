@@ -369,9 +369,13 @@ void Layer::AddRecentScene(const fs::path& scenePath) {
 void Layer::DrawDockspace() {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     float menuBarHeight = ImGui::GetFrameHeight();
+    const float statusBarHeight =
+        (m_StatusPanel && m_StatusPanel->IsVisible())
+            ? (ImGui::GetFrameHeightWithSpacing() - 2.5f)
+            : 0.0f;
 
     ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + menuBarHeight));
-    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - menuBarHeight));
+    ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - menuBarHeight - statusBarHeight));
     ImGui::SetNextWindowViewport(viewport->ID);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
