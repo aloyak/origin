@@ -9,9 +9,8 @@
     #include <glad/glad.h>
 #endif
 
-#include <spdlog/spdlog.h>
-
 #include "engine/utils/path.h"
+#include "engine/utils/logger.h"
 
 Texture::Texture(const std::string& path) {
     std::string resolvedPath = Path::resolve(path).string();
@@ -32,7 +31,7 @@ Texture::Texture(const std::string& path) {
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
-        spdlog::error("Failed to load texture at: {}", resolvedPath);
+        Logger::error("Failed to load texture at: " + resolvedPath);
     }
 
     stbi_image_free(data);

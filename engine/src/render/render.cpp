@@ -8,6 +8,7 @@
 
 #include "engine/core/window.h"
 #include "engine/utils/path.h"
+#include "engine/utils/logger.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>
@@ -17,7 +18,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <spdlog/spdlog.h>
+
 #include <cmath>
 
 Renderer::Renderer(Window& window)
@@ -64,7 +65,7 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        spdlog::error("Framebuffer is not complete!");
+        Logger::error("Framebuffer is not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -99,7 +100,7 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
 
 void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
     if (m_fbo == 0) {
-        spdlog::warn("resizeRenderTarget called before setupRenderTarget — ignoring.");
+        Logger::warn("resizeRenderTarget called before setupRenderTarget — ignoring.");
         return;
     }
     if (width == m_virtualWidth && height == m_virtualHeight) return;
@@ -116,7 +117,7 @@ void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
 
 void Renderer::setPixelArt(bool enabled, int colorDepth) {
     if (enabled && m_fbo == 0) {
-        spdlog::warn("setPixelArt() called before setupRenderTarget!");
+        Logger::warn("setPixelArt() called before setupRenderTarget!");
     }
     m_pixelArtEnabled = enabled;
     m_colorDepth      = colorDepth;

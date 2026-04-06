@@ -1,8 +1,11 @@
 #include "sandbox/layer.h"
 #include "sandbox/inspectorRegistry.h"
+
 #include "sandbox/panel/hierarchyPanel.h"
 #include "sandbox/panel/propertiesPanel.h"
 #include "sandbox/panel/sceneViewPanel.h"
+#include "sandbox/panel/statusPanel.h"
+
 #include "sandbox/dialog.h"
 
 #include "engine/components/cameraComponent.h"
@@ -55,6 +58,13 @@ Layer::Layer(Engine& engine)
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<SceneViewPanel>(m_Engine, m_EditorCamera, m_CameraSpeed, m_SelectedEntity, m_ColliderDebugEntities, m_GizmoOperation, m_ShowRenderStats, m_CameraSens));
+    auto statusPanel = std::make_unique<StatusPanel>();
+    m_StatusPanel = statusPanel.get();
+    m_Panels.push_back(std::move(statusPanel));
+
+    Logger::setCallback([this](const std::string& message) {
+        if (m_StatusPanel) m_StatusPanel->SetConsole(message);
+    });
 }
 
 Layer::~Layer() {

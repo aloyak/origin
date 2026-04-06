@@ -7,13 +7,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <spdlog/spdlog.h>
 #include <fstream>
 #include <string>
 #include <sstream>
 
 #include "engine/render/shader.h"
 #include "engine/utils/path.h"
+#include "engine/utils/logger.h"
 
 auto replaceFirstLine = [](std::string& src, const std::string& newLine)
 {
@@ -56,7 +56,7 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
 #endif
 
     } catch (std::ifstream::failure& e) {
-        spdlog::error("Failed to read shader files: {}", e.what());
+        Logger::error("Failed to read shader files: " + std::string(e.what()));
     }
 
     const char* vShaderCode = vertexCode.c_str();
@@ -84,7 +84,7 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        spdlog::error("Failed to link shader program: {}", infoLog);
+        Logger::error("Failed to link shader program: " + std::string(infoLog));
     }
 
     glDeleteShader(vertex);
@@ -137,6 +137,6 @@ void Shader::checkShader(unsigned int shader) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        spdlog::error("Failed to compile shader: {}", infoLog);
+        Logger::error("Failed to compile shader: " + std::string(infoLog));
     }
 }

@@ -7,6 +7,7 @@
 
 #include "sandbox/panel/panel.h"
 #include "sandbox/panel/aboutPanel.h"
+#include "sandbox/panel/statusPanel.h"
 
 #include "sandbox/styles.h"
 #include "sandbox/icons.h"
@@ -130,4 +131,5 @@ private:
 
     // Closeable panels
     AboutPanel* m_AboutPanel = nullptr;
+    StatusPanel* m_StatusPanel = nullptr;
 };

@@ -2,6 +2,8 @@
 #include "engine/render/camera.h"
 #include "engine/engine.h"
 
+#include "engine/utils/logger.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> 
 
@@ -12,7 +14,6 @@
 #endif
 
 #include <stb_image.h>
-#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 
 #include "engine/utils/path.h"
@@ -77,7 +78,7 @@ void SkyboxComponent::loadCubemap(const std::vector<std::string>& faces) {
                          0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         } else {
-            spdlog::error("Cubemap texture failed to load at path: {}", faces[i]);
+            Logger::error("Cubemap texture failed to load at path: " + faces[i]);
         }
     }
 

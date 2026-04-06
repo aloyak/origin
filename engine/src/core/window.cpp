@@ -1,4 +1,5 @@
 #include "engine/core/window.h"
+#include "engine/utils/logger.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>
@@ -7,7 +8,6 @@
 #endif
 
 #include <SDL2/SDL.h>
-#include <spdlog/spdlog.h>
 
 static int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
     if (event->type == SDL_WINDOWEVENT &&
@@ -20,7 +20,7 @@ static int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
 Window::Window(unsigned int width, unsigned int height, const char* title) {
     SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        spdlog::error("Failed to initialize SDL: {}", SDL_GetError());
+        Logger::error("Failed to initialize SDL: " + std::string(SDL_GetError()));
         SDL_Quit();
         throw std::runtime_error("SDL initialization failed");
     }
@@ -38,14 +38,14 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
     m_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                 width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!m_window) {
-        spdlog::error("Failed to create SDL window: {}", SDL_GetError());
+        Logger::error("Failed to create SDL window: " + std::string(SDL_GetError()));
         SDL_Quit();
         throw std::runtime_error("SDL window creation failed");
     }
 
     m_glContext = SDL_GL_CreateContext(m_window);
     if (!m_glContext) {
-        spdlog::error("Failed to create GL context: {}", SDL_GetError());
+        Logger::error("Failed to create GL context: " + std::string(SDL_GetError()));
         SDL_DestroyWindow(m_window);
         SDL_Quit();
         throw std::runtime_error("GL context creation failed");
@@ -54,7 +54,7 @@ Window::Window(unsigned int width, unsigned int height, const char* title) {
 
 #ifndef __EMSCRIPTEN__
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-        spdlog::error("Failed to init GLAD!");
+        Logger::error("Failed to init GLAD!");
 #endif
 
     glEnable(GL_DEPTH_TEST);

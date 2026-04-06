@@ -1,6 +1,6 @@
 #include "engine/scene/sceneManager.h"
 
-#include "spdlog/spdlog.h"
+#include "engine/utils/logger.h"
 
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rendererComponent.h"
@@ -58,7 +58,7 @@ namespace {
         if (type == "SkyboxComponent") {
             const std::vector<std::string> faces = readStringArray(jComp, "faces");
             if (faces.size() != 6) {
-                spdlog::warn("Skipping SkyboxComponent on entity '{}' due to invalid faces array.", entity->name);
+                Logger::warn("Skipping SkyboxComponent on entity '{}' due to invalid faces array.");
                 return nullptr;
             }
             return entity->addComponent<SkyboxComponent>(faces);
@@ -68,7 +68,7 @@ namespace {
         if (type == "PointLightComponent") return entity->addComponent<PointLightComponent>();
         if (type == "RigidbodyComponent") return entity->addComponent<RigidbodyComponent>();
         
-        spdlog::warn("Unknown component type '{}' on entity '{}'.", type, entity->name);
+        Logger::warn("Unknown component type on entity '" + entity->name + "'.");
         return nullptr;
     }
 }
@@ -76,14 +76,14 @@ namespace {
 void SceneManager::unload() {
     if (m_activeScene) {
         m_activeScene.reset();
-        spdlog::info("Scene unloaded.");
+        Logger::info("Scene unloaded.");
     }
 }
 
 void SceneManager::save(const std::string& scenePath) {
     std::string resolvedScenePath = Path::resolve(scenePath).string();
     if (!m_activeScene) {
-        spdlog::warn("No active scene to save.");
+        Logger::warn("No active scene to save.");
         return;
     }
 
@@ -116,9 +116,9 @@ void SceneManager::save(const std::string& scenePath) {
     std::ofstream file(resolvedScenePath);
     if (file.is_open()) {
         file << j.dump(4);
-        spdlog::info("Scene saved to: {}", resolvedScenePath);
+        Logger::info("Scene saved to: " + resolvedScenePath);
     } else {
-        spdlog::error("Failed to open file for saving: {}", resolvedScenePath);
+        Logger::error("Failed to open file for saving: " + resolvedScenePath);
     }
 }
 
@@ -127,7 +127,7 @@ Scene* SceneManager::load(const std::string& scenePath) {
 
     std::ifstream file(resolvedScenePath);
     if (!file.is_open()) {
-        spdlog::error("Could not open scene file: {}", resolvedScenePath);
+        Logger::error("Could not open scene file: " + resolvedScenePath);
         return nullptr;
     }
 
@@ -135,12 +135,12 @@ Scene* SceneManager::load(const std::string& scenePath) {
     try {
         file >> j;
     } catch (json::parse_error& e) {
-        spdlog::error("JSON parse error in {}: {}", resolvedScenePath, e.what());
+        Logger::error("JSON parse error in " + resolvedScenePath + ": " + e.what());
         return nullptr;
     }
 
     if (!j.is_object()) {
-        spdlog::error("Scene root in {} must be a JSON object.", resolvedScenePath);
+        Logger::error("Scene root in " + resolvedScenePath + " must be a JSON object.");
         return nullptr;
     }
 
@@ -154,7 +154,7 @@ Scene* SceneManager::load(const std::string& scenePath) {
     if (j.contains("entities") && j["entities"].is_array()) {
         for (const auto& jEnt : j["entities"]) {
             if (!jEnt.is_object()) {
-                spdlog::warn("Skipping malformed entity entry in scene '{}'.", loadedScene->name);
+                Logger::warn("Skipping malformed entity entry in scene '" + loadedScene->name + "'.");
                 continue;
             }
 
@@ -172,13 +172,13 @@ Scene* SceneManager::load(const std::string& scenePath) {
             if (jEnt.contains("components") && jEnt["components"].is_array()) {
                 for (const auto& jComp : jEnt["components"]) {
                     if (!jComp.is_object()) {
-                        spdlog::warn("Skipping malformed component on entity '{}'.", ent->name);
+                        Logger::warn("Skipping malformed component on entity '" + ent->name + "'.");
                         continue;
                     }
 
                     std::string type = jComp.value("type", "");
                     if (type.empty()) {
-                        spdlog::warn("Skipping component with missing type on entity '{}'.", ent->name);
+                        Logger::warn("Skipping component with missing type on entity '" + ent->name + "'.");
                         continue;
                     }
 
@@ -187,7 +187,7 @@ Scene* SceneManager::load(const std::string& scenePath) {
                         try {
                             c->deserialize(jComp);
                         } catch (const std::exception& e) {
-                            spdlog::error("Failed to deserialize component '{}' on entity '{}': {}", type, ent->name, e.what());
+                            Logger::error("Failed to deserialize component '" + type + "' on entity '" + ent->name + "': " + e.what());
                         }
                     }
                 }
@@ -198,6 +198,6 @@ Scene* SceneManager::load(const std::string& scenePath) {
     unload();
     m_activeScene = std::move(loadedScene);
 
-    spdlog::info("Scene '{}' loaded from {}", m_activeScene->name, resolvedScenePath);
+    Logger::info("Scene '" + m_activeScene->name + "' loaded from " + resolvedScenePath);
     return m_activeScene.get();
 }

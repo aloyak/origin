@@ -4,6 +4,7 @@
 #include "engine/render/shader.h"
 #include "engine/render/texture.h"
 #include "engine/core/resourceManager.h"
+
 #include "engine/lighting/directionalLight.h"
 #include "engine/lighting/pointLight.h"
 
@@ -12,14 +13,13 @@
 #include <assimp/postprocess.h>
 
 #include "engine/utils/path.h"
+#include "engine/utils/logger.h"
 
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>
 #else
     #include <glad/glad.h>
 #endif
-
-#include <spdlog/spdlog.h>
 
 Model::Model(const char* path) {
     loadModel(path);
@@ -39,7 +39,7 @@ void Model::loadModel(std::string path) {
     const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        spdlog::error(import.GetErrorString());
+        Logger::error(import.GetErrorString());
         return;
     }
     directory = path.substr(0, path.find_last_of('/'));

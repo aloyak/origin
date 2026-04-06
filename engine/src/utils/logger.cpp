@@ -3,6 +3,12 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 
+static Logger::Callback g_Callback = nullptr;
+
+void Logger::setCallback(Callback callback) {
+    g_Callback = callback;
+}
+
 void Logger::setVerbose(int verbose) {
     switch (verbose) {
         case 0: spdlog::set_level(spdlog::level::off);   break;
@@ -30,12 +36,15 @@ void Logger::debug(const std::string& message) {
 
 void Logger::info(const std::string& message) {
     spdlog::info(message);
+    if (g_Callback) g_Callback(message);
 }
 
 void Logger::warn(const std::string& message) {
     spdlog::warn(message);
+    if (g_Callback) g_Callback(message);
 }
 
 void Logger::error(const std::string& message) {
     spdlog::error(message);
+    if (g_Callback) g_Callback(message);
 }
