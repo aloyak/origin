@@ -3,6 +3,11 @@
 #include "sandbox/panel/panel.h"
 #include <imgui.h>
 
+#ifdef _WIN32
+    #include <windows.h>
+    #include <shellapi.h>
+#endif
+
 class AboutPanel : public Panel {
 public:
     void OnUIRender() override {
