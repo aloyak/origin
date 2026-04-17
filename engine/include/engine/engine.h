@@ -4,6 +4,7 @@
 #include "engine/core/window.h"
 #include "engine/input/input.h"
 #include "engine/physics/world.h"
+#include "engine/audio/audio.h"
 #include "engine/render/render.h"
 #include "engine/scene/sceneManager.h"
 
@@ -39,6 +40,7 @@ public:
     Window& getWindow() { return *m_window; }
     Renderer& getRenderer() { return *m_renderer; }
     PhysicsWorld& getPhysicsWorld() { return *m_physicsWorld; }
+    AudioSystem& getAudioSystem() { return *m_audioSystem; }
 
     // Entity management
     Entity* createEntity(std::string name = "Entity");
@@ -66,6 +68,7 @@ private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Input> m_input;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
+    std::unique_ptr<AudioSystem> m_audioSystem;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<SceneManager> m_sceneManager;
 

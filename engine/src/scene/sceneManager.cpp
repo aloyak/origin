@@ -8,6 +8,8 @@
 #include "engine/components/directionalLightComponent.h"
 #include "engine/components/pointLightComponent.h"
 #include "engine/components/rigidbodyComponent.h"
+#include "engine/components/audioSourceComponent.h"
+#include "engine/components/listenerComponent.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -67,6 +69,8 @@ namespace {
         if (type == "DirectionalLightComponent") return entity->addComponent<DirectionalLightComponent>();
         if (type == "PointLightComponent") return entity->addComponent<PointLightComponent>();
         if (type == "RigidbodyComponent") return entity->addComponent<RigidbodyComponent>();
+        if (type == "AudioSourceComponent") return entity->addComponent<AudioSourceComponent>();
+        if (type == "ListenerComponent") return entity->addComponent<ListenerComponent>();
         
         Logger::warn("Unknown component type on entity '" + entity->name + "'.");
         return nullptr;

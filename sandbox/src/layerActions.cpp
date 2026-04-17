@@ -437,6 +437,28 @@ void Layer::DrawMenuBar() {
             
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Audio")) {
+            if (ImGui::Checkbox("Mute Audio", &m_AudioEnabled)) {
+                ApplyAudioSettings();
+                SaveUserPreferences();
+            }
+
+            if (!m_AudioEnabled) {
+                ImGui::BeginDisabled();
+            }
+            ImGui::TextUnformatted("Master Volume");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(120.0f);
+            if (ImGui::SliderFloat("##MasterVolume", &m_MasterVolume, 0.0f, 8.0f, "%.2f")) {
+                ApplyAudioSettings();
+                SaveUserPreferences();
+            }
+            if (!m_AudioEnabled) {
+                ImGui::EndDisabled();
+            }
+
+            ImGui::EndMenu();
+        }
         if (ImGui::BeginMenu("Help")) {
             for (const ActionDef& action : actions) {
                 if (action.section == ActionSection::Help) {

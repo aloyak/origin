@@ -27,6 +27,7 @@
                 }
             ],
             "name": "Sponza",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     0.0,
@@ -61,6 +62,7 @@
                 }
             ],
             "name": "Skybox",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     0.0,
@@ -87,9 +89,13 @@
                     "fov": 60.0,
                     "near": 0.10000000149011612,
                     "type": "CameraComponent"
+                },
+                {
+                    "type": "ListenerComponent"
                 }
             ],
             "name": "Player Camera",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     0.0,
@@ -128,6 +134,7 @@
                 }
             ],
             "name": "Player Body",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     -250.0,
@@ -166,6 +173,7 @@
                 }
             ],
             "name": "Floor",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     0.0,
@@ -226,6 +234,7 @@
                 }
             ],
             "name": "Sphere",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     402.824462890625,
@@ -286,6 +295,7 @@
                 }
             ],
             "name": "Cube 2",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     451.3475646972656,
@@ -346,6 +356,7 @@
                 }
             ],
             "name": "Cube 3",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     251.2766876220703,
@@ -406,6 +417,7 @@
                 }
             ],
             "name": "Cube 4",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     334.2552795410156,
@@ -466,6 +478,7 @@
                 }
             ],
             "name": "Cube 5",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     334.2552795410156,
@@ -526,6 +539,7 @@
                 }
             ],
             "name": "Cube 6",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     413.8836364746094,
@@ -586,6 +600,7 @@
                 }
             ],
             "name": "Cube 7",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     309.8080749511719,
@@ -618,6 +633,7 @@
                 }
             ],
             "name": "Light",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     394.4024963378906,
@@ -678,6 +694,7 @@
                 }
             ],
             "name": "Sphere 2",
+            "tag": "Untagged",
             "transform": {
                 "pos": [
                     279.8478088378906,
@@ -693,6 +710,39 @@
                     49.9998893737793,
                     50.000057220458984,
                     49.99992752075195
+                ]
+            }
+        },
+        {
+            "components": [
+                {
+                    "falloffExponent": 1.0,
+                    "looping": true,
+                    "playOnStart": true,
+                    "radius": 1000.0,
+                    "sound": "assets/audio/wind.wav",
+                    "type": "AudioSourceComponent",
+                    "useFalloff": true,
+                    "volume": 1.0
+                }
+            ],
+            "name": "Wind",
+            "tag": "Untagged",
+            "transform": {
+                "pos": [
+                    -862.23974609375,
+                    146.72305297851563,
+                    -51.43330764770508
+                ],
+                "rot": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "sca": [
+                    1.0,
+                    1.0,
+                    1.0
                 ]
             }
         }

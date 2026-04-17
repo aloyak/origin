@@ -10,6 +10,8 @@
 #include "engine/components/directionalLightComponent.h"
 #include "engine/components/pointLightComponent.h"
 #include "engine/components/rigidbodyComponent.h"
+#include "engine/components/audioSourceComponent.h"
+#include "engine/components/listenerComponent.h"
 
 #include <string>
 #include <vector>
@@ -318,4 +320,58 @@ void Layer::registerDefaultInspectors() {
             c->setAngularDamping(angularDamping);
         }
     });
+
+	InspectorRegistry::registerComponent<AudioSourceComponent>([](AudioSourceComponent* c) {
+		DrawFilePicker(
+			"Sound",
+			"audio_source_sound",
+			c->getSoundPath(),
+			{ "Audio Files", "*.wav *.ogg *.mp3 *.flac", "All Files", "*" },
+			[&](const std::string& path) { c->setSoundPath(path); }
+		);
+
+		bool playOnStart = c->getPlayOnStart();
+		if (ImGui::Checkbox("Play On Start", &playOnStart)) {
+			c->setPlayOnStart(playOnStart);
+		}
+
+		bool looping = c->getLooping();
+		if (ImGui::Checkbox("Loop", &looping)) {
+			c->setLooping(looping);
+		}
+
+		float volume = c->getVolume();
+		if (ImGui::DragFloat("Volume", &volume, 0.01f, 0.0f, 8.0f)) {
+			c->setVolume(volume);
+		}
+
+		float radius = c->getRadius();
+		if (ImGui::DragFloat("Radius", &radius, 0.1f, 0.0f, 2000.0f)) {
+			c->setRadius(radius);
+		}
+
+		bool useFalloff = c->getUseFalloff();
+		if (ImGui::Checkbox("Use Falloff", &useFalloff)) {
+			c->setUseFalloff(useFalloff);
+		}
+
+		if (useFalloff) {
+			float falloffExponent = c->getFalloffExponent();
+			if (ImGui::DragFloat("Falloff", &falloffExponent, 0.05f, 0.01f, 16.0f)) {
+				c->setFalloffExponent(falloffExponent);
+			}
+		}
+
+		if (ImGui::Button(ICON_LC_PLAY " Play")) {
+			c->play();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(ICON_LC_CIRCLE_STOP " Stop")) {
+			c->stop();
+		}
+	});
+
+	InspectorRegistry::registerComponent<ListenerComponent>([](ListenerComponent* /*c*/) {
+		ImGui::TextDisabled("Listener marker component (spatial audio WIP).");
+	});
 }

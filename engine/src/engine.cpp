@@ -1,6 +1,7 @@
 #include "engine/engine.h"
 #include "engine/components/entity.h"
 #include "engine/components/cameraComponent.h"
+#include "engine/components/listenerComponent.h"
 #include "engine/lighting/lightingManager.h"
 
 #ifdef __EMSCRIPTEN__
@@ -22,6 +23,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     m_renderer = std::make_unique<Renderer>(*m_window);
     m_input = std::make_unique<Input>(m_window->getHandle());
     m_physicsWorld = std::make_unique<PhysicsWorld>();
+    m_audioSystem = std::make_unique<AudioSystem>();
     m_sceneManager = std::make_unique<SceneManager>();
 
     m_lastSceneAmbient = m_renderer->getMinimumAmbientLight();
@@ -163,6 +165,64 @@ void Engine::moveToScene(Entity* entity) {
 
 // Scene update + render
 void Engine::updateScene() {
+    if (m_audioSystem) {
+        bool listenerFound = false;
+        Scene* activeScene = m_sceneManager ? m_sceneManager->getActiveScene() : nullptr;
+
+        auto trySetListenerFromEntity = [&](Entity* entity) {
+            if (listenerFound || entity == nullptr) {
+                return;
+            }
+
+            auto* listener = entity->getComponent<ListenerComponent>();
+            if (listener && listener->isEnabled) {
+                m_audioSystem->setListenerPosition(entity->transform.position);
+                listenerFound = true;
+            }
+        };
+
+        for (const auto& entity : m_entities) {
+            trySetListenerFromEntity(entity.get());
+        }
+
+        if (!listenerFound && activeScene) {
+            for (const auto& entity : activeScene->getEntities()) {
+                trySetListenerFromEntity(entity.get());
+            }
+        }
+
+        auto isTrackedEntity = [&](Entity* candidate) {
+            if (!candidate) {
+                return false;
+            }
+
+            for (const auto& entity : m_entities) {
+                if (entity.get() == candidate) {
+                    return true;
+                }
+            }
+
+            if (activeScene) {
+                for (const auto& entity : activeScene->getEntities()) {
+                    if (entity.get() == candidate) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+
+        if (!listenerFound && isTrackedEntity(m_activeCamera)) {
+            m_audioSystem->setListenerPosition(m_activeCamera->transform.position);
+            listenerFound = true;
+        }
+
+        if (!listenerFound) {
+            m_audioSystem->clearListenerPosition();
+        }
+    }
+
     m_physicsWorld->stepSimulation(m_deltaTime);
 
     for (auto& entity : m_entities)

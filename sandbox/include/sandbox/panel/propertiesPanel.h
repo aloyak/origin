@@ -12,6 +12,8 @@
 #include "engine/components/directionalLightComponent.h"
 #include "engine/components/pointLightComponent.h"
 #include "engine/components/rigidbodyComponent.h"
+#include "engine/components/audioSourceComponent.h"
+#include "engine/components/listenerComponent.h"
 
 #include <cctype>
 
@@ -113,6 +115,14 @@ public:
                 }
                 if (!m_SelectedEntity->getComponent<RigidbodyComponent>() && ImGui::MenuItem(ICON_LC_ATOM " Rigidbody")) {
                     m_SelectedEntity->addComponent<RigidbodyComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<AudioSourceComponent>() && ImGui::MenuItem(ICON_LC_AUDIO_LINES " Audio Source")) {
+                    m_SelectedEntity->addComponent<AudioSourceComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<ListenerComponent>() && ImGui::MenuItem(ICON_LC_AUDIO_WAVEFORM " Listener")) {
+                    m_SelectedEntity->addComponent<ListenerComponent>();
                     ImGui::CloseCurrentPopup();
                 }
 

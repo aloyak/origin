@@ -26,6 +26,11 @@ namespace {
 constexpr std::size_t kMaxRecentScenes = 5;
 }
 
+void Layer::ApplyAudioSettings() {
+    const float appliedVolume = m_AudioEnabled ? std::clamp(m_MasterVolume, 0.0f, 8.0f) : 0.0f;
+    m_Engine.getAudioSystem().setGlobalVolume(appliedVolume);
+}
+
 Layer::Layer(Engine& engine) 
     : m_Engine(engine) {
     
@@ -40,6 +45,7 @@ Layer::Layer(Engine& engine)
     Styles::setupDarkTheme();
 
     LoadUserPreferences();
+    ApplyAudioSettings();
 
     m_Window.setSize((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
     m_Renderer.setupRenderTarget((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
@@ -54,6 +60,7 @@ Layer::Layer(Engine& engine)
     cam->addComponent<CameraComponent>(60.0f, m_Window.getAspectRatio(), 0.1f, 10000.0f);
     cam->transform.position = Vec3(0.0f, 0.0f, 0.0f);
     m_EditorCamera = cam;
+    m_EditorCamera->addComponent<ListenerComponent>();
 
     m_Panels.push_back(std::make_unique<HierarchyPanel>(m_Engine, m_SelectedEntity));
     m_Panels.push_back(std::make_unique<PropertiesPanel>(m_Engine, m_SelectedEntity));
@@ -294,6 +301,13 @@ void Layer::LoadUserPreferences() {
             }
         }
 
+        if (data.contains("audio_enabled") && data["audio_enabled"].is_boolean()) {
+            m_AudioEnabled = data["audio_enabled"].get<bool>();
+        }
+        if (data.contains("master_volume") && data["master_volume"].is_number()) {
+            m_MasterVolume = std::clamp(data["master_volume"].get<float>(), 0.0f, 8.0f);
+        }
+
         if (data.contains("recent_scenes") && data["recent_scenes"].is_array()) {
             for (const auto& scene : data["recent_scenes"]) {
                 if (!scene.is_string()) {
@@ -326,6 +340,8 @@ void Layer::SaveUserPreferences() const {
         { "camera_sensitivity", m_CameraSens },
         { "camera_speed", m_CameraSpeed },
         { "style", m_ThemeStyle },
+        { "audio_enabled", m_AudioEnabled },
+        { "master_volume", m_MasterVolume },
         { "window_width", windowSize.x },
         { "window_height", windowSize.y },
         { "recent_scenes", m_RecentScenes }
@@ -343,6 +359,8 @@ void Layer::SaveUserPreferences() const {
 void Layer::ClearUserPreferences() {
     m_CameraSens = 0.15f;
     m_CameraSpeed = 1.0f;
+    m_AudioEnabled = true;
+    m_MasterVolume = 1.0f;
     m_RecentScenes.clear();
 
     std::error_code ec;
@@ -351,6 +369,7 @@ void Layer::ClearUserPreferences() {
         Logger::warn("Failed to remove user preferences file: " + ec.message());
     }
 
+    ApplyAudioSettings();
     SaveUserPreferences();
 }
 

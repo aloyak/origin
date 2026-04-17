@@ -50,6 +50,7 @@ private:
         Rendering,
         Gizmos,
         Physics,
+        Audio,
         Help,
     };
 
@@ -111,6 +112,7 @@ private:
     void SaveUserPreferences() const;
     void ClearUserPreferences();
     void AddRecentScene(const fs::path& scenePath);
+    void ApplyAudioSettings();
 
     void registerDefaultInspectors();
     std::string m_ThemeStyle = "Dark";
@@ -128,6 +130,8 @@ private:
     fs::path m_UserPreferencesPath;
     std::vector<std::string> m_RecentScenes;
     Vec2 m_WindowSize = Vec2(1600.0f, 900.0f);
+    bool m_AudioEnabled = true;
+    float m_MasterVolume = 1.0f;
 
     // Closeable panels
     AboutPanel* m_AboutPanel = nullptr;
