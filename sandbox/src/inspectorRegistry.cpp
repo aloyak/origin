@@ -50,8 +50,7 @@ static void DrawFilePicker(
 	if (currentPath.empty()) {
 		ImGui::BeginDisabled();
 	}
-	const std::string clearLabel = std::string("X##clear_") + id;
-	if (ImGui::Button(clearLabel.c_str(), ImVec2(clearButtonWidth, 0.0f))) {
+	if (ImGui::Button(ICON_LC_X "", ImVec2(clearButtonWidth, 0.0f))) {
 		setPath("");
 	}
 	if (currentPath.empty()) {
@@ -344,34 +343,35 @@ void Layer::registerDefaultInspectors() {
 		if (ImGui::DragFloat("Volume", &volume, 0.01f, 0.0f, 8.0f)) {
 			c->setVolume(volume);
 		}
+		
+		float width = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) / 2.0f;
 
-		float radius = c->getRadius();
-		if (ImGui::DragFloat("Radius", &radius, 0.1f, 0.0f, 2000.0f)) {
-			c->setRadius(radius);
+		if (ImGui::Button(ICON_LC_PLAY " Play", ImVec2(width, 0))) {
+			c->play();
 		}
+		ImGui::SameLine();
+		if (ImGui::Button(ICON_LC_SQUARE_STOP " Stop", ImVec2(width, 0))) {
+			c->stop();
+		}
+
+		ImGui::SeparatorText("Spatialization");
 
 		bool useFalloff = c->getUseFalloff();
 		if (ImGui::Checkbox("Use Falloff", &useFalloff)) {
 			c->setUseFalloff(useFalloff);
 		}
-
+		
 		if (useFalloff) {
+			float radius = c->getRadius();
+			if (ImGui::DragFloat("Radius", &radius, 0.1f, 0.0f, 2000.0f)) {
+				c->setRadius(radius);
+			}
 			float falloffExponent = c->getFalloffExponent();
 			if (ImGui::DragFloat("Falloff", &falloffExponent, 0.05f, 0.01f, 16.0f)) {
 				c->setFalloffExponent(falloffExponent);
 			}
 		}
-
-		if (ImGui::Button(ICON_LC_PLAY " Play")) {
-			c->play();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button(ICON_LC_CIRCLE_STOP " Stop")) {
-			c->stop();
-		}
 	});
 
-	InspectorRegistry::registerComponent<ListenerComponent>([](ListenerComponent* /*c*/) {
-		ImGui::TextDisabled("Listener marker component (spatial audio WIP).");
-	});
+	InspectorRegistry::registerComponent<ListenerComponent>([](ListenerComponent* /*c*/) {});
 }

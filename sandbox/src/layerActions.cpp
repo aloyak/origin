@@ -238,6 +238,14 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SceneManager.getActiveScene() != nullptr; },
             nullptr },
+        { ActionSection::Audio, ICON_LC_VOLUME_OFF " Mute Audio", "Ctrl+M", { KEY_M, true, false, false },
+            [this]() { 
+                m_AudioEnabled = !m_AudioEnabled; 
+                ApplyAudioSettings();
+                SaveUserPreferences();
+            },
+            nullptr,
+            [this]() { return !m_AudioEnabled; } },
         { ActionSection::Help, ICON_LC_INFO " About", nullptr, { 0, false, false, false },
             [this]() {
                 if (!m_AboutPanel) {
@@ -438,9 +446,10 @@ void Layer::DrawMenuBar() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Audio")) {
-            if (ImGui::Checkbox("Mute Audio", &m_AudioEnabled)) {
-                ApplyAudioSettings();
-                SaveUserPreferences();
+            for (const ActionDef& action : actions) {
+                if (action.section == ActionSection::Audio) {
+                    DrawActionItem(action);
+                }
             }
 
             if (!m_AudioEnabled) {

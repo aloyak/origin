@@ -25,9 +25,10 @@ public:
             ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - textWidth) * 0.5f);
             ImGui::Text("Origin Sandbox");
             ImGui::PopFont();
+            ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - textWidth) * 0.5f);
+            ImGui::Text("By 4loyak!");
 
             ImGui::SeparatorText("About");
-            ImGui::Text("By 4loyak!");
             ImGui::Text("Sandbox Scene Editor for the Origin Engine");
             ImGui::Text("More info: ");
             ImGui::SameLine();
@@ -47,6 +48,7 @@ public:
             ImGui::SeparatorText("Dependencies");
             ImGui::BulletText(" OpenGL — 4.1");
             ImGui::BulletText(" Bullet Physics — 3.25");
+            ImGui::BulletText(" SoLoud — Latest");
             ImGui::BulletText(" SDL2 — 2.32.8");
             ImGui::BulletText(" Assimp — 6.0.4");
         }
