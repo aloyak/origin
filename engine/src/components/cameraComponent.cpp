@@ -18,6 +18,14 @@ std::unique_ptr<Component> CameraComponent::clone() const {
     return copy;
 }
 
+// CHECK: move to transform itself?
+void CameraComponent::lookAt(Entity& target) {
+    Vec3 direction = (target.transform.position - entity->transform.position).normalize();
+    float pitch = std::asin(direction.y) * 180.0f / 3.14159265f;
+    float yaw = std::atan2(direction.z, direction.x) * 180.0f / 3.14159265f;
+    entity->transform.rotation = Vec3(pitch, yaw, 0.0f);
+}
+
 void CameraComponent::serialize(nlohmann::json& j) const {
     j["type"] = "CameraComponent";
     j["fov"] = m_fov;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/components/entity.h"
 #include "engine/components/component.h"
 #include "engine/render/camera.h"
 
@@ -16,6 +17,7 @@ public:
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
 
+    void lookAt(Entity& target);
 private:
     std::unique_ptr<Camera> m_camera;
     
