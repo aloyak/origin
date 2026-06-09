@@ -4,6 +4,8 @@
 #include "engine/components/rigidbodyComponent.h" 
 #include "engine/render/camera.h"
 #include "engine/scene/scene.h"
+
+#include "engine/core/math.h"
 #include "engine/core/transform.h"
 
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
@@ -26,23 +28,7 @@
 
 namespace {
 PhysicsWorld* g_activeWorld = nullptr;
-
-float dot(const Vec3& a, const Vec3& b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-float length(const Vec3& v) {
-    return std::sqrt(dot(v, v));
-}
-
-Vec3 normalize(const Vec3& v) {
-    const float len = length(v);
-    if (len <= 0.000001f) {
-        return Vec3(0.0f, 0.0f, -1.0f);
-    }
-    return Vec3(v.x / len, v.y / len, v.z / len);
-}
-} // namespace
+} 
 
 struct PhysicsWorld::Data {
     btDefaultCollisionConfiguration collisionConfig;
