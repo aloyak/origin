@@ -22,7 +22,7 @@ Camera::Camera(float fov, float aspect, float zNear, float zFar) {
 
 void* Camera::getViewMatrix(const Transform& transform) const {
     float yaw   = transform.rotation.y;
-    float pitch = glm::clamp(transform.rotation.x, -89.0f, 89.0f);
+    float pitch = transform.rotation.x;
 
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
