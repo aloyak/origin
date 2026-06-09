@@ -12,4 +12,11 @@ FetchContent_Declare(
     GIT_PROGRESS   TRUE
 )
 
+if(EMSCRIPTEN)
+    set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
+    set(SOLOUD_BACKEND_SDL2_STATIC OFF CACHE BOOL "" FORCE)
+    set(WITH_SDL2 OFF CACHE BOOL "" FORCE)
+    set(WITH_SDL2_STATIC OFF CACHE BOOL "" FORCE)
+endif()
+
 FetchContent_MakeAvailable(soloud)
