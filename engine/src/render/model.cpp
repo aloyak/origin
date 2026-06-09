@@ -15,11 +15,53 @@
 #include "engine/utils/path.h"
 #include "engine/utils/logger.h"
 
+#include <cctype>
+
 #ifdef __EMSCRIPTEN__
     #include <GLES3/gl3.h>
 #else
     #include <glad/glad.h>
 #endif
+
+static const aiTexture* findEmbeddedTexture(const aiScene* scene, const std::string& path) {
+    if (const aiTexture* tex = scene->GetEmbeddedTexture(path.c_str())) {
+        return tex;
+    }
+
+    auto normalize = [](std::string p) {
+        size_t pos = p.find_last_of("\\/");
+        if (pos != std::string::npos) p = p.substr(pos + 1);
+        for (char& c : p) {
+            if (c == '.') c = '_';
+            c = std::tolower(static_cast<unsigned char>(c));
+        }
+        return p;
+    };
+
+    std::string target = normalize(path);
+
+    for (unsigned int i = 0; i < scene->mNumTextures; i++) {
+        std::string texName = scene->mTextures[i]->mFilename.C_Str();
+        if (target == normalize(texName) && !target.empty()) {
+            return scene->mTextures[i];
+        }
+    }
+
+    return nullptr;
+}
+
+static std::string restoreExtension(std::string path) {
+    const std::string extensions[] = { "_png", "_jpg", "_jpeg", "_tga", "_dds", "_bmp" };
+    for (const auto& ext : extensions) {
+        if (path.length() >= ext.length()) {
+            if (path.compare(path.length() - ext.length(), ext.length(), ext) == 0) {
+                path[path.length() - ext.length()] = '.';
+                break;
+            }
+        }
+    }
+    return path;
+}
 
 Model::Model(const char* path) {
     loadModel(path);
@@ -43,6 +85,7 @@ void Model::loadModel(std::string path) {
         return;
     }
     directory = path.substr(0, path.find_last_of('/'));
+    m_embeddedTextures.clear();
 
     processNode(scene->mRootNode, scene);
 }
@@ -96,38 +139,80 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-    std::vector<MeshTexture> diffuseMaps = loadMaterialTextures(material, (int)aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    std::vector<MeshTexture> diffuseMaps  = loadMaterialTextures(material, (int)aiTextureType_DIFFUSE,   "texture_diffuse",  scene);
+    std::vector<MeshTexture> specularMaps = loadMaterialTextures(material, (int)aiTextureType_SPECULAR,  "texture_specular", scene);
+    std::vector<MeshTexture> normalMaps   = loadMaterialTextures(material, (int)aiTextureType_NORMALS,   "texture_normal",   scene);
 
-    std::vector<MeshTexture> specularMaps = loadMaterialTextures(material, (int)aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-    std::vector<MeshTexture> normalMaps = loadMaterialTextures(material, (int)aiTextureType_NORMALS, "texture_normal");
     if (normalMaps.empty()) {
-        normalMaps = loadMaterialTextures(material, (int)aiTextureType_HEIGHT, "texture_normal");
+        normalMaps = loadMaterialTextures(material, (int)aiTextureType_HEIGHT, "texture_normal", scene);
     }
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
-    std::vector<MeshTexture> metallicMaps = loadMaterialTextures(material, (int)aiTextureType_METALNESS, "texture_metallic");
+    std::vector<MeshTexture> metallicMaps = loadMaterialTextures(material, (int)aiTextureType_METALNESS, "texture_metallic", scene);
+
+    textures.insert(textures.end(), diffuseMaps.begin(),  diffuseMaps.end());
+    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    textures.insert(textures.end(), normalMaps.begin(),   normalMaps.end());
     textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<MeshTexture> Model::loadMaterialTextures(aiMaterial *mat, int type, std::string typeName) {
+std::vector<MeshTexture> Model::loadMaterialTextures(
+    aiMaterial *mat, int type, std::string typeName, const aiScene* scene)
+{
     std::vector<MeshTexture> textures;
     aiTextureType assimpType = static_cast<aiTextureType>(type);
 
     for(unsigned int i = 0; i < mat->GetTextureCount(assimpType); i++) {
         aiString str;
         mat->GetTexture(assimpType, i, &str);
-
-        std::string fullPath = directory + '/' + str.C_Str();
+        const std::string texPath = str.C_Str();
 
         MeshTexture meshTex;
-        meshTex.texture = ResourceManager::instance().getTexture(fullPath);
         meshTex.type = typeName;
-        textures.push_back(meshTex);
+
+        const aiTexture* aiTex = findEmbeddedTexture(scene, str.C_Str());
+
+        if (aiTex) {
+            auto it = m_embeddedTextures.find(texPath);
+            if (it != m_embeddedTextures.end()) {
+                meshTex.texture = it->second;
+            } else {
+                std::shared_ptr<Texture> tex;
+
+                if (aiTex->mHeight == 0) {
+                    tex = std::make_shared<Texture>(
+                        reinterpret_cast<const unsigned char*>(aiTex->pcData),
+                        aiTex->mWidth
+                    );
+                } else {
+                    const int pixelCount = aiTex->mWidth * aiTex->mHeight;
+                    std::vector<unsigned char> rgba(pixelCount * 4);
+                    for (int p = 0; p < pixelCount; ++p) {
+                        rgba[p*4+0] = aiTex->pcData[p].r;
+                        rgba[p*4+1] = aiTex->pcData[p].g;
+                        rgba[p*4+2] = aiTex->pcData[p].b;
+                        rgba[p*4+3] = aiTex->pcData[p].a;
+                    }
+                    tex = std::make_shared<Texture>(rgba.data(), aiTex->mWidth, aiTex->mHeight, 4);
+                }
+
+                m_embeddedTextures[texPath] = tex;
+                meshTex.texture = tex;
+            }
+        } else {
+            std::string unmangledPath = restoreExtension(texPath);
+            
+            meshTex.texture = ResourceManager::instance().getTexture(directory + '/' + unmangledPath);
+            
+            if (!meshTex.texture && unmangledPath != texPath) {
+                meshTex.texture = ResourceManager::instance().getTexture(directory + '/' + texPath);
+            }
+        }
+
+        if (meshTex.texture) {
+            textures.push_back(meshTex);
+        }
     }
     return textures;
 }
