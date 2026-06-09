@@ -13,6 +13,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/pfd.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imguizmo.cmake)
 
 target_link_libraries(sandbox PRIVATE engine imguizmo pfd)
+target_link_libraries(imguizmo PRIVATE imgui)
 
 if(WIN32)
     add_custom_command(TARGET sandbox POST_BUILD
