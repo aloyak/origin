@@ -141,6 +141,8 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
     glDepthFunc(GL_LEQUAL); 
     m_shader->use();
 
+    m_shader->setVec3("colorTint", m_colorTint);
+
     glm::mat4 view = glm::mat4(glm::mat3(*(glm::mat4*)camera.getViewMatrix(cameraTransform)));
     if (m_rotation != 0.0f) {
         view = glm::rotate(view, glm::radians(m_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -162,6 +164,7 @@ void SkyboxComponent::serialize(nlohmann::json& j) const {
     j["type"] = "SkyboxComponent";
     j["faces"] = m_facePaths;
     j["rotation"] = m_rotation;
+    j["colorTint"] = { m_colorTint.x, m_colorTint.y, m_colorTint.z };
 }
 
 void SkyboxComponent::deserialize(const nlohmann::json& j) {
@@ -175,5 +178,12 @@ void SkyboxComponent::deserialize(const nlohmann::json& j) {
             m_facePaths = std::vector<std::string>(6);
         }
         loadCubemap(m_facePaths);
+    }
+
+    if (j.contains("colorTint") && j["colorTint"].is_array()) {
+        auto tint = j["colorTint"].get<std::vector<float>>();
+        if (tint.size() == 3) {
+            m_colorTint = { tint[0], tint[1], tint[2] };
+        }
     }
 }

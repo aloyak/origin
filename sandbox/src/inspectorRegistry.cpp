@@ -223,6 +223,11 @@ void Layer::registerDefaultInspectors() {
 		if (ImGui::DragFloat("Rotation", &rotation, 0.1f, 0.0f, 360.0f)) {
 			c->setRotation(rotation);
 		}
+
+		Vec3 colorTint = c->getColorTint();
+		if (ImGui::ColorEdit3("Color Tint", &colorTint.x)) {
+			c->setColorTint(colorTint);
+		}
 	});
 
 	InspectorRegistry::registerComponent<PointLightComponent>([](PointLightComponent* c) {
