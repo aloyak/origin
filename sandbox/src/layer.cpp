@@ -156,7 +156,7 @@ void Layer::OnUIRender() {
 }
 
 void Layer::OpenScene() {
-    std::string path = Dialog::openFile({ "Scene Files", "*.json" });
+    std::string path = Dialog::openFile({ "Scene Files", "*.json *.scene" });
     if (!path.empty()) {
         OpenSceneFromPath(path);
     }
@@ -207,7 +207,7 @@ void Layer::SaveSceneAs() {
         return;
     }
 
-    std::string path = Dialog::saveFile({ "Scene Files", "*.json" });
+    std::string path = Dialog::saveFile({ "Scene Files", "*.json *.scene" });
     if (!path.empty()) {
         fs::path chosenPath(path);
         if (!chosenPath.has_extension()) {
