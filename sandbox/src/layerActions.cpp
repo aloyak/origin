@@ -136,6 +136,15 @@ Layer::ActionList Layer::BuildActions() {
             },
             [this]() { return m_SelectedEntity != nullptr; },
             nullptr },
+        { ActionSection::Scene, ICON_LC_ARROW_LEFT " Align With Camera", "Ctrl+Shift+F", { KEY_F, true, true, false },
+            [this]() {
+                if (!m_SelectedEntity || !m_EditorCamera) return;
+
+                m_SelectedEntity->transform.position = m_EditorCamera->transform.position;
+                m_SelectedEntity->transform.rotation = m_EditorCamera->transform.rotation;
+            },
+            nullptr,
+            nullptr },
         { ActionSection::Rendering, ICON_LC_GRID_2_X_2 " Toggle Pixelart", "Ctrl+P", { KEY_P, true, false, false },
             [this]() {
                 if (!m_Renderer.isPixelArtEnabled()) {
