@@ -25,6 +25,8 @@ struct Vec2 {
 
 inline Vec3 operator*(const Vec3& a, float s) { return {a.x*s, a.y*s, a.z*s}; }
 inline Vec3 operator*(float s, const Vec3& a) { return {a.x*s, a.y*s, a.z*s}; }
+inline Vec3 operator/(const Vec3& a, float s) { return {a.x/s, a.y/s, a.z/s}; }
+inline Vec3 operator/(float s, const Vec3& a) { return {s/a.x, s/a.y, s/a.z}; }
 inline Vec3 operator*(const Vec3& a, const Vec3& b) { return {a.x*b.x, a.y*b.y, a.z*b.z}; }
 inline Vec3 operator+(const Vec3& a, const Vec3& b) { return {a.x+b.x, a.y+b.y, a.z+b.z}; }
 inline Vec3 operator-(const Vec3& a, const Vec3& b) { return {a.x-b.x, a.y-b.y, a.z-b.z}; }
