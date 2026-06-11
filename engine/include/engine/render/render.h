@@ -60,14 +60,20 @@ public:
 
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
+    void drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness = 2.0f);
+
 private:
-    Window& m_window;   // non-owning reference
+    Window& m_window;
 
     unsigned int m_fbo        = 0;
     unsigned int m_fboTexture = 0;
     unsigned int m_rbo        = 0;
     unsigned int m_quadVAO    = 0;
     unsigned int m_quadVBO    = 0;
+
+    unsigned int m_lineVAO    = 0;
+    unsigned int m_lineVBO    = 0;
+    std::unique_ptr<Shader> m_lineShader;
 
     unsigned int m_virtualWidth  = 0;
     unsigned int m_virtualHeight = 0;

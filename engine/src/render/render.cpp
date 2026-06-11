@@ -33,9 +33,12 @@ Renderer::~Renderer() {
         glDeleteVertexArrays(1,  &m_quadVAO);
         glDeleteBuffers(1,       &m_quadVBO);
     }
+    if (m_lineVAO) {
+        glDeleteVertexArrays(1, &m_lineVAO);
+        glDeleteBuffers(1,      &m_lineVBO);
+    }
 }
 
-// Render target
 void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     m_virtualWidth  = width;
     m_virtualHeight = height;
@@ -46,7 +49,9 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
         glDeleteRenderbuffers(1, &m_rbo);
         glDeleteVertexArrays(1,  &m_quadVAO);
         glDeleteBuffers(1,       &m_quadVBO);
-        m_fbo = m_fboTexture = m_rbo = m_quadVAO = m_quadVBO = 0;
+        glDeleteVertexArrays(1,  &m_lineVAO);
+        glDeleteBuffers(1,       &m_lineVBO);
+        m_fbo = m_fboTexture = m_rbo = m_quadVAO = m_quadVBO = m_lineVAO = m_lineVBO = 0;
     }
 
     glGenFramebuffers(1, &m_fbo);
@@ -94,6 +99,26 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
         m_screenShader = std::make_unique<Shader>(
             Path::resolve("assets/shaders/post_vert.glsl").string(),
             Path::resolve("assets/shaders/post_frag.glsl").string()
+        );
+    }
+
+    glGenVertexArrays(1, &m_lineVAO);
+    glGenBuffers(1, &m_lineVBO);
+    glBindVertexArray(m_lineVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_lineVBO);
+    glBufferData(GL_ARRAY_BUFFER, 6 * 7 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    if (!m_lineShader) {
+        m_lineShader = std::make_unique<Shader>(
+            Path::resolve("assets/shaders/line_vert.glsl").string(),
+            Path::resolve("assets/shaders/line_frag.glsl").string()
         );
     }
 }
@@ -223,4 +248,34 @@ void Renderer::render(Model& model, Material& material,
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
     model.draw(material, directionalLights, pointLights);
+}
+
+void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness) {
+    if (!m_lineShader) return;
+
+    float vertices[] = {
+        start.x, start.y, start.z,  end.x,   end.y,   end.z,   1.0f,
+        start.x, start.y, start.z,  end.x,   end.y,   end.z,  -1.0f,
+        end.x,   end.y,   end.z,    start.x, start.y, start.z, 1.0f,
+
+        start.x, start.y, start.z,  end.x,   end.y,   end.z,  -1.0f,
+        end.x,   end.y,   end.z,    start.x, start.y, start.z, 1.0f,
+        end.x,   end.y,   end.z,    start.x, start.y, start.z, -1.0f
+    };
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_lineVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+    m_lineShader->use();
+    m_lineShader->setMat4("u_View",       camera.getViewMatrix(cameraTransform));
+    m_lineShader->setMat4("u_Projection", camera.getProjectionMatrix());
+    m_lineShader->setVec3("u_Color",      Vec3(color.x, color.y, color.z));
+    m_lineShader->setFloat("u_Thickness", thickness);
+    
+    Vec2 size = m_window.getSize();
+    m_lineShader->setVec2("u_ScreenSize", Vec2(size.x, size.y));
+
+    glBindVertexArray(m_lineVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }
