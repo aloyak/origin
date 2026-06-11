@@ -58,6 +58,13 @@ public:
                 const std::vector<DirectionalLight>& directionalLights,
                 const std::vector<PointLight>& pointLights);
 
+    void renderInstanced(Model& model, Material& material,
+                         const Camera& camera,
+                         const Transform& cameraTransform,
+                         const std::vector<Transform>& modelTransforms,
+                         const std::vector<DirectionalLight>& directionalLights,
+                         const std::vector<PointLight>& pointLights);
+
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
     void drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness = 2.0f, bool ignoreDepth = true);

@@ -74,6 +74,16 @@ void Model::draw(const Material& material,
         meshes[i].draw(material, directionalLights, pointLights);
 }
 
+void Model::drawInstanced(const Material& material,
+                          const std::vector<DirectionalLight>& directionalLights,
+                          const std::vector<PointLight>& pointLights,
+                          unsigned int instanceVBO,
+                          unsigned int instanceCount) {
+    for (unsigned int i = 0; i < meshes.size(); i++) {
+        meshes[i].drawInstanced(material, directionalLights, pointLights, instanceVBO, instanceCount);
+    }
+}
+
 void Model::loadModel(std::string path) {
     path = Path::resolve(path).string();
 

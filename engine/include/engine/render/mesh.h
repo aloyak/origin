@@ -45,6 +45,13 @@ public:
               const std::vector<DirectionalLight>& directionalLights,
               const std::vector<PointLight>& pointLights) const;
 
+
+    void drawInstanced(const Material& material,
+                   const std::vector<DirectionalLight>& directionalLights,
+                   const std::vector<PointLight>& pointLights,
+                   unsigned int instanceVBO,
+                   unsigned int instanceCount) const;
+
 private:
     unsigned int m_vao, m_vbo, m_ebo;
     int m_vertexCount, m_indexCount;
