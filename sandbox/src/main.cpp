@@ -8,7 +8,7 @@ int main() {
 
     Layer layer(engine);
 
-    engine.run([&]() {
+    engine.run([&]() {}, [&]() {
         engine.beginUI();
         layer.OnUIRender();
         engine.endUI();
