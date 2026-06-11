@@ -60,15 +60,16 @@ float Engine::getTime() {
     return (float)SDL_GetTicks() / 1000.0f;
 }
 
-void Engine::run(std::function<void()> mainLoop) {
+void Engine::run(std::function<void()> mainLoop, std::function<void()> lateLoop) {
 #ifdef __EMSCRIPTEN__
     static std::function<void()> s_loop = [this, mainLoop]() {
         if (!m_running) { emscripten_cancel_main_loop(); return; }
         beginFrame();
+        mainLoop();
         updateScene();
         renderScene();
         resolveFrame();
-        mainLoop();
+        lateLoop();
         endFrame();
     };
     emscripten_set_main_loop([]() { s_loop(); }, 0, 1);
@@ -76,11 +77,12 @@ void Engine::run(std::function<void()> mainLoop) {
     while (m_running) {
         beginFrame();
 
+        mainLoop();
         updateScene();
         renderScene();
 
         resolveFrame();
-        mainLoop();
+        lateLoop();
         endFrame();
     }
 #endif

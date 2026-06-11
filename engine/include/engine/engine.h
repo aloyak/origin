@@ -26,7 +26,7 @@ public:
     Engine(unsigned int width = 640, unsigned int height = 480, const char* title = "Origin Engine");
     ~Engine();
 
-    void run(std::function<void()> mainLoop);
+    void run(std::function<void()> mainLoop, std::function<void()> lateLoop = []() {});
     void stop();
 
     bool isRunning();
@@ -79,6 +79,7 @@ private:
     float m_deltaTime = 0.0f;
     float m_lastFrame = 0.0f;
 
+    // These entities are owned by the engine, not the scene, and thus persist across scene loads
     std::vector<std::unique_ptr<Entity>> m_entities;
     Entity* m_activeCamera = nullptr;
     

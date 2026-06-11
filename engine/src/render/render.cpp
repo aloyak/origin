@@ -250,8 +250,14 @@ void Renderer::render(Model& model, Material& material,
     model.draw(material, directionalLights, pointLights);
 }
 
-void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness) {
+void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness, bool ignoreDepth) {
     if (!m_lineShader) return;
+
+    if (ignoreDepth) {
+        glDisable(GL_DEPTH_TEST);
+    } else {
+        glEnable(GL_DEPTH_TEST);
+    }
 
     float vertices[] = {
         start.x, start.y, start.z,  end.x,   end.y,   end.z,   1.0f,

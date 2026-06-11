@@ -60,7 +60,7 @@ public:
 
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
-    void drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness = 2.0f);
+    void drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness = 2.0f, bool ignoreDepth = true);
 
 private:
     Window& m_window;
