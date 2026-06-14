@@ -15,7 +15,7 @@ void main() {
     vec4 targetClip  = viewProj * vec4(aTargetPos,  1.0);
 
     vec2 currentScreen = (currentClip.xy / currentClip.w) * u_ScreenSize;
-    vec2 targetScreen  = (targetClip.xy  / targetClip.w)  * u_ScreenSize;
+    vec2 targetScreen  = (targetClip.xy  / currentClip.w) * u_ScreenSize;
 
     vec2 dir = normalize(targetScreen - currentScreen);
     vec2 normal = vec2(-dir.y, dir.x);
