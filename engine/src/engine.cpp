@@ -62,7 +62,7 @@ float Engine::getTime() {
 
 void Engine::run(std::function<void()> mainLoop, std::function<void()> lateLoop) {
 #ifdef __EMSCRIPTEN__
-    static std::function<void()> s_loop = [this, mainLoop]() {
+    static std::function<void()> s_loop = [this, mainLoop, lateLoop]() {
         if (!m_running) { emscripten_cancel_main_loop(); return; }
         beginFrame();
         mainLoop();
