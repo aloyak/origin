@@ -19,7 +19,9 @@ if(NOT TARGET imgui)
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
     )
 
-    target_link_libraries(imgui PUBLIC SDL2::SDL2)
+    if(NOT EMSCRIPTEN)
+        target_link_libraries(imgui PUBLIC SDL2::SDL2)
+    endif()
 
     target_include_directories(imgui PUBLIC 
         ${imgui_SOURCE_DIR} 
