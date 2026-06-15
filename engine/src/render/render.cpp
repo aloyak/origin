@@ -250,6 +250,52 @@ void Renderer::render(Model& model, Material& material,
     model.draw(material, directionalLights, pointLights);
 }
 
+#include <vector>
+
+void Renderer::renderInstanced(Model& model, Material& material,
+                               const Camera& camera,
+                               const Transform& cameraTransform,
+                               const std::vector<Transform>& modelTransforms,
+                               const std::vector<DirectionalLight>& directionalLights,
+                               const std::vector<PointLight>& pointLights)
+{
+    if (modelTransforms.empty()) return;
+
+    Shader& shader = material.getShader();
+    shader.use();
+
+    shader.setMat4("u_View",       camera.getViewMatrix(cameraTransform));
+    shader.setMat4("u_Projection", camera.getProjectionMatrix());
+
+    shader.setBool ("u_VertexSnap",      m_vertexSnap);
+    shader.setFloat("u_SnapIntensity",   m_snapIntensity);
+    shader.setBool ("u_LightingEnabled", m_lightingEnabled);
+    shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
+    shader.setVec3 ("u_ViewPos",         cameraTransform.position);
+
+    std::vector<glm::mat4> modelMatrices;
+    modelMatrices.reserve(modelTransforms.size());
+
+    for (const auto& t : modelTransforms) {
+        glm::mat4 modelMat = glm::mat4(1.0f);
+        modelMat = glm::translate(modelMat, glm::vec3(t.position.x, t.position.y, t.position.z));
+        modelMat = glm::rotate(modelMat, glm::radians(t.rotation.z), glm::vec3(0, 0, 1));
+        modelMat = glm::rotate(modelMat, glm::radians(t.rotation.y), glm::vec3(0, 1, 0));
+        modelMat = glm::rotate(modelMat, glm::radians(t.rotation.x), glm::vec3(1, 0, 0));
+        modelMat = glm::scale(modelMat, glm::vec3(t.scale.x, t.scale.y, t.scale.z));
+        modelMatrices.push_back(modelMat);
+    }
+
+    unsigned int instanceVBO;
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data(), GL_STREAM_DRAW);
+
+    model.drawInstanced(material, directionalLights, pointLights, instanceVBO, modelTransforms.size());
+
+    glDeleteBuffers(1, &instanceVBO);
+}
+
 void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness, bool ignoreDepth) {
     if (!m_lineShader) return;
 

@@ -191,3 +191,127 @@ void Mesh::draw(const Material& material,
 
     glActiveTexture(GL_TEXTURE0);
 }
+
+void Mesh::drawInstanced(const Material& material,
+                         const std::vector<DirectionalLight>& directionalLights,
+                         const std::vector<PointLight>& pointLights,
+                         unsigned int instanceVBO,
+                         unsigned int instanceCount) const {
+    Shader& materialShader = material.getShader();
+
+    unsigned int textureUnit = 0;
+
+    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) {
+        std::shared_ptr<Texture> selected = material.getTexture(uniformName);
+
+        if (!selected) {
+            for (const auto& meshTexture : textures) {
+                if (meshTexture.type == meshType && meshTexture.texture) {
+                    selected = meshTexture.texture;
+                    break;
+                }
+            }
+        }
+
+        if (!selected) {
+            return;
+        }
+
+        materialShader.setInt(("material." + uniformName).c_str(), textureUnit);
+        selected->bind(textureUnit);
+        ++textureUnit;
+    };
+
+    bindTextureSlot("texture_diffuse", "texture_diffuse");
+    bindTextureSlot("texture_specular", "texture_specular");
+    bindTextureSlot("texture_normal", "texture_normal");
+    bindTextureSlot("texture_metallic", "texture_metallic");
+
+    bool hasNormalMap = material.hasTexture("texture_normal");
+    if (!hasNormalMap) {
+        for (const auto& meshTexture : textures) {
+            if (meshTexture.type == "texture_normal" && meshTexture.texture) {
+                hasNormalMap = true;
+                break;
+            }
+        }
+    }
+    materialShader.setBool("u_NormalMap", hasNormalMap);
+
+    bool hasMetallicMap = material.hasTexture("texture_metallic");
+    if (!hasMetallicMap) {
+        for (const auto& meshTexture : textures) {
+            if (meshTexture.type == "texture_metallic" && meshTexture.texture) {
+                hasMetallicMap = true;
+                break;
+            }
+        }
+    }
+    materialShader.setBool("u_MetallicMap", hasMetallicMap);
+
+    materialShader.setFloat("u_AmbientStrength", material.getAmbientStrength());
+    materialShader.setFloat("u_SpecularStrength", material.getSpecularStrength());
+    materialShader.setFloat("u_Shininess", material.getShininess());
+    materialShader.setVec3("u_BaseColor", material.getBaseColor());
+    materialShader.setVec2("u_UVScale", material.getUVScale());
+    
+    for (size_t i = 0; i < directionalLights.size() && i < m_maxDirectionalLights; ++i) {
+        const auto& light = directionalLights[i];
+        std::string prefix = "dirLights[" + std::to_string(i) + "]";
+        
+        materialShader.setVec3((prefix + ".direction").c_str(), light.getDirection());
+        materialShader.setVec3((prefix + ".color").c_str(), light.getColor());
+        materialShader.setFloat((prefix + ".intensity").c_str(), light.getIntensity());
+    }
+    
+    materialShader.setInt("numDirLights", static_cast<int>(std::min(directionalLights.size(), size_t(m_maxDirectionalLights))));
+
+    for (size_t i = 0; i < pointLights.size() && i < m_maxPointLights; ++i) {
+        const auto& light = pointLights[i];
+        std::string prefix = "pointLights[" + std::to_string(i) + "]";
+
+        materialShader.setVec3((prefix + ".position").c_str(), light.getPosition());
+        materialShader.setVec3((prefix + ".color").c_str(), light.getColor());
+        materialShader.setFloat((prefix + ".intensity").c_str(), light.getIntensity());
+        materialShader.setFloat((prefix + ".radius").c_str(), light.getRadius());
+    }
+
+    materialShader.setInt("numPointLights", static_cast<int>(std::min(pointLights.size(), size_t(m_maxPointLights))));
+    
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+
+    std::size_t vec4Size = 4 * sizeof(float);
+    std::size_t mat4Size = 4 * vec4Size;
+
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, mat4Size, (void*)0);
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mat4Size, (void*)(1 * vec4Size));
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, mat4Size, (void*)(2 * vec4Size));
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, mat4Size, (void*)(3 * vec4Size));
+
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
+    glVertexAttribDivisor(8, 1);
+
+    glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0, instanceCount);
+    
+    glVertexAttribDivisor(5, 0);
+    glVertexAttribDivisor(6, 0);
+    glVertexAttribDivisor(7, 0);
+    glVertexAttribDivisor(8, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    for (unsigned int i = 0; i < textureUnit; i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+}

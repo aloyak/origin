@@ -25,6 +25,12 @@ public:
               const std::vector<DirectionalLight>& directionalLights,
               const std::vector<PointLight>& pointLights);
 
+    void drawInstanced(const Material& material,
+                  const std::vector<DirectionalLight>& directionalLights,
+                  const std::vector<PointLight>& pointLights,
+                  unsigned int instanceVBO,
+                  unsigned int instanceCount);
+
     const std::vector<Mesh>& getMeshes() const { return meshes; }
 
 private:
