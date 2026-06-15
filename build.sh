@@ -1,22 +1,16 @@
 #!/bin/bash
 WEB_BUILD=false
 NO_SANDBOX=false
-UPDATE_ASSETS=false
 
 for arg in "$@"; do
     case $arg in
         --web) WEB_BUILD=true ;;
         --no-sandbox) NO_SANDBOX=true ;;
-        --update-assets) UPDATE_ASSETS=true ;;
         *) echo "Unknown argument: $arg"; exit 1 ;;
     esac
 done
 
-if [ "$UPDATE_ASSETS" = true ]; then
-    rm -rf "$(dirname "$0")/build/game/assets"
-    cp -r "$(dirname "$0")/assets" "$(dirname "$0")/build/game/assets"
-    echo "Assets updated!"
-elif [ "$WEB_BUILD" = true ]; then
+if [ "$WEB_BUILD" = true ]; then
     echo "Building Project..."
     echo "Target: Web"
 
