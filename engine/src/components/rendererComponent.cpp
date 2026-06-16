@@ -151,6 +151,24 @@ void RenderComponent::setTexture(const std::string& path, const std::string& typ
     m_material->setTexture(type, ResourceManager::instance().getTexture(normalizedPath));
 }
 
+
+void RenderComponent::setPaintableTexture(std::shared_ptr<Texture> texture) {
+    ensureMaterial();
+    m_paintableTexture = std::move(texture);
+    m_material->setTexture("diffuse", m_paintableTexture);
+}
+
+void RenderComponent::clearPaintableTexture() {
+    m_paintableTexture.reset();
+
+    if (!m_diffusePath.empty()) {
+        m_material->setTexture("diffuse", ResourceManager::instance().getTexture(m_diffusePath));
+    } else {
+        m_material->setTexture("diffuse", nullptr);
+    }
+}
+
+
 void RenderComponent::setDiffuseTexturePath(const std::string& path) {
     setTexture(path, "diffuse");
 }

@@ -27,6 +27,10 @@ public:
     std::string getNormalTexturePath() const { return m_normalPath; }
     std::string getMetallicTexturePath() const { return m_metallicPath; }
 
+    void setPaintableTexture(std::shared_ptr<Texture> texture);
+    void clearPaintableTexture();
+    bool hasPaintableTexture() const { return m_paintableTexture != nullptr; }
+
     void setAmbientStrength(float strength);
     float getAmbientStrength() const;
     void setSpecularStrength(float strength);
@@ -55,6 +59,9 @@ private:
 
     std::shared_ptr<Model>  m_model;
     std::unique_ptr<Material> m_material;
+
+    
+    std::shared_ptr<Texture> m_paintableTexture;
 
     std::string m_modelPath;
     std::string m_vertPath;

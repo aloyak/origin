@@ -18,8 +18,10 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <cmath>
+#include <vector>
 
 Renderer::Renderer(Window& window)
     : m_window(window)
@@ -159,7 +161,7 @@ void Renderer::setMinimumAmbientLight(float value) {
     }
 }
 
-// Frame pipeline: begin, reslolve, end (called from engine::run)
+// Frame pipeline: begin, resolve, end (called from engine::run)
 void Renderer::beginFrame() {
     if (m_fbo != 0) {
         glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -243,14 +245,12 @@ void Renderer::render(Model& model, Material& material,
     shader.setFloat("u_SnapIntensity", m_snapIntensity);
     shader.setBool ("u_LightingEnabled", m_lightingEnabled);
     shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
-    
+
     // Bind camera position for lighting calculations
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
     model.draw(material, directionalLights, pointLights);
 }
-
-#include <vector>
 
 void Renderer::renderInstanced(Model& model, Material& material,
                                const Camera& camera,
@@ -296,7 +296,10 @@ void Renderer::renderInstanced(Model& model, Material& material,
     glDeleteBuffers(1, &instanceVBO);
 }
 
-void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness, bool ignoreDepth) {
+void Renderer::drawLine(const Vec3& start, const Vec3& end,
+                        const Camera& camera, const Transform& cameraTransform,
+                        const Vec3& color, float thickness, bool ignoreDepth)
+{
     if (!m_lineShader) return;
 
     if (ignoreDepth) {
@@ -323,11 +326,55 @@ void Renderer::drawLine(const Vec3& start, const Vec3& end, const Camera& camera
     m_lineShader->setMat4("u_Projection", camera.getProjectionMatrix());
     m_lineShader->setVec3("u_Color",      Vec3(color.x, color.y, color.z));
     m_lineShader->setFloat("u_Thickness", thickness);
-    
+
     Vec2 size = m_window.getSize();
     m_lineShader->setVec2("u_ScreenSize", Vec2(size.x, size.y));
 
     glBindVertexArray(m_lineVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+}
+
+Ray Renderer::pickRay(float mouseX, float mouseY,
+                      const Camera& camera,
+                      const Transform& cameraTransform) const
+{
+    // If a virtual render target is active, mouse coords (in window pixels)
+    // must be remapped into virtual pixels first; otherwise use window size.
+    float vpW, vpH;
+    if (m_fbo != 0 && m_virtualWidth > 0 && m_virtualHeight > 0) {
+        Vec2 windowSize = m_window.getSize();
+        // Scale mouse position from window space into virtual space
+        mouseX = mouseX * (static_cast<float>(m_virtualWidth)  / windowSize.x);
+        mouseY = mouseY * (static_cast<float>(m_virtualHeight) / windowSize.y);
+        vpW = static_cast<float>(m_virtualWidth);
+        vpH = static_cast<float>(m_virtualHeight);
+    } else {
+        Vec2 windowSize = m_window.getSize();
+        vpW = windowSize.x;
+        vpH = windowSize.y;
+    }
+
+    const float ndcX =  (2.0f * mouseX / vpW) - 1.0f;
+    const float ndcY = -((2.0f * mouseY / vpH) - 1.0f);
+
+    const glm::mat4 view       = glm::make_mat4(reinterpret_cast<const float*>(camera.getViewMatrix(cameraTransform)));
+    const glm::mat4 projection = glm::make_mat4(reinterpret_cast<const float*>(camera.getProjectionMatrix()));
+    const glm::mat4 invVP      = glm::inverse(projection * view);
+
+    const glm::vec4 nearNDC(ndcX, ndcY, -1.0f, 1.0f);
+    const glm::vec4 farNDC (ndcX, ndcY,  1.0f, 1.0f);
+
+    glm::vec4 nearWorld = invVP * nearNDC;
+    glm::vec4 farWorld  = invVP * farNDC;
+
+    nearWorld /= nearWorld.w;
+    farWorld  /= farWorld.w;
+
+    const glm::vec3 dir = glm::normalize(glm::vec3(farWorld) - glm::vec3(nearWorld));
+
+    return Ray {
+        Vec3(nearWorld.x, nearWorld.y, nearWorld.z),
+        Vec3(dir.x,       dir.y,       dir.z)
+    };
 }

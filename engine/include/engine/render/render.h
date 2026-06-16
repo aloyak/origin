@@ -15,6 +15,13 @@ class Material;
 class DirectionalLight;
 class PointLight;
 
+// plain world-space ray returned by pickRay()
+// Origin^(TM) is the camera position, direction is unit length
+struct Ray {
+    Vec3 origin;
+    Vec3 direction;  // normalized
+};
+
 class Renderer {
 public:
     explicit Renderer(Window& window);
@@ -36,7 +43,7 @@ public:
     }
 
     void setVertexSnap(bool enabled, float intensity = 40.0f) {
-        m_vertexSnap   = enabled;
+        m_vertexSnap = enabled;
         m_snapIntensity = intensity;
     }
     bool isVertexSnapEnabled() const { return m_vertexSnap; }
@@ -67,7 +74,16 @@ public:
 
     unsigned int getRenderTexture() const { return m_fboTexture; }
 
-    void drawLine(const Vec3& start, const Vec3& end, const Camera& camera, const Transform& cameraTransform, const Vec3& color, float thickness = 2.0f, bool ignoreDepth = true);
+    void drawLine(const Vec3& start, const Vec3& end,
+                  const Camera& camera, const Transform& cameraTransform,
+                  const Vec3& color, float thickness = 2.0f, bool ignoreDepth = true);
+
+    // world-space position from screen-space mouse coordinates 
+    Ray pickRay(float mouseX, float mouseY,
+                const Camera& camera,
+                const Transform& cameraTransform) const;
+
+    // TODO: world-space to screen-space
 
 private:
     Window& m_window;
