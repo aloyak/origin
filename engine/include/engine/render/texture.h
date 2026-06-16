@@ -6,8 +6,6 @@
 
 class Texture {
 public:
-    unsigned int ID;
-
     // no CPU buffer retained
     Texture(const std::string& path);
     Texture(const unsigned char* data, int width, int height, int channels);  // embedded / in-memory
