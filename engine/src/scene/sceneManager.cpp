@@ -53,8 +53,8 @@ namespace {
     Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
         if (type == "RenderComponent") {
             const std::string modelPath = jComp.value("model", "");
-            const std::string vertPath = jComp.value("vert", "assets/shaders/vert.glsl");
-            const std::string fragPath = jComp.value("frag", "assets/shaders/frag.glsl");
+            const std::string vertPath = jComp.value("vert", "assets/shaders/builtin/vert.glsl");
+            const std::string fragPath = jComp.value("frag", "assets/shaders/builtin/frag.glsl");
             return entity->addComponent<RenderComponent>(modelPath, vertPath, fragPath);
         }
         if (type == "SkyboxComponent") {

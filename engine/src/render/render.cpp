@@ -99,8 +99,8 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
 
     if (!m_screenShader) {
         m_screenShader = std::make_unique<Shader>(
-            Path::resolve("assets/shaders/post_vert.glsl").string(),
-            Path::resolve("assets/shaders/post_frag.glsl").string()
+            Path::resolve("assets/shaders/builtin/post_vert.glsl").string(),
+            Path::resolve("assets/shaders/builtin/post_frag.glsl").string()
         );
     }
 
@@ -119,8 +119,8 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
 
     if (!m_lineShader) {
         m_lineShader = std::make_unique<Shader>(
-            Path::resolve("assets/shaders/line_vert.glsl").string(),
-            Path::resolve("assets/shaders/line_frag.glsl").string()
+            Path::resolve("assets/shaders/builtin/line_vert.glsl").string(),
+            Path::resolve("assets/shaders/builtin/line_frag.glsl").string()
         );
     }
 }

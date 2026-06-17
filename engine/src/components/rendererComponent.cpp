@@ -57,8 +57,8 @@ void RenderComponent::serialize(nlohmann::json& j) const {
 
 void RenderComponent::deserialize(const nlohmann::json& j) {
     m_modelPath = Path::toAssetsRelative(j.value("model", ""));
-    m_vertPath = Path::toAssetsRelative(j.value("vert", "assets/shaders/vert.glsl"));
-    m_fragPath = Path::toAssetsRelative(j.value("frag", "assets/shaders/frag.glsl"));
+    m_vertPath = Path::toAssetsRelative(j.value("vert", "assets/shaders/builtin/vert.glsl"));
+    m_fragPath = Path::toAssetsRelative(j.value("frag", "assets/shaders/builtin/frag.glsl"));
     m_diffusePath = Path::toAssetsRelative(j.value("diffuse", ""));
     m_specularPath = Path::toAssetsRelative(j.value("specular", ""));
     m_normalPath = Path::toAssetsRelative(j.value("normal", ""));

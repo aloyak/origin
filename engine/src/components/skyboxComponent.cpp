@@ -42,7 +42,7 @@ namespace {
 
 SkyboxComponent::SkyboxComponent(const std::vector<std::string>& faces) 
     : m_facePaths(faces.empty() ? std::vector<std::string>(6) : normalizeFaces(faces)) {
-    m_shader = std::make_unique<Shader>("assets/shaders/skybox/skybox_vert.glsl", "assets/shaders/skybox/skybox_frag.glsl");
+    m_shader = std::make_unique<Shader>("assets/shaders/builtin/skybox_vert.glsl", "assets/shaders/builtin/skybox_frag.glsl");
     setupMesh();
     loadCubemap(m_facePaths);
 }

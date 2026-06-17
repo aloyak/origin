@@ -27,7 +27,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/grass.png",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/plane.obj",
                     "normal": "",
@@ -39,7 +39,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Floor",
@@ -157,7 +157,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/rock.png",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -169,7 +169,7 @@
                         10.0,
                         10.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Slide 1",
@@ -201,7 +201,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -213,7 +213,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,
@@ -261,7 +261,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/rock.png",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -273,7 +273,7 @@
                         10.0,
                         10.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,
@@ -337,7 +337,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/rock.png",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -349,7 +349,7 @@
                         10.0,
                         10.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Wall",
@@ -397,7 +397,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/sphere.obj",
                     "normal": "",
@@ -409,7 +409,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "DynamicSphere",

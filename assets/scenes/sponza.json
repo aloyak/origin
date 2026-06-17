@@ -11,7 +11,7 @@
                         1.0
                     ],
                     "diffuse": "",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/sponza/sponza.obj",
                     "normal": "",
@@ -23,7 +23,7 @@
                         1.0,
                         1.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Sponza",
@@ -218,7 +218,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/sphere.obj",
                     "normal": "",
@@ -230,7 +230,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Sphere",
@@ -263,7 +263,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -275,7 +275,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,
@@ -340,7 +340,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -352,7 +352,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Cube 3",
@@ -385,7 +385,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -397,7 +397,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,
@@ -462,7 +462,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -474,7 +474,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Cube 5",
@@ -507,7 +507,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -519,7 +519,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,
@@ -584,7 +584,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/cube.obj",
                     "normal": "",
@@ -596,7 +596,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 }
             ],
             "name": "Cube 7",
@@ -662,7 +662,7 @@
                         1.0
                     ],
                     "diffuse": "assets/textures/crate.jpg",
-                    "frag": "assets/shaders/frag.glsl",
+                    "frag": "assets/shaders/builtin/frag.glsl",
                     "metallic": "",
                     "model": "assets/models/primitive/sphere.obj",
                     "normal": "",
@@ -674,7 +674,7 @@
                         4.0,
                         4.0
                     ],
-                    "vert": "assets/shaders/vert.glsl"
+                    "vert": "assets/shaders/builtin/vert.glsl"
                 },
                 {
                     "angularDamping": 0.05000000074505806,

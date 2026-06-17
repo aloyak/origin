@@ -10,8 +10,8 @@
 class RenderComponent : public Component {
 public:
     RenderComponent(const std::string& modelPath = "",
-                    const std::string& vertPath = "assets/shaders/vert.glsl",
-                    const std::string& fragPath = "assets/shaders/frag.glsl");
+                    const std::string& vertPath = "assets/shaders/builtin/vert.glsl",
+                    const std::string& fragPath = "assets/shaders/builtin/frag.glsl");
     
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
