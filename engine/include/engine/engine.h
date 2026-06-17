@@ -51,6 +51,8 @@ public:
     void clearActiveCamera() { m_activeCamera = nullptr; }
     Entity* getActiveCamera() const { return m_activeCamera; }
 
+    void setTargetFps(int target);
+
     // Update & render all entities and the active scene
     // Entities are expected to call renderer.render() themselves
     void updateScene();
@@ -78,6 +80,8 @@ private:
 
     float m_deltaTime = 0.0f;
     float m_lastFrame = 0.0f;
+
+    int m_targetFps = 0;
 
     // These entities are owned by the engine, not the scene, and thus persist across scene loads
     std::vector<std::unique_ptr<Entity>> m_entities;

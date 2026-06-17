@@ -254,3 +254,14 @@ bool Texture::save(const std::string& path) const {
 
     return true;
 }
+
+void Texture::setPixel(int px, int py, Vec4 color) {
+    if (m_pixels.empty()) return;
+    if (px < 0 || py < 0 || px >= m_width || py >= m_height) return;
+
+    const int idx      = (py * m_width + px) * 4;
+    m_pixels[idx + 0]  = static_cast<uint8_t>(color.x * 255.0f);
+    m_pixels[idx + 1]  = static_cast<uint8_t>(color.y * 255.0f);
+    m_pixels[idx + 2]  = static_cast<uint8_t>(color.z * 255.0f);
+    m_pixels[idx + 3]  = static_cast<uint8_t>(color.w * 255.0f);
+}

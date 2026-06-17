@@ -60,6 +60,10 @@ float Engine::getTime() {
     return (float)SDL_GetTicks() / 1000.0f;
 }
 
+void Engine::setTargetFps(int target) {
+    m_targetFps = target;
+}
+
 void Engine::run(std::function<void()> mainLoop, std::function<void()> lateLoop) {
 #ifdef __EMSCRIPTEN__
     static std::function<void()> s_loop = [this, mainLoop, lateLoop]() {
@@ -131,9 +135,16 @@ void Engine::resolveFrame() {
 }
 
 void Engine::endFrame() {
+    if (m_targetFps > 0) {
+        float targetFrameTime = 1.0f / m_targetFps;
+        float currentFrameTime = getTime() - m_lastFrame;
+        if (currentFrameTime < targetFrameTime) {
+            SDL_Delay(static_cast<Uint32>((targetFrameTime - currentFrameTime) * 1000.0f));
+        }
+    }
+
     m_window->swapBuffers();
 }
-
 // Entity Management
 Entity* Engine::createEntity(std::string name) {
     m_entities.push_back(std::make_unique<Entity>());

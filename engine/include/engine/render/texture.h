@@ -36,6 +36,8 @@ public:
 
     bool save(const std::string& path) const;
     void fill(Vec4 color);
+
+    void setPixel(int px, int py, Vec4 color);
 private:
     Texture() = default;
 
