@@ -135,7 +135,7 @@ void Texture::paint(float u, float v, float brushRadius, Vec4 color)
 
     // Convert UV + radius to pixel space
     const float cx = u * static_cast<float>(m_width);
-    const float cy = (1.0f - v) * static_cast<float>(m_height); // flip V, UV origin is bottom-left
+    const float cy = (1.0f - v) * static_cast<float>(m_height);
     const float rPx = brushRadius * static_cast<float>(m_width);
 
     const int x0 = static_cast<int>(std::floor(cx - rPx));
@@ -161,7 +161,7 @@ void Texture::paint(float u, float v, float brushRadius, Vec4 color)
 
             const float dist   = std::sqrt(dist2);
             const float t      = 1.0f - (dist / rPx);
-            const float alpha  = t * t * color.w * 255;  // quadratic falloff
+            const float alpha  = t * t * color.w;
 
             const int idx = (py * m_width + px) * 4;
             auto& pr = m_pixels[idx + 0];
