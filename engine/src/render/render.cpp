@@ -160,6 +160,24 @@ PostProcessor& Renderer::addPostProcessor(const std::string& vertPath, const std
     return *m_postProcessors.back();
 }
 
+void Renderer::removePostProcessor(PostProcessor* processor) {
+    if (!processor) return;
+
+    auto it = std::find_if(m_postProcessors.begin(), m_postProcessors.end(),
+        [processor](const std::unique_ptr<PostProcessor>& p) {
+            return p.get() == processor;
+        });
+
+    if (it != m_postProcessors.end()) {
+        if (it == m_postProcessors.begin()) {
+            Logger::warn("removePostProcessor: The default pass at index 0 cannot be removed.");
+            return;
+        }
+        m_postProcessors.erase(it);
+        updateOutputToScreenFlag();
+    }
+}
+
 void Renderer::removePostProcessor(size_t index) {
     if (index == 0 || index >= m_postProcessors.size()) {
         Logger::warn("removePostProcessor: invalid index (the default pass at 0 cannot be removed).");

@@ -89,6 +89,7 @@ public:
     // Custom post-processing chain
     PostProcessor& addPostProcessor(const std::string& vertPath, const std::string& fragPath);
     void removePostProcessor(size_t index);
+    void removePostProcessor(PostProcessor* processor);
     PostProcessor& getPostProcessor(size_t index);
     size_t getPostProcessorCount() const { return m_postProcessors.size(); }
 
