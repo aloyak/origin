@@ -148,8 +148,15 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
         view = glm::rotate(view, glm::radians(m_rotation), glm::vec3(0.0f, 1.0f, 0.0f));
     }
     
-    m_shader->setMat4("u_View", &view[0][0]);
-    m_shader->setMat4("u_Projection", camera.getProjectionMatrix());
+    Mat4 viewMat4;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            viewMat4[col][row] = view[col][row];
+    m_shader->setMat4("u_View", viewMat4);
+
+    Mat4 projMat4;
+    camera.getProjectionMatrix(projMat4);
+    m_shader->setMat4("u_Projection", projMat4);
 
     glBindVertexArray(m_skyboxVAO);
     glActiveTexture(GL_TEXTURE0);

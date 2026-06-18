@@ -267,9 +267,21 @@ void Renderer::render(Model& model, Material& material,
                                                modelTransform.scale.y,
                                                modelTransform.scale.z));
 
-    shader.setMat4("u_Model",      &modelMat);
-    shader.setMat4("u_View",       camera.getViewMatrix(cameraTransform));
-    shader.setMat4("u_Projection", camera.getProjectionMatrix());
+    Mat4 modelMat4;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            modelMat4[col][row] = modelMat[col][row];
+    shader.setMat4("u_Model", modelMat4);
+
+    Mat4 viewMat4;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            viewMat4[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    shader.setMat4("u_View", viewMat4);
+
+    Mat4 projMat4;
+    camera.getProjectionMatrix(projMat4);
+    shader.setMat4("u_Projection", projMat4);
 
     shader.setBool ("u_VertexSnap",    m_vertexSnap);
     shader.setFloat("u_SnapIntensity", m_snapIntensity);
@@ -293,8 +305,15 @@ void Renderer::renderInstanced(Model& model, Material& material,
     Shader& shader = material.getShader();
     shader.use();
 
-    shader.setMat4("u_View",       camera.getViewMatrix(cameraTransform));
-    shader.setMat4("u_Projection", camera.getProjectionMatrix());
+    Mat4 viewMat4Instanced;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            viewMat4Instanced[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    shader.setMat4("u_View", viewMat4Instanced);
+
+    Mat4 projMat4Instanced;
+    camera.getProjectionMatrix(projMat4Instanced);
+    shader.setMat4("u_Projection", projMat4Instanced);
 
     shader.setBool ("u_VertexSnap",      m_vertexSnap);
     shader.setFloat("u_SnapIntensity",   m_snapIntensity);
@@ -351,8 +370,15 @@ void Renderer::drawLine(const Vec3& start, const Vec3& end,
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
     m_lineShader->use();
-    m_lineShader->setMat4("u_View",       camera.getViewMatrix(cameraTransform));
-    m_lineShader->setMat4("u_Projection", camera.getProjectionMatrix());
+    Mat4 viewMat4Line;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            viewMat4Line[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    m_lineShader->setMat4("u_View", viewMat4Line);
+
+    Mat4 projMat4Line;
+    camera.getProjectionMatrix(projMat4Line);
+    m_lineShader->setMat4("u_Projection", projMat4Line);
     m_lineShader->setVec3("u_Color",      Vec3(color.x, color.y, color.z));
     m_lineShader->setFloat("u_Thickness", thickness);
 
