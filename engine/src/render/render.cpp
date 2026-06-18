@@ -32,14 +32,45 @@ Renderer::~Renderer() {
         glDeleteVertexArrays(1, &m_lineVAO);
         glDeleteBuffers(1,      &m_lineVBO);
     }
+    if (m_sceneFBO != 0) {
+        glDeleteFramebuffers(1,  &m_sceneFBO);
+        glDeleteTextures(1,      &m_sceneTexture);
+        glDeleteRenderbuffers(1, &m_sceneRBO);
+    }
 }
 
 void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     m_virtualWidth  = width;
     m_virtualHeight = height;
 
+    if (m_sceneFBO != 0) {
+        glDeleteFramebuffers(1,  &m_sceneFBO);
+        glDeleteTextures(1,      &m_sceneTexture);
+        glDeleteRenderbuffers(1, &m_sceneRBO);
+    }
+
+    glGenFramebuffers(1, &m_sceneFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+
+    glGenTextures(1, &m_sceneTexture);
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_sceneTexture, 0);
+
+    glGenRenderbuffers(1, &m_sceneRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_sceneRBO);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        Logger::error("Renderer scene framebuffer is not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     m_postProcessors.clear();
-    auto defaultPass = std::make_unique<PostProcessor>(Vec2((float)width, (float)height), /*needsDepth=*/true);
+    auto defaultPass = std::make_unique<PostProcessor>(Vec2((float)width, (float)height), false);
     defaultPass->setShader(
         Path::resolve("assets/shaders/builtin/post_vert.glsl").string(),
         Path::resolve("assets/shaders/builtin/post_frag.glsl").string()
@@ -84,6 +115,12 @@ void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
     m_virtualWidth  = width;
     m_virtualHeight = height;
 
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
     for (auto& pass : m_postProcessors) {
         if (!pass->isOutputToScreen()) {
             pass->resize(width, height);
@@ -111,8 +148,8 @@ void Renderer::setMinimumAmbientLight(float value) {
 }
 
 unsigned int Renderer::getRenderTexture() const {
-    if (m_postProcessors.empty()) return 0;
-    return m_postProcessors.front()->getTexture();
+    if (m_postProcessors.empty()) return m_sceneTexture;
+    return m_postProcessors.back()->getTexture();
 }
 
 PostProcessor& Renderer::addPostProcessor(const std::string& vertPath, const std::string& fragPath) {
@@ -142,10 +179,10 @@ void Renderer::updateOutputToScreenFlag() {
     }
 }
 
-// Frame pipeline: begin, resolve, end (called from engine::run)
 void Renderer::beginFrame() {
-    if (!m_postProcessors.empty()) {
-        m_postProcessors.front()->bind();
+    if (m_sceneFBO != 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+        glViewport(0, 0, (int)m_virtualWidth, (int)m_virtualHeight);
     } else {
         Vec2 size = m_window.getSize();
         glViewport(0, 0, (int)size.x, (int)size.y);
@@ -161,16 +198,6 @@ void Renderer::resolveFrame() {
     Vec2 windowSize = m_window.getSize();
 
     PostProcessor& defaultPass = *m_postProcessors.front();
-    // NOTE: defaultPass.getTexture() is the SAME texture the scene was just rendered into
-    // (bound via beginFrame() -> front()->bind()). That's fine as long as defaultPass is also
-    // the last pass in the chain (isOutputToScreen() == true), since then process() writes to
-    // the screen framebuffer, not back into m_fbo/m_fboTexture, so read and write targets differ.
-    // KNOWN ISSUE: if a custom post-processor is ever appended after this one, defaultPass will
-    // no longer be isOutputToScreen(), and process() will bind m_fbo while sampling m_fboTexture
-    // as input -- i.e. it reads and writes the same texture in one draw call. That's undefined
-    // behavior in GL (typically shows up as black or garbled output). TODO: give the default
-    // pass a separate input attachment (or ping-pong textures) so it never samples its own
-    // current render target. Safe today only because it's currently always the single pass.
     defaultPass.setBool("u_GammaEnabled", m_gammaCorrectionEnabled);
     defaultPass.setFloat("u_Gamma", m_gamma);
     defaultPass.setFloat("u_Exposure", m_exposure);
@@ -187,32 +214,20 @@ void Renderer::resolveFrame() {
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    unsigned int inputTexture = defaultPass.getTexture();
+    unsigned int inputTexture = m_sceneTexture;
 
-    if (!defaultPass.isOutputToScreen()) {
-        Logger::warn("Default post-process pass is not the last pass — it will sample its own "
-                      "render target as input, which is undefined behavior. See TODO in resolveFrame().");
-    }
-
-    if (defaultPass.isOutputToScreen()) {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    defaultPass.process(inputTexture, windowSize);
-
-    for (size_t i = 1; i < m_postProcessors.size(); ++i) {
+    for (size_t i = 0; i < m_postProcessors.size(); ++i) {
         PostProcessor& pass = *m_postProcessors[i];
-        unsigned int prevTexture = m_postProcessors[i - 1]->getTexture();
 
         if (pass.isOutputToScreen()) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-        pass.process(prevTexture, windowSize);
+        pass.process(inputTexture, windowSize);
+        inputTexture = pass.getTexture();
     }
 }
 
-// Rendering
 void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,
@@ -243,7 +258,6 @@ void Renderer::render(Model& model, Material& material,
     shader.setBool ("u_LightingEnabled", m_lightingEnabled);
     shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
 
-    // Bind camera position for lighting calculations
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
     model.draw(material, directionalLights, pointLights);
@@ -336,12 +350,10 @@ Ray Renderer::pickRay(float mouseX, float mouseY,
                       const Camera& camera,
                       const Transform& cameraTransform) const
 {
-    // If a virtual render target is active, mouse coords (in window pixels)
-    // must be remapped into virtual pixels first; otherwise use window size.
     float vpW, vpH;
     if (!m_postProcessors.empty() && m_virtualWidth > 0 && m_virtualHeight > 0) {
         Vec2 windowSize = m_window.getSize();
-        // Scale mouse position from window space into virtual space
+        
         mouseX = mouseX * (static_cast<float>(m_virtualWidth)  / windowSize.x);
         mouseY = mouseY * (static_cast<float>(m_virtualHeight) / windowSize.y);
         vpW = static_cast<float>(m_virtualWidth);

@@ -100,6 +100,10 @@ private:
     unsigned int m_virtualWidth  = 0;
     unsigned int m_virtualHeight = 0;
 
+    unsigned int m_sceneFBO      = 0;
+    unsigned int m_sceneTexture  = 0;
+    unsigned int m_sceneRBO      = 0;
+
     std::vector<std::unique_ptr<PostProcessor>> m_postProcessors;
 
     unsigned int m_lineVAO    = 0;
