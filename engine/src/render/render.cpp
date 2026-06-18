@@ -28,16 +28,14 @@ Renderer::Renderer(Window& window)
 {}
 
 Renderer::~Renderer() {
-    if (m_fbo) {
-        glDeleteFramebuffers(1,  &m_fbo);
-        glDeleteTextures(1,      &m_fboTexture);
-        glDeleteRenderbuffers(1, &m_rbo);
-        glDeleteVertexArrays(1,  &m_quadVAO);
-        glDeleteBuffers(1,       &m_quadVBO);
-    }
     if (m_lineVAO) {
         glDeleteVertexArrays(1, &m_lineVAO);
         glDeleteBuffers(1,      &m_lineVBO);
+    }
+    if (m_sceneFBO != 0) {
+        glDeleteFramebuffers(1,  &m_sceneFBO);
+        glDeleteTextures(1,      &m_sceneTexture);
+        glDeleteRenderbuffers(1, &m_sceneRBO);
     }
 }
 
@@ -45,63 +43,45 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     m_virtualWidth  = width;
     m_virtualHeight = height;
 
-    if (m_fbo != 0) {
-        glDeleteFramebuffers(1,  &m_fbo);
-        glDeleteTextures(1,      &m_fboTexture);
-        glDeleteRenderbuffers(1, &m_rbo);
-        glDeleteVertexArrays(1,  &m_quadVAO);
-        glDeleteBuffers(1,       &m_quadVBO);
-        glDeleteVertexArrays(1,  &m_lineVAO);
-        glDeleteBuffers(1,       &m_lineVBO);
-        m_fbo = m_fboTexture = m_rbo = m_quadVAO = m_quadVBO = m_lineVAO = m_lineVBO = 0;
+    if (m_sceneFBO != 0) {
+        glDeleteFramebuffers(1,  &m_sceneFBO);
+        glDeleteTextures(1,      &m_sceneTexture);
+        glDeleteRenderbuffers(1, &m_sceneRBO);
     }
 
-    glGenFramebuffers(1, &m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glGenFramebuffers(1, &m_sceneFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
 
-    glGenTextures(1, &m_fboTexture);
-    glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+    glGenTextures(1, &m_sceneTexture);
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_sceneTexture, 0);
 
-    glGenRenderbuffers(1, &m_rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glGenRenderbuffers(1, &m_sceneRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_sceneRBO);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Logger::error("Framebuffer is not complete!");
+        Logger::error("Renderer scene framebuffer is not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    float quadVertices[] = {
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+    m_postProcessors.clear();
+    auto defaultPass = std::make_unique<PostProcessor>(Vec2((float)width, (float)height), false);
+    defaultPass->setShader(
+        Path::resolve("assets/shaders/builtin/post_vert.glsl").string(),
+        Path::resolve("assets/shaders/builtin/post_frag.glsl").string()
+    );
+    m_postProcessors.push_back(std::move(defaultPass));
+    updateOutputToScreenFlag();
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-
-    glGenVertexArrays(1, &m_quadVAO);
-    glGenBuffers(1, &m_quadVBO);
-    glBindVertexArray(m_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-    if (!m_screenShader) {
-        m_screenShader = std::make_unique<Shader>(
-            Path::resolve("assets/shaders/builtin/post_vert.glsl").string(),
-            Path::resolve("assets/shaders/builtin/post_frag.glsl").string()
-        );
+    if (m_lineVAO) {
+        glDeleteVertexArrays(1, &m_lineVAO);
+        glDeleteBuffers(1,      &m_lineVBO);
+        m_lineVAO = m_lineVBO = 0;
     }
 
     glGenVertexArrays(1, &m_lineVAO);
@@ -126,7 +106,7 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
 }
 
 void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
-    if (m_fbo == 0) {
+    if (m_postProcessors.empty()) {
         Logger::warn("resizeRenderTarget called before setupRenderTarget — ignoring.");
         return;
     }
@@ -135,15 +115,21 @@ void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
     m_virtualWidth  = width;
     m_virtualHeight = height;
 
-    glBindTexture(GL_TEXTURE_2D, m_fboTexture);
+    glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+
+    for (auto& pass : m_postProcessors) {
+        if (!pass->isOutputToScreen()) {
+            pass->resize(width, height);
+        }
+    }
 }
 
 void Renderer::setPixelArt(bool enabled, int colorDepth) {
-    if (enabled && m_fbo == 0) {
+    if (enabled && m_postProcessors.empty()) {
         Logger::warn("setPixelArt() called before setupRenderTarget!");
     }
     m_pixelArtEnabled = enabled;
@@ -161,11 +147,42 @@ void Renderer::setMinimumAmbientLight(float value) {
     }
 }
 
-// Frame pipeline: begin, resolve, end (called from engine::run)
+unsigned int Renderer::getRenderTexture() const {
+    if (m_postProcessors.empty()) return m_sceneTexture;
+    return m_postProcessors.back()->getTexture();
+}
+
+PostProcessor& Renderer::addPostProcessor(const std::string& vertPath, const std::string& fragPath) {
+    auto pass = std::make_unique<PostProcessor>(Vec2((float)m_virtualWidth, (float)m_virtualHeight));
+    pass->setShader(vertPath, fragPath);
+    m_postProcessors.push_back(std::move(pass));
+    updateOutputToScreenFlag();
+    return *m_postProcessors.back();
+}
+
+void Renderer::removePostProcessor(size_t index) {
+    if (index == 0 || index >= m_postProcessors.size()) {
+        Logger::warn("removePostProcessor: invalid index (the default pass at 0 cannot be removed).");
+        return;
+    }
+    m_postProcessors.erase(m_postProcessors.begin() + index);
+    updateOutputToScreenFlag();
+}
+
+PostProcessor& Renderer::getPostProcessor(size_t index) {
+    return *m_postProcessors.at(index);
+}
+
+void Renderer::updateOutputToScreenFlag() {
+    for (size_t i = 0; i < m_postProcessors.size(); ++i) {
+        m_postProcessors[i]->setOutputToScreen(i == m_postProcessors.size() - 1);
+    }
+}
+
 void Renderer::beginFrame() {
-    if (m_fbo != 0) {
-        glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-        glViewport(0, 0, m_virtualWidth, m_virtualHeight);
+    if (m_sceneFBO != 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_sceneFBO);
+        glViewport(0, 0, (int)m_virtualWidth, (int)m_virtualHeight);
     } else {
         Vec2 size = m_window.getSize();
         glViewport(0, 0, (int)size.x, (int)size.y);
@@ -176,20 +193,14 @@ void Renderer::beginFrame() {
 }
 
 void Renderer::resolveFrame() {
-    if (m_fbo == 0) return;
+    if (m_postProcessors.empty()) return;
+    
+    Vec2 windowSize = m_window.getSize();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    Vec2 size = m_window.getSize();
-    glViewport(0, 0, (int)size.x, (int)size.y);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    m_screenShader->use();
-    m_screenShader->setBool("u_GammaEnabled", m_gammaCorrectionEnabled);
-    m_screenShader->setFloat("u_Gamma", m_gamma);
-    m_screenShader->setFloat("u_Exposure", m_exposure);
+    PostProcessor& defaultPass = *m_postProcessors.front();
+    defaultPass.setBool("u_GammaEnabled", m_gammaCorrectionEnabled);
+    defaultPass.setFloat("u_Gamma", m_gamma);
+    defaultPass.setFloat("u_Exposure", m_exposure);
 
     float levels = 0.0f;
     if (m_pixelArtEnabled) {
@@ -199,23 +210,24 @@ void Renderer::resolveFrame() {
         else if (m_colorDepth <= 16) levels = 32.0f;
         else if (m_colorDepth >= 32) levels = 0.0f;
     }
-    m_screenShader->setFloat("colorLevels", levels);
+    defaultPass.setFloat("colorLevels", levels);
 
-    glBindVertexArray(m_quadVAO);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fboTexture);
-    m_screenShader->setInt("screenTexture", 0);
+    unsigned int inputTexture = m_sceneTexture;
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    for (size_t i = 0; i < m_postProcessors.size(); ++i) {
+        PostProcessor& pass = *m_postProcessors[i];
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+        if (pass.isOutputToScreen()) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+        pass.process(inputTexture, windowSize);
+        inputTexture = pass.getTexture();
+    }
 }
 
-// Rendering
 void Renderer::render(Model& model, Material& material,
                       const Camera& camera,
                       const Transform& cameraTransform,
@@ -246,7 +258,6 @@ void Renderer::render(Model& model, Material& material,
     shader.setBool ("u_LightingEnabled", m_lightingEnabled);
     shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
 
-    // Bind camera position for lighting calculations
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
     model.draw(material, directionalLights, pointLights);
@@ -339,12 +350,10 @@ Ray Renderer::pickRay(float mouseX, float mouseY,
                       const Camera& camera,
                       const Transform& cameraTransform) const
 {
-    // If a virtual render target is active, mouse coords (in window pixels)
-    // must be remapped into virtual pixels first; otherwise use window size.
     float vpW, vpH;
-    if (m_fbo != 0 && m_virtualWidth > 0 && m_virtualHeight > 0) {
+    if (!m_postProcessors.empty() && m_virtualWidth > 0 && m_virtualHeight > 0) {
         Vec2 windowSize = m_window.getSize();
-        // Scale mouse position from window space into virtual space
+        
         mouseX = mouseX * (static_cast<float>(m_virtualWidth)  / windowSize.x);
         mouseY = mouseY * (static_cast<float>(m_virtualHeight) / windowSize.y);
         vpW = static_cast<float>(m_virtualWidth);
