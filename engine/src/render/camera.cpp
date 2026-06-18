@@ -46,6 +46,25 @@ Mat4 Camera::getProjectionMatrix(Mat4& out) const {
     return out;
 }
 
+Mat4 Camera::getInvViewMatrix(const Transform& transform) const {
+    getViewMatrix(transform);
+    glm::mat4 inv = glm::inverse(m_data->view);
+    Mat4 out;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            out[col][row] = inv[col][row];
+    return out;
+}
+
+Mat4 Camera::getInvProjMatrix() const {
+    glm::mat4 inv = glm::inverse(m_data->projection);
+    Mat4 out;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            out[col][row] = inv[col][row];
+    return out;
+}
+
 void Camera::setAspectRatio(float aspect) {
     float fov = glm::degrees(2.0f * atan(1.0f / m_data->projection[1][1]));
     float zNear = m_data->projection[3][2] / (m_data->projection[2][2] - 1.0f);

@@ -9,8 +9,12 @@ public:
     ~Camera();
 
     void* getViewMatrix(const Transform& transform) const;
+    
     void* getProjectionMatrix() const;
     Mat4  getProjectionMatrix(Mat4& out) const;
+
+    Mat4  getInvViewMatrix(const Transform& transform) const;
+    Mat4  getInvProjMatrix() const;
 
     void setAspectRatio(float aspect);
 

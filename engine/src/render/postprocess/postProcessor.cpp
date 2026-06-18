@@ -153,3 +153,4 @@ void PostProcessor::setFloat(const std::string& name, float value)      { m_shad
 void PostProcessor::setVec2(const std::string& name, const Vec2& value) { m_shader->use(); m_shader->setVec2(name, value); }
 void PostProcessor::setVec3(const std::string& name, const Vec3& value) { m_shader->use(); m_shader->setVec3(name, value); }
 void PostProcessor::setVec4(const std::string& name, const Vec4& value) { m_shader->use(); m_shader->setVec4(name, value); }
+void PostProcessor::setMat4(const std::string& name, const Mat4& value) { m_shader->use(); m_shader->setMat4(name, value); }

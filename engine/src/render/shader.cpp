@@ -126,9 +126,8 @@ void Shader::setVec4(const std::string& name, const Vec4& value) const {
     glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(glmValue));
 }
 
-void Shader::setMat4(const std::string& name, const void* mat) const {
-    const glm::mat4* matPtr = static_cast<const glm::mat4*>(mat);
-    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &(*matPtr)[0][0]);
+void Shader::setMat4(const std::string& name, const Mat4& value) const {
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &value[0][0]);
 }
 
 void Shader::checkShader(unsigned int shader) {
