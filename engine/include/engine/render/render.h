@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/core/transform.h"
+#include "engine/render/postprocess/postProcessor.h"
 
 #include <algorithm>
 #include <functional>
@@ -72,7 +73,7 @@ public:
                          const std::vector<DirectionalLight>& directionalLights,
                          const std::vector<PointLight>& pointLights);
 
-    unsigned int getRenderTexture() const { return m_fboTexture; }
+    unsigned int getRenderTexture() const;
 
     void drawLine(const Vec3& start, const Vec3& end,
                   const Camera& camera, const Transform& cameraTransform,
@@ -85,25 +86,32 @@ public:
 
     // TODO: world-space to screen-space
 
+    // Custom post-processing chain
+    PostProcessor& addPostProcessor(const std::string& vertPath, const std::string& fragPath);
+    void removePostProcessor(size_t index);
+    PostProcessor& getPostProcessor(size_t index);
+    size_t getPostProcessorCount() const { return m_postProcessors.size(); }
+
 private:
+    void updateOutputToScreenFlag();
+
     Window& m_window;
 
-    unsigned int m_fbo        = 0;
-    unsigned int m_fboTexture = 0;
-    unsigned int m_rbo        = 0;
-    unsigned int m_quadVAO    = 0;
-    unsigned int m_quadVBO    = 0;
+    unsigned int m_virtualWidth  = 0;
+    unsigned int m_virtualHeight = 0;
+
+    unsigned int m_sceneFBO      = 0;
+    unsigned int m_sceneTexture  = 0;
+    unsigned int m_sceneRBO      = 0;
+
+    std::vector<std::unique_ptr<PostProcessor>> m_postProcessors;
 
     unsigned int m_lineVAO    = 0;
     unsigned int m_lineVBO    = 0;
     std::unique_ptr<Shader> m_lineShader;
 
-    unsigned int m_virtualWidth  = 0;
-    unsigned int m_virtualHeight = 0;
-
     bool  m_pixelArtEnabled = false;
     int   m_colorDepth      = 32;
-    std::unique_ptr<Shader> m_screenShader;
 
     bool  m_vertexSnap    = false;
     float m_snapIntensity = 40.0f;
@@ -112,7 +120,7 @@ private:
     float m_minAmbientLight = 0.05f;
     std::function<void(float)> m_onMinimumAmbientLightChanged;
 
-    // Gamma correction
+    // Gamma correction (forwarded)
     float m_gamma = 2.2f;
     bool m_gammaCorrectionEnabled = true;
     float m_exposure = 1.0f;
