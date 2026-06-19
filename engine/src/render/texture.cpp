@@ -111,6 +111,56 @@ Texture* Texture::createPaintable(Vec2 size, Vec4 color)
     return t;
 }
 
+Texture* Texture::createPaintable(const std::string& sourcePath)
+{
+    std::string resolvedPath = Path::resolve(sourcePath).string();
+
+    int width, height, channels;
+    unsigned char* data = stbi_load(
+        resolvedPath.c_str(),
+        &width,
+        &height,
+        &channels,
+        STBI_rgb_alpha
+    );
+
+    if (!data) {
+        Logger::error("Failed to load paintable texture: " + resolvedPath);
+        return nullptr;
+    }
+
+    Texture* t = new Texture();
+
+    genAndBind(t->m_id);
+
+    t->m_width = width;
+    t->m_height = height;
+    t->m_channels = 4;
+
+    size_t size = width * height * 4;
+    t->m_pixels.resize(size);
+
+    memcpy(t->m_pixels.data(), data, size);
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        width,
+        height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        t->m_pixels.data()
+    );
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(data);
+
+    return t;
+}
+
 Texture::~Texture() {
     glDeleteTextures(1, &m_id);
 }

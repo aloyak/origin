@@ -12,7 +12,8 @@ public:
     Texture(const unsigned char* compressedData, unsigned int dataLength);    // compressed embedded (e.g. PNG/JPG inside FBX)
     
     static Texture* createPaintable(Vec2 size, Vec4 color = Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    
+    static Texture* createPaintable(const std::string& sourcePath);
+
     ~Texture();
 
     // owns a GPU texture object
