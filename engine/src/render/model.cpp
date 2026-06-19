@@ -63,7 +63,7 @@ static std::string restoreExtension(std::string path) {
     return path;
 }
 
-Model::Model(const char* path) {
+Model::Model(const char* path, bool dynamic) : m_dynamic(dynamic) {
     loadModel(path);
 }
 
@@ -164,7 +164,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     textures.insert(textures.end(), normalMaps.begin(),   normalMaps.end());
     textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, textures, m_dynamic);
 }
 
 std::vector<MeshTexture> Model::loadMaterialTextures(

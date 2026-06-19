@@ -32,7 +32,8 @@ public:
     std::vector<unsigned int> indices;
     std::vector<MeshTexture>  textures;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures,
+         bool dynamic = false);
     ~Mesh();
 
     Mesh(const Mesh&) = delete;
@@ -40,6 +41,11 @@ public:
 
     Mesh(Mesh&& other) noexcept;
     Mesh& operator=(Mesh&& other) noexcept;
+
+    void updateVertexBuffer();
+    void recalculateNormals();
+
+    bool isDynamic() const { return m_dynamic; }
 
     void draw(const Material& material,
               const std::vector<DirectionalLight>& directionalLights,
@@ -55,6 +61,7 @@ public:
 private:
     unsigned int m_vao, m_vbo, m_ebo;
     int m_vertexCount, m_indexCount;
+    bool m_dynamic = false;
 
     int m_maxDirectionalLights = 4;
     int m_maxPointLights = 8;

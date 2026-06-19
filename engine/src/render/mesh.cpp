@@ -11,9 +11,10 @@
 #include "engine/lighting/directionalLight.h"
 #include "engine/lighting/pointLight.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures) {
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures, bool dynamic) {
     m_vertexCount = vertices.size(); 
     m_indexCount  = indices.size();
+    m_dynamic     = dynamic;
 
     this->vertices = vertices;
     this->indices  = indices;
@@ -25,7 +26,8 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
   
     glBindVertexArray(m_vao);
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);  
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0],
+                 m_dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);  
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
@@ -63,6 +65,7 @@ Mesh::Mesh(Mesh&& other) noexcept
     , m_ebo(other.m_ebo)
     , m_vertexCount(other.m_vertexCount)
     , m_indexCount(other.m_indexCount)
+    , m_dynamic(other.m_dynamic)
 {
     other.m_vao = 0;
     other.m_vbo = 0;
@@ -85,12 +88,60 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     m_ebo = other.m_ebo;
     m_vertexCount = other.m_vertexCount;
     m_indexCount  = other.m_indexCount;
+    m_dynamic     = other.m_dynamic;
 
     other.m_vao = 0;
     other.m_vbo = 0;
     other.m_ebo = 0;
 
     return *this;
+}
+
+void Mesh::updateVertexBuffer() {
+    if (!m_dynamic) {
+        return; 
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data());
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::recalculateNormals() {
+    for (auto& v : vertices) {
+        v.Normal = Vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+        unsigned int i0 = indices[i];
+        unsigned int i1 = indices[i + 1];
+        unsigned int i2 = indices[i + 2];
+
+        const Vec3& p0 = vertices[i0].Position;
+        const Vec3& p1 = vertices[i1].Position;
+        const Vec3& p2 = vertices[i2].Position;
+
+        Vec3 e1 = p1 - p0;
+        Vec3 e2 = p2 - p0;
+
+        Vec3 faceNormal(
+            e1.y * e2.z - e1.z * e2.y,
+            e1.z * e2.x - e1.x * e2.z,
+            e1.x * e2.y - e1.y * e2.x
+        );
+
+        vertices[i0].Normal = vertices[i0].Normal + faceNormal;
+        vertices[i1].Normal = vertices[i1].Normal + faceNormal;
+        vertices[i2].Normal = vertices[i2].Normal + faceNormal;
+    }
+
+    for (auto& v : vertices) {
+        float lenSq = v.Normal.x * v.Normal.x + v.Normal.y * v.Normal.y + v.Normal.z * v.Normal.z;
+        if (lenSq > 1e-12f) {
+            v.Normal = v.Normal.normalize();
+        } else {
+            v.Normal = Vec3(0.0f, 0.0f, 1.0f);
+        }
+    }
 }
 
 void Mesh::draw(const Material& material,

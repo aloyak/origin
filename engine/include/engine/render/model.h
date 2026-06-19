@@ -20,7 +20,7 @@ struct aiMaterial;
 
 class Model {
 public:
-    Model(const char* path);
+    Model(const char* path, bool dynamic = false);
     void draw(const Material& material,
               const std::vector<DirectionalLight>& directionalLights,
               const std::vector<PointLight>& pointLights);
@@ -32,10 +32,12 @@ public:
                   unsigned int instanceCount);
 
     const std::vector<Mesh>& getMeshes() const { return meshes; }
+    std::vector<Mesh>& getMeshes() { return meshes; }
 
 private:
     std::vector<Mesh> meshes;
     std::string directory;
+    bool m_dynamic = false;
     std::unordered_map<std::string, std::shared_ptr<Texture>> m_embeddedTextures;
 
     void loadModel(std::string path);

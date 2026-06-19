@@ -10,7 +10,9 @@
 
 RenderComponent::RenderComponent(const std::string& modelPath,
                                  const std::string& vertPath,
-                                 const std::string& fragPath)
+                                 const std::string& fragPath,
+                                 bool dynamic)
+    : m_dynamic(dynamic)
 {
     m_modelPath = Path::toAssetsRelative(modelPath);
     m_vertPath = Path::toAssetsRelative(vertPath);
@@ -19,7 +21,11 @@ RenderComponent::RenderComponent(const std::string& modelPath,
     ensureMaterial();
 
     if (!m_modelPath.empty()) {
-        m_model = ResourceManager::instance().getModel(m_modelPath);
+        if (m_dynamic) {
+            m_model = std::make_shared<Model>(m_modelPath.c_str(), true);
+        } else {
+            m_model = ResourceManager::instance().getModel(m_modelPath);
+        }
     }
 }
 
@@ -67,7 +73,11 @@ void RenderComponent::deserialize(const nlohmann::json& j) {
     ensureMaterial();
 
     if (!m_modelPath.empty()) {
-        m_model = ResourceManager::instance().getModel(m_modelPath);
+        if (m_dynamic) {
+            m_model = std::make_shared<Model>(m_modelPath.c_str(), true);
+        } else {
+            m_model = ResourceManager::instance().getModel(m_modelPath);
+        }
     } else {
         m_model.reset();
     }
@@ -114,7 +124,11 @@ void RenderComponent::setModelPath(const std::string& modelPath) {
     }
 
     ensureMaterial();
-    m_model = ResourceManager::instance().getModel(m_modelPath);
+    if (m_dynamic) {
+        m_model = std::make_shared<Model>(m_modelPath.c_str(), true);
+    } else {
+        m_model = ResourceManager::instance().getModel(m_modelPath);
+    }
 }
 
 void RenderComponent::setVertPath(const std::string& vertPath) {
@@ -241,6 +255,11 @@ void RenderComponent::ensureMaterial() {
     m_material->setShader(shader);
 }
 
+void RenderComponent::reloadModel() {
+    if (m_modelPath.empty()) return;
+    m_model = std::make_shared<Model>(m_modelPath.c_str(), m_dynamic);
+}
+
 void RenderComponent::render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) {
     if (!isEnabled) return;
     if (!m_model || !m_material || !m_material->getShaderHandle()) return;
@@ -249,4 +268,3 @@ void RenderComponent::render(Renderer& renderer, const Camera& camera, const Tra
     const auto& pointLights = LightingManager::instance().getPointLights();
     renderer.render(*m_model, *m_material, camera, cameraTransform, entity->transform, directionalLights, pointLights);
 }
-

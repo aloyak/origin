@@ -11,7 +11,8 @@ class RenderComponent : public Component {
 public:
     RenderComponent(const std::string& modelPath = "",
                     const std::string& vertPath = "assets/shaders/builtin/vert.glsl",
-                    const std::string& fragPath = "assets/shaders/builtin/frag.glsl");
+                    const std::string& fragPath = "assets/shaders/builtin/frag.glsl",
+                    bool dynamic = false);
     
     void serialize(nlohmann::json& j) const override;
     void deserialize(const nlohmann::json& j) override;
@@ -54,11 +55,16 @@ public:
     std::string getModelPath() const { return m_modelPath; }
     std::string getVertPath() const { return m_vertPath; }
     std::string getFragPath() const { return m_fragPath; }
+
+    void reloadModel();
+
 private:
     void ensureMaterial();
 
     std::shared_ptr<Model>  m_model;
     std::unique_ptr<Material> m_material;
+
+    bool m_dynamic = false;
 
     
     std::shared_ptr<Texture> m_paintableTexture;
