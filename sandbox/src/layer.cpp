@@ -38,7 +38,6 @@ Layer::Layer(Engine& engine)
     static std::string layout = Path::resolve("resources/layout.ini").string();
     io.IniFilename = layout.c_str();
     m_UserPreferencesPath = Path::resolve("resources/user.json");
-    m_WindowSize = m_Window.getSize();
 
     // Styles
     ImGui::StyleColorsDark();
@@ -48,7 +47,6 @@ Layer::Layer(Engine& engine)
     ApplyAudioSettings();
 
     m_Window.setSize((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
-    m_Renderer.setupRenderTarget((unsigned int)m_WindowSize.x, (unsigned int)m_WindowSize.y);
 
     SetupFonts();
 

@@ -18,7 +18,10 @@ class SceneViewPanel : public Panel {
 public:
     SceneViewPanel(Engine& engine, Entity*& editorCameraRef, float& cameraSpeedRef, Entity*& selectedEntityRef, std::unordered_set<Entity*>& colliderDebugEntitiesRef, ImGuizmo::OPERATION& gizmoOperationRef, bool& showRenderStatsRef, float& cameraSensRef)
         : m_Engine(engine), m_EditorCamera(editorCameraRef), m_CameraSpeed(cameraSpeedRef), m_SelectedEntity(selectedEntityRef), m_ColliderDebugEntities(colliderDebugEntitiesRef), m_GizmoOperation(gizmoOperationRef), m_ShowRenderStats(showRenderStatsRef),
-          m_CameraSens(cameraSensRef) {}
+          m_CameraSens(cameraSensRef) 
+    {
+        engine.getRenderer().setupRenderTarget(1600, 900);
+    }
 
     void OnUIRender() override {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));

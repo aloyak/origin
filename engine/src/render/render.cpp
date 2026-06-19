@@ -148,8 +148,7 @@ void Renderer::setMinimumAmbientLight(float value) {
 }
 
 unsigned int Renderer::getRenderTexture() const {
-    if (m_postProcessors.empty()) return m_sceneTexture;
-    return m_postProcessors.back()->getTexture();
+    return m_sceneTexture;
 }
 
 PostProcessor& Renderer::addPostProcessor(const std::string& vertPath, const std::string& fragPath) {
