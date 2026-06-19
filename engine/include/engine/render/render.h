@@ -80,12 +80,9 @@ public:
                   const Camera& camera, const Transform& cameraTransform,
                   const Vec3& color, float thickness = 2.0f, bool ignoreDepth = true);
 
-    // world-space position from screen-space mouse coordinates 
     Ray pickRay(float mouseX, float mouseY,
                 const Camera& camera,
                 const Transform& cameraTransform) const;
-
-    // TODO: world-space to screen-space
 
     // Custom post-processing chain
     PostProcessor& addPostProcessor(const std::string& vertPath, const std::string& fragPath);
