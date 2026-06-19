@@ -18,6 +18,10 @@ public:
     void deserialize(const nlohmann::json& j) override;
 
     void lookAt(Entity& target);
+
+    float getFOV() const { return m_fov; }
+    float getFar() const { return m_far; }
+    float getNear() const { return m_near; }
 private:
     std::unique_ptr<Camera> m_camera;
     

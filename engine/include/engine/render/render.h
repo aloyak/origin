@@ -74,6 +74,7 @@ public:
                          const std::vector<PointLight>& pointLights);
 
     unsigned int getRenderTexture() const;
+    unsigned int getSceneDepthTexture() const { return m_sceneDepthTexture; }
 
     void drawLine(const Vec3& start, const Vec3& end,
                   const Camera& camera, const Transform& cameraTransform,
@@ -101,9 +102,9 @@ private:
     unsigned int m_virtualWidth  = 0;
     unsigned int m_virtualHeight = 0;
 
-    unsigned int m_sceneFBO      = 0;
-    unsigned int m_sceneTexture  = 0;
-    unsigned int m_sceneRBO      = 0;
+    unsigned int m_sceneFBO          = 0;
+    unsigned int m_sceneTexture      = 0;
+    unsigned int m_sceneDepthTexture = 0;
 
     std::vector<std::unique_ptr<PostProcessor>> m_postProcessors;
 

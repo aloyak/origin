@@ -113,7 +113,7 @@ void PostProcessor::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void PostProcessor::process(unsigned int inputTexture, Vec2 outputSize) {
+void PostProcessor::process(unsigned int inputTexture, Vec2 outputSize, unsigned int depthTexture) {
     if (!m_shader) {
         Logger::warn("PostProcessor::process() called with no shader set — call setShader() first. Skipping.");
         return;
@@ -132,6 +132,12 @@ void PostProcessor::process(unsigned int inputTexture, Vec2 outputSize) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, inputTexture);
     m_shader->setInt("screenTexture", 0);
+
+    if (depthTexture != 0) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthTexture);
+        m_shader->setInt("depthTexture", 1);
+    }
 
     glBindVertexArray(m_quadVao);
     glDisable(GL_DEPTH_TEST);

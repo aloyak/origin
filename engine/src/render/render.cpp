@@ -35,7 +35,7 @@ Renderer::~Renderer() {
     if (m_sceneFBO != 0) {
         glDeleteFramebuffers(1,  &m_sceneFBO);
         glDeleteTextures(1,      &m_sceneTexture);
-        glDeleteRenderbuffers(1, &m_sceneRBO);
+        glDeleteTextures(1,      &m_sceneDepthTexture);
     }
 }
 
@@ -46,7 +46,7 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     if (m_sceneFBO != 0) {
         glDeleteFramebuffers(1,  &m_sceneFBO);
         glDeleteTextures(1,      &m_sceneTexture);
-        glDeleteRenderbuffers(1, &m_sceneRBO);
+        glDeleteTextures(1,      &m_sceneDepthTexture);
     }
 
     glGenFramebuffers(1, &m_sceneFBO);
@@ -59,10 +59,15 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_sceneTexture, 0);
 
-    glGenRenderbuffers(1, &m_sceneRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_sceneRBO);
+    glGenTextures(1, &m_sceneDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, m_sceneDepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
+                 GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_sceneDepthTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         Logger::error("Renderer scene framebuffer is not complete!");
@@ -118,8 +123,9 @@ void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
     glBindTexture(GL_TEXTURE_2D, m_sceneTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, m_sceneRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glBindTexture(GL_TEXTURE_2D, m_sceneDepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
+                 GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
 
     for (auto& pass : m_postProcessors) {
         if (!pass->isOutputToScreen()) {
@@ -240,7 +246,7 @@ void Renderer::resolveFrame() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-        pass.process(inputTexture, windowSize);
+        pass.process(inputTexture, windowSize, m_sceneDepthTexture);
         inputTexture = pass.getTexture();
     }
 }

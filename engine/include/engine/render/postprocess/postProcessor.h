@@ -20,7 +20,7 @@ public:
     void bind();
     void unbind();
 
-    void process(unsigned int inputTexture, Vec2 outputSize);
+    void process(unsigned int inputTexture, Vec2 outputSize, unsigned int depthTexture = 0);
 
     void setShader(const std::string& vert, const std::string& frag);
 
