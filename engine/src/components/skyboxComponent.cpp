@@ -138,7 +138,7 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
     if (!isEnabled) return;
     if (m_cubemapID == 0) return;
 
-    glDepthFunc(GL_LEQUAL); 
+    glDepthFunc(GL_GEQUAL);
     m_shader->use();
 
     m_shader->setVec3("colorTint", m_colorTint);
@@ -164,7 +164,7 @@ void SkyboxComponent::render(Renderer& renderer, const Camera& camera, const Tra
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
     
-    glDepthFunc(GL_LESS); 
+    glDepthFunc(GL_GREATER); 
 }
 
 void SkyboxComponent::serialize(nlohmann::json& j) const {

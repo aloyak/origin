@@ -61,13 +61,13 @@ void Renderer::setupRenderTarget(unsigned int width, unsigned int height) {
 
     glGenTextures(1, &m_sceneDepthTexture);
     glBindTexture(GL_TEXTURE_2D, m_sceneDepthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
-                 GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0,
+                 GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_sceneDepthTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_sceneDepthTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         Logger::error("Renderer scene framebuffer is not complete!");
@@ -124,8 +124,8 @@ void Renderer::resizeRenderTarget(unsigned int width, unsigned int height) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
     glBindTexture(GL_TEXTURE_2D, m_sceneDepthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
-                 GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, width, height, 0,
+                 GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
     for (auto& pass : m_postProcessors) {
         if (!pass->isOutputToScreen()) {
@@ -211,7 +211,10 @@ void Renderer::beginFrame() {
         glViewport(0, 0, (int)size.x, (int)size.y);
     }
 
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glDepthFunc(GL_GREATER);
+    glClearDepth(0.0f);
+
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f); // default base color bright
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -420,8 +423,9 @@ Ray Renderer::pickRay(float mouseX, float mouseY,
     const glm::mat4 projection = glm::make_mat4(reinterpret_cast<const float*>(camera.getProjectionMatrix()));
     const glm::mat4 invVP      = glm::inverse(projection * view);
 
-    const glm::vec4 nearNDC(ndcX, ndcY, -1.0f, 1.0f);
-    const glm::vec4 farNDC (ndcX, ndcY,  1.0f, 1.0f);
+    // reverse-z: far plane is z = -1, near plane is z = 1
+    const glm::vec4 nearNDC(ndcX, ndcY,  1.0f, 1.0f);
+    const glm::vec4 farNDC (ndcX, ndcY, -1.0f, 1.0f);
 
     glm::vec4 nearWorld = invVP * nearNDC;
     glm::vec4 farWorld  = invVP * farNDC;
