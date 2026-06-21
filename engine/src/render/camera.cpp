@@ -10,9 +10,23 @@ struct Camera::CameraData {
     glm::mat4 view;
 };
 
+namespace {
+    glm::mat4 reverseZPerspective(float fovRadians, float aspect, float zNear, float zFar) {
+        const float f = 1.0f / tan(fovRadians * 0.5f);
+
+        glm::mat4 proj(0.0f);
+        proj[0][0] = f / aspect;
+        proj[1][1] = f;
+        proj[2][2] = (zFar + zNear) / (zFar - zNear);
+        proj[2][3] = -1.0f;
+        proj[3][2] = (2.0f * zFar * zNear) / (zFar - zNear);
+        return proj;
+    }
+}
+
 Camera::Camera(float fov, float aspect, float zNear, float zFar) {
     m_data = new CameraData();
-    m_data->projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+    m_data->projection = reverseZPerspective(glm::radians(fov), aspect, zNear, zFar);
 
     m_fov = fov;
     m_aspect = aspect;
@@ -66,10 +80,8 @@ Mat4 Camera::getInvProjMatrix() const {
 }
 
 void Camera::setAspectRatio(float aspect) {
-    float fov = glm::degrees(2.0f * atan(1.0f / m_data->projection[1][1]));
-    float zNear = m_data->projection[3][2] / (m_data->projection[2][2] - 1.0f);
-    float zFar = m_data->projection[3][2] / (m_data->projection[2][2] + 1.0f);
-    m_data->projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
+    m_aspect = aspect;
+    m_data->projection = reverseZPerspective(glm::radians(m_fov), m_aspect, m_near, m_far);
 }
 
 Camera::~Camera() {
