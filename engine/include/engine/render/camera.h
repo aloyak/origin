@@ -26,6 +26,9 @@ public:
     
     void setFar(float farPlane) { m_far = farPlane; }
     float getFar() const { return m_far; }
+
+    void setAspect(float aspect) { m_aspect = aspect; }
+    float getAspectRatio() const { return m_aspect; }
 private:
     struct CameraData;
     CameraData* m_data;

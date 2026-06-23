@@ -105,7 +105,14 @@ public:
         ImGuizmo::SetRect(viewportMin.x, viewportMin.y, viewportSize.x, viewportSize.y);
 
         const float* view = static_cast<const float*>(camera.getViewMatrix(cameraTransform));
-        const float* projection = static_cast<const float*>(camera.getProjectionMatrix());
+
+        Mat4 standardProj = Mat4::perspective(
+            camera.getFov(),
+            camera.getAspectRatio(),
+            camera.getNear(),
+            camera.getFar()
+        );
+        const float* projection = &standardProj[0][0];
 
         if (!m_SelectedEntity) return;
 

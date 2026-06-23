@@ -52,6 +52,7 @@ public:
     Entity* getActiveCamera() const { return m_activeCamera; }
 
     void setTargetFps(int target);
+    int getTargetFps() const { return m_targetFps; }
 
     // Update & render all entities and the active scene
     // Entities are expected to call renderer.render() themselves
