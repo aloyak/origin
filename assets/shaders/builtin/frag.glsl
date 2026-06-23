@@ -62,16 +62,19 @@ vec3 srgbToLinear(vec3 color) {
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 viewDir, vec3 diffuseColor, vec3 specularColor) {
     vec3 lightDir = normalize(-light.direction);  // negative because direction points FROM light
-    
+
+    float NdotL = dot(norm, lightDir);
+
     // Diffuse
-    float diff = max(dot(norm, lightDir), 0.0);
+    float diff = max(NdotL, 0.0);
     vec3 diffuse = diff * diffuseColor * light.color * light.intensity;
-    
+
     // Blinn-Phong
     vec3 halfDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(norm, halfDir), 0.0), u_Shininess);
+    spec *= smoothstep(0.0, 0.1, NdotL);
     vec3 specular = u_SpecularStrength * spec * specularColor * light.color * light.intensity;
-    
+
     return diffuse + specular;
 }
 
@@ -83,11 +86,14 @@ vec3 calcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec
     float radius = max(light.radius, 0.001);
     float attenuation = clamp(1.0 - (distanceToLight / radius), 0.0, 1.0);
 
-    float diff = max(dot(norm, lightDir), 0.0);
+    float NdotL = dot(norm, lightDir);
+
+    float diff = max(NdotL, 0.0);
     vec3 diffuse = diff * diffuseColor * light.color * light.intensity;
 
     vec3 halfDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(norm, halfDir), 0.0), u_Shininess);
+    spec *= smoothstep(0.0, 0.1, NdotL);
     vec3 specular = u_SpecularStrength * spec * specularColor * light.color * light.intensity;
 
     return (diffuse + specular) * attenuation;
