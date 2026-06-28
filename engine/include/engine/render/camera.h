@@ -18,20 +18,22 @@ public:
 
     void setAspectRatio(float aspect);
 
-    void setFov(float fov) { m_fov = fov; }
+    void setFov(float fov);
     float getFov() const { return m_fov; }
 
-    void setNear(float nearPlane) { m_near = nearPlane; }
+    void setNear(float nearPlane);
     float getNear() const { return m_near; }
     
-    void setFar(float farPlane) { m_far = farPlane; }
+    void setFar(float farPlane);
     float getFar() const { return m_far; }
 
-    void setAspect(float aspect) { m_aspect = aspect; }
+    void setAspect(float aspect) { setAspectRatio(aspect); }
     float getAspectRatio() const { return m_aspect; }
 private:
     struct CameraData;
     CameraData* m_data;
+
+    void rebuildProjection();
 
     float m_fov, m_aspect, m_near, m_far;
 };

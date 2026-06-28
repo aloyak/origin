@@ -79,9 +79,28 @@ Mat4 Camera::getInvProjMatrix() const {
     return out;
 }
 
+void Camera::rebuildProjection() {
+    m_data->projection = reverseZPerspective(glm::radians(m_fov), m_aspect, m_near, m_far);
+}
+
 void Camera::setAspectRatio(float aspect) {
     m_aspect = aspect;
-    m_data->projection = reverseZPerspective(glm::radians(m_fov), m_aspect, m_near, m_far);
+    rebuildProjection();
+}
+
+void Camera::setFov(float fov) {
+    m_fov = fov;
+    rebuildProjection();
+}
+
+void Camera::setNear(float nearPlane) {
+    m_near = nearPlane;
+    rebuildProjection();
+}
+
+void Camera::setFar(float farPlane) {
+    m_far = farPlane;
+    rebuildProjection();
 }
 
 Camera::~Camera() {

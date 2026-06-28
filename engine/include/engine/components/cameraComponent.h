@@ -20,8 +20,13 @@ public:
     void lookAt(Entity& target);
 
     float getFOV() const { return m_fov; }
+    void setFOV(float fov) { m_fov = fov; m_camera->setFov(fov); }
+
     float getFar() const { return m_far; }
+    void setFar(float farPlane) { m_far = farPlane; m_camera->setFar(farPlane); }
+    
     float getNear() const { return m_near; }
+    void setNear(float nearPlane) { m_near = nearPlane; m_camera->setNear(nearPlane); }
 private:
     std::unique_ptr<Camera> m_camera;
     
