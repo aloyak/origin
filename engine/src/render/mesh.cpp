@@ -11,10 +11,11 @@
 #include "engine/lighting/directionalLight.h"
 #include "engine/lighting/pointLight.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures, bool dynamic) {
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures, bool dynamic, Vec3 baseColor) {
     m_vertexCount = vertices.size(); 
     m_indexCount  = indices.size();
     m_dynamic     = dynamic;
+    m_baseColor   = baseColor;
 
     this->vertices = vertices;
     this->indices  = indices;
@@ -66,6 +67,7 @@ Mesh::Mesh(Mesh&& other) noexcept
     , m_vertexCount(other.m_vertexCount)
     , m_indexCount(other.m_indexCount)
     , m_dynamic(other.m_dynamic)
+    , m_baseColor(other.m_baseColor)
 {
     other.m_vao = 0;
     other.m_vbo = 0;
@@ -89,6 +91,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     m_vertexCount = other.m_vertexCount;
     m_indexCount  = other.m_indexCount;
     m_dynamic     = other.m_dynamic;
+    m_baseColor   = other.m_baseColor;
 
     other.m_vao = 0;
     other.m_vbo = 0;
@@ -151,7 +154,7 @@ void Mesh::draw(const Material& material,
 
     unsigned int textureUnit = 0;
 
-    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) {
+    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) -> bool {
         std::shared_ptr<Texture> selected = material.getTexture(uniformName);
 
         if (!selected) {
@@ -164,46 +167,36 @@ void Mesh::draw(const Material& material,
         }
 
         if (!selected) {
-            return;
+            return false;
         }
 
         shader.setInt(("material." + uniformName).c_str(), textureUnit);
         selected->bind(textureUnit);
         ++textureUnit;
+        return true;
     };
 
-    bindTextureSlot("texture_diffuse", "texture_diffuse");
-    bindTextureSlot("texture_specular", "texture_specular");
-    bindTextureSlot("texture_normal", "texture_normal");
-    bindTextureSlot("texture_metallic", "texture_metallic");
+    bool hasDiffuseMap   = bindTextureSlot("texture_diffuse", "texture_diffuse");
+    bool hasSpecularMap  = bindTextureSlot("texture_specular", "texture_specular");
+    bool hasNormalMap    = bindTextureSlot("texture_normal", "texture_normal");
+    bool hasMetallicMap  = bindTextureSlot("texture_metallic", "texture_metallic");
 
-    bool hasNormalMap = material.hasTexture("texture_normal");
-    if (!hasNormalMap) {
-        for (const auto& meshTexture : textures) {
-            if (meshTexture.type == "texture_normal" && meshTexture.texture) {
-                hasNormalMap = true;
-                break;
-            }
-        }
-    }
+    shader.setBool("u_DiffuseMap", hasDiffuseMap);
+    shader.setBool("u_SpecularMap", hasSpecularMap);
     shader.setBool("u_NormalMap", hasNormalMap);
-
-    bool hasMetallicMap = material.hasTexture("texture_metallic");
-    if (!hasMetallicMap) {
-        for (const auto& meshTexture : textures) {
-            if (meshTexture.type == "texture_metallic" && meshTexture.texture) {
-                hasMetallicMap = true;
-                break;
-            }
-        }
-    }
     shader.setBool("u_MetallicMap", hasMetallicMap);
+
+    Vec3 effectiveBaseColor = material.getBaseColor();
+    bool materialColorIsDefault = (effectiveBaseColor.x == 1.0f && effectiveBaseColor.y == 1.0f && effectiveBaseColor.z == 1.0f);
+    if (!hasDiffuseMap && materialColorIsDefault) {
+        effectiveBaseColor = m_baseColor;
+    }
 
     // Bind material properties
     shader.setFloat("u_AmbientStrength", material.getAmbientStrength());
     shader.setFloat("u_SpecularStrength", material.getSpecularStrength());
     shader.setFloat("u_Shininess", material.getShininess());
-    shader.setVec3("u_BaseColor", material.getBaseColor());
+    shader.setVec3("u_BaseColor", effectiveBaseColor);
     shader.setVec2("u_UVScale", material.getUVScale());
     
     // Bind directional light uniforms
@@ -252,7 +245,7 @@ void Mesh::drawInstanced(const Material& material,
 
     unsigned int textureUnit = 0;
 
-    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) {
+    auto bindTextureSlot = [&](const std::string& uniformName, const std::string& meshType) -> bool {
         std::shared_ptr<Texture> selected = material.getTexture(uniformName);
 
         if (!selected) {
@@ -265,45 +258,35 @@ void Mesh::drawInstanced(const Material& material,
         }
 
         if (!selected) {
-            return;
+            return false;
         }
 
         materialShader.setInt(("material." + uniformName).c_str(), textureUnit);
         selected->bind(textureUnit);
         ++textureUnit;
+        return true;
     };
 
-    bindTextureSlot("texture_diffuse", "texture_diffuse");
-    bindTextureSlot("texture_specular", "texture_specular");
-    bindTextureSlot("texture_normal", "texture_normal");
-    bindTextureSlot("texture_metallic", "texture_metallic");
+    bool hasDiffuseMap   = bindTextureSlot("texture_diffuse", "texture_diffuse");
+    bool hasSpecularMap  = bindTextureSlot("texture_specular", "texture_specular");
+    bool hasNormalMap    = bindTextureSlot("texture_normal", "texture_normal");
+    bool hasMetallicMap  = bindTextureSlot("texture_metallic", "texture_metallic");
 
-    bool hasNormalMap = material.hasTexture("texture_normal");
-    if (!hasNormalMap) {
-        for (const auto& meshTexture : textures) {
-            if (meshTexture.type == "texture_normal" && meshTexture.texture) {
-                hasNormalMap = true;
-                break;
-            }
-        }
-    }
+    materialShader.setBool("u_DiffuseMap", hasDiffuseMap);
+    materialShader.setBool("u_SpecularMap", hasSpecularMap);
     materialShader.setBool("u_NormalMap", hasNormalMap);
-
-    bool hasMetallicMap = material.hasTexture("texture_metallic");
-    if (!hasMetallicMap) {
-        for (const auto& meshTexture : textures) {
-            if (meshTexture.type == "texture_metallic" && meshTexture.texture) {
-                hasMetallicMap = true;
-                break;
-            }
-        }
-    }
     materialShader.setBool("u_MetallicMap", hasMetallicMap);
+
+    Vec3 effectiveBaseColor = material.getBaseColor();
+    bool materialColorIsDefault = (effectiveBaseColor.x == 1.0f && effectiveBaseColor.y == 1.0f && effectiveBaseColor.z == 1.0f);
+    if (!hasDiffuseMap && materialColorIsDefault) {
+        effectiveBaseColor = m_baseColor;
+    }
 
     materialShader.setFloat("u_AmbientStrength", material.getAmbientStrength());
     materialShader.setFloat("u_SpecularStrength", material.getSpecularStrength());
     materialShader.setFloat("u_Shininess", material.getShininess());
-    materialShader.setVec3("u_BaseColor", material.getBaseColor());
+    materialShader.setVec3("u_BaseColor", effectiveBaseColor);
     materialShader.setVec2("u_UVScale", material.getUVScale());
     
     for (size_t i = 0; i < directionalLights.size() && i < m_maxDirectionalLights; ++i) {

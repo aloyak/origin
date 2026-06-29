@@ -33,7 +33,7 @@ public:
     std::vector<MeshTexture>  textures;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<MeshTexture> textures,
-         bool dynamic = false);
+         bool dynamic = false, Vec3 baseColor = Vec3(1.0f, 1.0f, 1.0f));
     ~Mesh();
 
     Mesh(const Mesh&) = delete;
@@ -46,6 +46,8 @@ public:
     void recalculateNormals();
 
     bool isDynamic() const { return m_dynamic; }
+    
+    Vec3 getBaseColor() const { return m_baseColor; } // base color if no texture but material still has color data
 
     void draw(const Material& material,
               const std::vector<DirectionalLight>& directionalLights,
@@ -62,6 +64,7 @@ private:
     unsigned int m_vao, m_vbo, m_ebo;
     int m_vertexCount, m_indexCount;
     bool m_dynamic = false;
+    Vec3 m_baseColor = Vec3(1.0f, 1.0f, 1.0f);
 
     int m_maxDirectionalLights = 4;
     int m_maxPointLights = 8;

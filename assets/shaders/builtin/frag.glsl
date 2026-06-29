@@ -55,6 +55,8 @@ uniform vec2 u_UVScale;
 
 uniform bool u_NormalMap;
 uniform bool u_MetallicMap;
+uniform bool u_DiffuseMap;
+uniform bool u_SpecularMap;
 
 vec3 srgbToLinear(vec3 color) {
     return pow(max(color, vec3(0.0)), vec3(2.2));
@@ -101,8 +103,14 @@ vec3 calcPointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir, vec
 
 void main() {
     vec2 tiledTexCoord = TexCoord * u_UVScale;
-    vec4 diffuseTexture = texture(material.texture_diffuse, tiledTexCoord);
-    vec4 specularTexture = texture(material.texture_specular, tiledTexCoord);
+
+    vec4 diffuseTexture = u_DiffuseMap
+        ? texture(material.texture_diffuse, tiledTexCoord)
+        : vec4(1.0, 1.0, 1.0, 1.0);
+
+    vec4 specularTexture = u_SpecularMap
+        ? texture(material.texture_specular, tiledTexCoord)
+        : vec4(1.0, 1.0, 1.0, 1.0);
 
     vec3 diffuseColor = srgbToLinear(diffuseTexture.rgb) * u_BaseColor;
     float metallic = 0.0;

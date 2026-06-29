@@ -11,6 +11,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/material.h>
 
 #include "engine/utils/path.h"
 #include "engine/utils/logger.h"
@@ -164,7 +165,15 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     textures.insert(textures.end(), normalMaps.begin(),   normalMaps.end());
     textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
 
-    return Mesh(vertices, indices, textures, m_dynamic);
+    Vec3 baseColor(1.0f, 1.0f, 1.0f);
+    aiColor4D aiColor;
+    if (aiGetMaterialColor(material, AI_MATKEY_BASE_COLOR, &aiColor) == AI_SUCCESS) {
+        baseColor = Vec3(aiColor.r, aiColor.g, aiColor.b);
+    } else if (aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &aiColor) == AI_SUCCESS) {
+        baseColor = Vec3(aiColor.r, aiColor.g, aiColor.b);
+    }
+
+    return Mesh(vertices, indices, textures, m_dynamic, baseColor);
 }
 
 std::vector<MeshTexture> Model::loadMaterialTextures(
