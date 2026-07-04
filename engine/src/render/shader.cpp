@@ -130,6 +130,11 @@ void Shader::setMat4(const std::string& name, const Mat4& value) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &value[0][0]);
 }
 
+void Shader::setTexture(const std::string& name, const Texture& texture, int unit) const {
+    texture.bind(unit);
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), unit);
+}
+
 void Shader::checkShader(unsigned int shader) {
     int success;
     char infoLog[512];

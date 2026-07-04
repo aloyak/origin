@@ -40,6 +40,7 @@ public:
     void setVec3(const std::string& name, const Vec3& value);
     void setVec4(const std::string& name, const Vec4& value);
     void setMat4(const std::string& name, const Mat4& value);
+    void setTexture(const std::string& name, const class Texture& texture);
 
 private:
     void createFramebuffer();
