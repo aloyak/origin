@@ -63,6 +63,11 @@ public:
     void initUI();
     void beginUI();
     void endUI();
+
+    void loadScene(const std::string& scenePath) { m_sceneManager->load(scenePath); }
+    void saveScene(const std::string& scenePath) { m_sceneManager->save(scenePath); }
+    void createScene(std::string name = "Scene") { m_sceneManager->createScene(name); }
+    void unloadScene() { m_sceneManager->unload(); }
 #ifndef __EMSCRIPTEN__
     ImGuiIO& getIO() { return ImGui::GetIO(); }
 #endif
