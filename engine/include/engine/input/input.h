@@ -7,6 +7,9 @@
 
 struct SDL_Window;
 
+#define CURSOR_LOCKED 1
+#define CURSOR_DEFAULT 0
+
 class Input {
 public:
     Input(SDL_Window* window);

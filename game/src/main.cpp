@@ -24,7 +24,7 @@ int main() {
     Input& input = engine.getInput();
     SceneManager& sm = engine.getSceneManager();
 
-    input.setCursorMode(true); // true = locked
+    input.setCursorMode(CURSOR_LOCKED); 
     engine.getWindow().setFullscreen(false);
     engine.getWindow().enableVSync(false);
 
