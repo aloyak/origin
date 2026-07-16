@@ -34,17 +34,17 @@ float toDegrees(float radians) {
 }
 
 btQuaternion toBulletQuaternion(const Vec3& eulerDegrees) {
-    btQuaternion qY, qX, qZ;
-    qY.setRotation(btVector3(0, 1, 0), toRadians(eulerDegrees.y));
+    btQuaternion qX, qY, qZ;
     qX.setRotation(btVector3(1, 0, 0), toRadians(eulerDegrees.x));
+    qY.setRotation(btVector3(0, 1, 0), toRadians(eulerDegrees.y));
     qZ.setRotation(btVector3(0, 0, 1), toRadians(eulerDegrees.z));
-    return qY * qX * qZ;
+    return qZ * qY * qX;
 }
 
 Vec3 toEulerDegrees(const btQuaternion& q) {
     btScalar yaw, pitch, roll;
-    btMatrix3x3(q).getEulerZYX(roll, pitch, yaw);
-    return Vec3(toDegrees(pitch), toDegrees(yaw), toDegrees(roll));
+    btMatrix3x3(q).getEulerZYX(yaw, pitch, roll);
+    return Vec3(toDegrees(roll), toDegrees(pitch), toDegrees(yaw));
 }
 
 std::string bodyTypeToString(RigidbodyComponent::BodyType type) {
@@ -459,9 +459,12 @@ void RigidbodyComponent::rebuildBody() {
     }
 
     m_world->addRigidBody(m_body);
-    
-    m_body->setCcdMotionThreshold(1e-7);
-    m_body->setCcdSweptSphereRadius(scaledSize.x * 0.2f); // m_colliderSize before
+
+    if (!isStatic && !isKinematic) {
+        const float smallestExtent = std::min(scaledSize.x, std::min(scaledSize.y, scaledSize.z));
+        m_body->setCcdMotionThreshold(smallestExtent * 0.5f);
+        m_body->setCcdSweptSphereRadius(smallestExtent * 0.4f);
+    }
 
     m_registered = true;
     m_dirty = false;
