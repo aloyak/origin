@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 #include "engine/core/math.h"
 
 class Texture {
@@ -23,12 +24,14 @@ public:
     void bind(unsigned int unit = 0) const;
     void unbind() const;
 
+    
     unsigned int getID() const { return m_id; }
     int getWidth() const { return m_width; }
     int getHeight() const { return m_height; }
     int getChannels() const { return m_channels; }
     bool isPaintable() const { return !m_pixels.empty(); }
-
+    
+    const uint8_t* getData() const { return m_pixels.empty() ? nullptr : m_pixels.data(); }
 
     void paint(float u, float v, float brushRadius, Vec4 color);
 
