@@ -10,6 +10,7 @@
 #include "engine/components/rigidbodyComponent.h"
 #include "engine/components/audioSourceComponent.h"
 #include "engine/components/listenerComponent.h"
+#include "engine/components/parentEntityComponent.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -50,7 +51,7 @@ namespace {
         return out;
     }
 
-    Component* createComponentByType(Entity* entity, const std::string& type, const json& jComp) {
+    Component* createComponentByType(SceneManager& sceneManager, Entity* entity, const std::string& type, const json& jComp) {
         if (type == "RenderComponent") {
             const std::string modelPath = jComp.value("model", "");
             const std::string vertPath = jComp.value("vert", "assets/shaders/builtin/vert.glsl");
@@ -71,6 +72,7 @@ namespace {
         if (type == "RigidbodyComponent") return entity->addComponent<RigidbodyComponent>();
         if (type == "AudioSourceComponent") return entity->addComponent<AudioSourceComponent>();
         if (type == "ListenerComponent") return entity->addComponent<ListenerComponent>();
+        if (type == "ParentEntityComponent") return entity->addComponent<ParentEntityComponent>(sceneManager);
         
         Logger::warn("Unknown component type on entity '" + entity->name + "'.");
         return nullptr;
@@ -172,35 +174,47 @@ Scene* SceneManager::load(const std::string& scenePath) {
                 if (tryReadVec3(t, "rot", parsed)) ent->transform.rotation = parsed;
                 if (tryReadVec3(t, "sca", parsed)) ent->transform.scale = parsed;
             }
+        }
+    }
 
-            if (jEnt.contains("components") && jEnt["components"].is_array()) {
-                for (const auto& jComp : jEnt["components"]) {
-                    if (!jComp.is_object()) {
-                        Logger::warn("Skipping malformed component on entity '" + ent->name + "'.");
-                        continue;
-                    }
+    m_activeScene = std::move(loadedScene);
 
-                    std::string type = jComp.value("type", "");
-                    if (type.empty()) {
-                        Logger::warn("Skipping component with missing type on entity '" + ent->name + "'.");
-                        continue;
-                    }
+    if (j.contains("entities") && j["entities"].is_array()) {
+        const auto& entities = j["entities"];
+        for (size_t entityIndex = 0; entityIndex < entities.size(); ++entityIndex) {
+            const auto& jEnt = entities[entityIndex];
+            if (!jEnt.is_object() || !jEnt.contains("components") || !jEnt["components"].is_array()) {
+                continue;
+            }
 
-                    Component* c = createComponentByType(ent, type, jComp);
-                    if (c) {
-                        try {
-                            c->deserialize(jComp);
-                        } catch (const std::exception& e) {
-                            Logger::error("Failed to deserialize component '" + type + "' on entity '" + ent->name + "': " + e.what());
-                        }
+            Entity* ent = m_activeScene->getEntity(entityIndex).get();
+            if (!ent) {
+                continue;
+            }
+
+            for (const auto& jComp : jEnt["components"]) {
+                if (!jComp.is_object()) {
+                    Logger::warn("Skipping malformed component on entity '" + ent->name + "'.");
+                    continue;
+                }
+
+                std::string type = jComp.value("type", "");
+                if (type.empty()) {
+                    Logger::warn("Skipping component with missing type on entity '" + ent->name + "'.");
+                    continue;
+                }
+
+                Component* c = createComponentByType(*this, ent, type, jComp);
+                if (c) {
+                    try {
+                        c->deserialize(jComp);
+                    } catch (const std::exception& e) {
+                        Logger::error("Failed to deserialize component '" + type + "' on entity '" + ent->name + "': " + e.what());
                     }
                 }
             }
         }
     }
-
-    unload();
-    m_activeScene = std::move(loadedScene);
 
     Logger::info("Scene '" + m_activeScene->name + "' loaded from " + resolvedScenePath);
     return m_activeScene.get();

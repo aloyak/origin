@@ -14,6 +14,7 @@
 #include "engine/components/rigidbodyComponent.h"
 #include "engine/components/audioSourceComponent.h"
 #include "engine/components/listenerComponent.h"
+#include "engine/components/parentEntityComponent.h"
 
 #include <cctype>
 
@@ -123,6 +124,10 @@ public:
                 }
                 if (!m_SelectedEntity->getComponent<ListenerComponent>() && ImGui::MenuItem(ICON_LC_AUDIO_WAVEFORM " Listener")) {
                     m_SelectedEntity->addComponent<ListenerComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+                if (!m_SelectedEntity->getComponent<ParentEntityComponent>() && ImGui::MenuItem(ICON_LC_LINK " Parent Entity")) {
+                    m_SelectedEntity->addComponent<ParentEntityComponent>(m_Engine.getSceneManager());
                     ImGui::CloseCurrentPopup();
                 }
 

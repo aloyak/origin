@@ -3,7 +3,6 @@
 #include <typeindex>
 #include <functional>
 #include <unordered_map>
-#include "engine/components/entity.h"
 
 #include <imgui.h>
 

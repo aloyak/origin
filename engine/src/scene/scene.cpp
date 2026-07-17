@@ -37,5 +37,7 @@ std::unique_ptr<Entity>& Scene::getEntityByName(const std::string name) {
     if (it != m_entities.end()) {
         return *it;
     }
-    throw std::runtime_error("Entity not found");
+
+    static std::unique_ptr<Entity> fallback;
+    return fallback;
 }

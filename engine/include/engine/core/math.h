@@ -185,3 +185,45 @@ inline Vec3 rotateAxisAngle(const Vec3& v, const Vec3& axis, float angle) {
 inline float length(const Vec3& v) {
     return std::sqrt(dot(v, v));
 }
+
+inline Quat inverse(const Quat& q) {
+    float normSq = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+    if (normSq > 0.0f) {
+        float invNormSq = 1.0f / normSq;
+        return Quat(-q.x * invNormSq, -q.y * invNormSq, -q.z * invNormSq, q.w * invNormSq);
+    }
+    return Quat(0, 0, 0, 1);
+}
+
+inline Quat operator*(const Quat& a, const Quat& b) {
+    return Quat(
+        a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+        a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+        a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
+        a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+    );
+}
+
+inline Vec3 operator/(const Vec3& a, const Vec3& b) {
+    return {a.x / b.x, a.y / b.y, a.z / b.z};
+}
+
+inline Vec3 toEulerAngles(const Quat& q) {
+    Vec3 angles;
+
+    float sinr_cosp = 2.0f * (q.w * q.x + q.y * q.z);
+    float cosr_cosp = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+    angles.x = std::atan2(sinr_cosp, cosr_cosp) * (180.0f / 3.1415926535f);
+
+    float sinp = 2.0f * (q.w * q.y - q.z * q.x);
+    if (std::abs(sinp) >= 1.0f)
+        angles.y = std::copysign(3.1415926535f / 2.0f, sinp) * (180.0f / 3.1415926535f);
+    else
+        angles.y = std::asin(sinp) * (180.0f / 3.1415926535f);
+
+    float siny_cosp = 2.0f * (q.w * q.z + q.x * q.y);
+    float cosy_cosp = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
+    angles.z = std::atan2(siny_cosp, cosy_cosp) * (180.0f / 3.1415926535f);
+
+    return angles;
+}

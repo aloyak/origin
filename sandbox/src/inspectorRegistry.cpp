@@ -4,6 +4,8 @@
 #include "sandbox/dialog.h"
 #include "sandbox/icons.h"
 
+#include "engine/components/entity.h"
+
 #include "engine/components/cameraComponent.h"
 #include "engine/components/rendererComponent.h"
 #include "engine/components/skyboxComponent.h"
@@ -12,6 +14,7 @@
 #include "engine/components/rigidbodyComponent.h"
 #include "engine/components/audioSourceComponent.h"
 #include "engine/components/listenerComponent.h"
+#include "engine/components/parentEntityComponent.h"
 
 #include <string>
 #include <vector>
@@ -70,6 +73,52 @@ void Layer::registerDefaultInspectors() {
 			}
 			c->getCamera().setNear(nearFar[0]);
 			c->getCamera().setFar(nearFar[1]);
+		}
+	});
+
+	InspectorRegistry::registerComponent<ParentEntityComponent>([this](ParentEntityComponent* c) {
+
+		ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.6f), "NOTE: this is a quick solution for parenting entities in the editor");
+		ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.6f), "this will probably end up being deprecated!");
+		
+		if (ImGui::Button("Clear All Children", ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+			c->clearChildren();
+		}
+
+		if (ImGui::Checkbox("Position", &c->applyPosition)) {} ImGui::SameLine();
+		if (ImGui::Checkbox("Rotation", &c->applyRotation)) {} ImGui::SameLine();
+		if (ImGui::Checkbox("Scale", &c->applyScale)) {}
+
+		ImGui::SeparatorText("Add Child");
+		
+		static char childNameBuffer[128] = "";
+		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Add").x - ImGui::GetStyle().ItemSpacing.x * 2.0f);
+		ImGui::InputText("##AddChildName", childNameBuffer, sizeof(childNameBuffer));
+		ImGui::SameLine();
+		if (ImGui::Button("Add")) {
+			Entity* childEntity = c->getSceneManager().getActiveScene()->getEntityByName(childNameBuffer).get();
+			if (childEntity) {
+				c->addChild(childEntity);
+			}
+		}
+
+		std::vector<Entity*> children = c->getChildren();
+		for (size_t i = 0; i < children.size(); ++i) {
+			Entity* child = children[i];
+			if (!child) continue;
+
+			ImGui::PushID(static_cast<int>(i));
+			if (ImGui::Button(child->name.c_str(), ImVec2(ImGui::GetContentRegionAvail().x - 30.0f, 0))) {
+				m_SelectedEntity = child;
+			}
+			
+			float removeWidth = ImGui::CalcTextSize(ICON_LC_X).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+			ImGui::SameLine(ImGui::GetContentRegionAvail().x - removeWidth);
+			
+			if (ImGui::Button(ICON_LC_X)) {
+				c->removeChild(child);
+			}
+			ImGui::PopID();
 		}
 	});
 
