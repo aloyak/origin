@@ -557,3 +557,19 @@ void RigidbodyComponent::applyTorque(const Vec3& torque) {
     m_body->activate(true);
     m_body->applyTorque(btVector3(torque.x, torque.y, torque.z));
 }
+
+
+void RigidbodyComponent::teleport(const Vec3& position, const Vec3& eulerDegrees) {
+    if (!entity) return;
+
+    entity->transform.position = position;
+    entity->transform.rotation = eulerDegrees;
+
+    if (m_body) {
+        syncBodyFromTransform();
+
+        m_body->setLinearVelocity(btVector3(0.0f, 0.0f, 0.0f));
+        m_body->setAngularVelocity(btVector3(0.0f, 0.0f, 0.0f));
+        m_body->activate(true);
+    }
+}

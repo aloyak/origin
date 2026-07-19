@@ -72,6 +72,8 @@ public:
 
     void resetMotion();
 
+    void teleport(const Vec3& position, const Vec3& eulerDegrees);
+
 private:
     void markDirty();
     void rebuildBody();
