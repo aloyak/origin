@@ -63,7 +63,11 @@ public:
     void setColliderSize(const Vec3& size);
     Vec3 getColliderSize() const { return m_colliderSize; }
 
-    
+    void applyForce(const Vec3& force);
+    void applyTorque(const Vec3& torque);
+    void applyImpulse(const Vec3& impulse);
+
+    // cant be used by the game
     btRigidBody* getRigidBody() const { return m_body; }
 
     void resetMotion();

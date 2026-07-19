@@ -530,3 +530,30 @@ void RigidbodyComponent::syncBodyFromTransform() const {
         m_world->updateSingleAabb(m_body);
     }
 }
+
+void RigidbodyComponent::applyForce(const Vec3& force) {
+    if (!m_body || m_bodyType != BodyType::Dynamic) {
+        return;
+    }
+
+    m_body->activate(true);
+    m_body->applyCentralForce(btVector3(force.x, force.y, force.z));
+}
+
+void RigidbodyComponent::applyImpulse(const Vec3& impulse) {
+    if (!m_body || m_bodyType != BodyType::Dynamic) {
+        return;
+    }
+
+    m_body->activate(true);
+    m_body->applyCentralImpulse(btVector3(impulse.x, impulse.y, impulse.z));
+}
+
+void RigidbodyComponent::applyTorque(const Vec3& torque) {
+    if (!m_body || m_bodyType != BodyType::Dynamic) {
+        return;
+    }
+
+    m_body->activate(true);
+    m_body->applyTorque(btVector3(torque.x, torque.y, torque.z));
+}
