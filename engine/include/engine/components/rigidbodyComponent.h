@@ -63,6 +63,15 @@ public:
     void setColliderSize(const Vec3& size);
     Vec3 getColliderSize() const { return m_colliderSize; }
 
+    void setFreezeRotationX(bool freeze);
+    bool getFreezeRotationX() const { return m_freezeRotationX; }
+
+    void setFreezeRotationY(bool freeze);
+    bool getFreezeRotationY() const { return m_freezeRotationY; }
+
+    void setFreezeRotationZ(bool freeze);
+    bool getFreezeRotationZ() const { return m_freezeRotationZ; }
+
     Vec3 getLinearVelocity() const;
     Vec3 getAngularVelocity() const;
 
@@ -107,4 +116,8 @@ private:
     bool m_useGravity = true;
     Vec3 m_colliderSize = Vec3(1.0f, 1.0f, 1.0f);
     Vec3 m_lastTrackedScale = Vec3(1.0f, 1.0f, 1.0f);
+    
+    bool m_freezeRotationX = false;
+    bool m_freezeRotationY = false;
+    bool m_freezeRotationZ = false;
 };
