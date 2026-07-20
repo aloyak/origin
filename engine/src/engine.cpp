@@ -23,6 +23,7 @@ Engine::Engine(unsigned int width, unsigned int height, const char* title) {
     m_renderer = std::make_unique<Renderer>(*m_window);
     m_input = std::make_unique<Input>(m_window->getHandle());
     m_physicsWorld = std::make_unique<PhysicsWorld>();
+    PhysicsWorld::setActive(m_physicsWorld.get());
     m_audioSystem = std::make_unique<AudioSystem>();
     m_sceneManager = std::make_unique<SceneManager>();
 
@@ -176,7 +177,20 @@ void Engine::moveToScene(Entity* entity) {
     }
 }
 
-// Scene update + render
+PhysicsWorld& Engine::createPhysicsWorld() {
+    m_extraPhysicsWorlds.push_back(std::make_unique<PhysicsWorld>());
+    return *m_extraPhysicsWorlds.back();
+}
+
+void Engine::destroyPhysicsWorld(PhysicsWorld& world) {
+    m_extraPhysicsWorlds.erase(
+        std::remove_if(m_extraPhysicsWorlds.begin(), m_extraPhysicsWorlds.end(),
+            [&world](const std::unique_ptr<PhysicsWorld>& w) { return w.get() == &world; }),
+        m_extraPhysicsWorlds.end()
+    );
+}
+
+// Scene update + render + physics step
 void Engine::updateScene() {
     if (m_audioSystem) {
         bool listenerFound = false;
@@ -237,6 +251,9 @@ void Engine::updateScene() {
     }
 
     m_physicsWorld->stepSimulation(m_deltaTime);
+    for (auto& world : m_extraPhysicsWorlds) {
+        world->stepSimulation(m_deltaTime);
+    }
 
     for (auto& entity : m_entities)
         entity->update(m_deltaTime);
@@ -347,7 +364,6 @@ void Engine::initUI() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplSDL2_InitForOpenGL(m_window->getHandle(), m_window->getGLContext());
     ImGui_ImplOpenGL3_Init("#version 410");

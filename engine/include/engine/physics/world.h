@@ -29,6 +29,9 @@ public:
                  btCollisionObject*& hitObject) const;
 
     static PhysicsWorld* getActive();
+    // Only the engine's primary world should normally call this
+    // Extra worlds must NOT call this, or they'll silently steal the "active" slot from the main world
+    static void setActive(PhysicsWorld* world);
 
     void setEnabled(bool enabled) { m_enabled = enabled; }
     bool isEnabled() const { return m_enabled; }

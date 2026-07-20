@@ -39,9 +39,13 @@ public:
     SceneManager& getSceneManager() { return *m_sceneManager; }
     Window& getWindow() { return *m_window; }
     Renderer& getRenderer() { return *m_renderer; }
-    PhysicsWorld& getPhysicsWorld() { return *m_physicsWorld; }
     AudioSystem& getAudioSystem() { return *m_audioSystem; }
-
+    
+    PhysicsWorld& getPhysicsWorld() { return *m_physicsWorld; }
+    // Extra physics worlds beyond the primary one
+    PhysicsWorld& createPhysicsWorld();
+    void destroyPhysicsWorld(PhysicsWorld& world);
+    
     // Entity management
     Entity* createEntity(std::string name = "Entity");
     void    destroyEntity(Entity* entity);
@@ -76,6 +80,7 @@ private:
     std::unique_ptr<Window> m_window;
     std::unique_ptr<Input> m_input;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
+    std::vector<std::unique_ptr<PhysicsWorld>> m_extraPhysicsWorlds;
     std::unique_ptr<AudioSystem> m_audioSystem;
     std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<SceneManager> m_sceneManager;
