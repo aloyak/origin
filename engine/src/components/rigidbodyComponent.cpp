@@ -573,3 +573,15 @@ void RigidbodyComponent::teleport(const Vec3& position, const Vec3& eulerDegrees
         m_body->activate(true);
     }
 }
+
+Vec3 RigidbodyComponent::getLinearVelocity() const {
+    if (!m_body) return Vec3(0.0f, 0.0f, 0.0f);
+    const btVector3 vel = m_body->getLinearVelocity();
+    return Vec3(vel.x(), vel.y(), vel.z());
+}
+
+Vec3 RigidbodyComponent::getAngularVelocity() const {
+    if (!m_body) return Vec3(0.0f, 0.0f, 0.0f);
+    const btVector3 vel = m_body->getAngularVelocity();
+    return Vec3(vel.x(), vel.y(), vel.z());
+}

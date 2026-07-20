@@ -63,6 +63,9 @@ public:
     void setColliderSize(const Vec3& size);
     Vec3 getColliderSize() const { return m_colliderSize; }
 
+    Vec3 getLinearVelocity() const;
+    Vec3 getAngularVelocity() const;
+
     void applyForce(const Vec3& force);
     void applyTorque(const Vec3& torque);
     void applyImpulse(const Vec3& impulse);
