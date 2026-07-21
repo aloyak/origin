@@ -209,6 +209,28 @@ inline Vec3 operator/(const Vec3& a, const Vec3& b) {
     return {a.x / b.x, a.y / b.y, a.z / b.z};
 }
 
+inline Vec3 operator*(const Quat& q, const Vec3& v) {
+    Vec3 qv(q.x, q.y, q.z);
+    Vec3 t = 2.0f * cross(qv, v);
+    return v + q.w * t + cross(qv, t);
+}
+
+inline Quat fromAxisAngle(const Vec3& axis, float angleRad) {
+    Vec3 a = axis.normalize();
+    float half = angleRad * 0.5f;
+    float s = std::sin(half);
+    return Quat(a.x * s, a.y * s, a.z * s, std::cos(half));
+}
+
+inline Quat normalize(const Quat& q) {
+    float lenSq = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+    if (lenSq > 0.0f) {
+        float invLen = 1.0f / std::sqrt(lenSq);
+        return Quat(q.x * invLen, q.y * invLen, q.z * invLen, q.w * invLen);
+    }
+    return Quat();
+}
+
 inline Vec3 toEulerAngles(const Quat& q) {
     Vec3 angles;
 

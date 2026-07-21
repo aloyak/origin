@@ -20,19 +20,16 @@ public:
     }
 
     Vec3 right() const {
-        float yaw = (rotation.y - 90.0f) * (3.14159265f / 180.0f);
-        return { cosf(yaw), 0, sinf(yaw) };
+        return cross(up(), forward()).normalize();
     }
 
     Vec3 up() const {
-        Vec3 f = forward(), r = right();
-        return {
-            r.y*f.z - r.z*f.y,
-            r.z*f.x - r.x*f.z,
-            r.x*f.y - r.y*f.x
-        };
+        Vec3 f = forward();
+        Vec3 worldUp(0.0f, 1.0f, 0.0f);
+        float roll = rotation.z * (3.14159265f / 180.0f);
+        return rotateAxisAngle(worldUp, f, roll);
     }
-
+    
     Vec3 localToWorld(const Vec3& local) const {
         const float deg2rad = 3.14159265f / 180.0f;
         const float yaw   = rotation.y * deg2rad;
