@@ -46,7 +46,6 @@ struct PhysicsWorld::Data {
 
 PhysicsWorld::PhysicsWorld() {
     m_data = new Data();
-    g_activeWorld = this;
 }
 
 PhysicsWorld::~PhysicsWorld() {
@@ -125,4 +124,8 @@ bool PhysicsWorld::rayTest(const Vec3& origin,
 
 PhysicsWorld* PhysicsWorld::getActive() {
     return g_activeWorld;
+}
+
+void PhysicsWorld::setActive(PhysicsWorld* world) {
+    g_activeWorld = world;
 }

@@ -151,6 +151,9 @@ void RigidbodyComponent::serialize(nlohmann::json& j) const {
     j["angularDamping"] = m_angularDamping;
     j["useGravity"] = m_useGravity;
     j["colliderSize"] = {m_colliderSize.x, m_colliderSize.y, m_colliderSize.z};
+    j["freezeRotationX"] = m_freezeRotationX;
+    j["freezeRotationY"] = m_freezeRotationY;
+    j["freezeRotationZ"] = m_freezeRotationZ;
 }
 
 void RigidbodyComponent::deserialize(const nlohmann::json& j) {
@@ -162,6 +165,9 @@ void RigidbodyComponent::deserialize(const nlohmann::json& j) {
     setLinearDamping(j.value("linearDamping", 0.02f));
     setAngularDamping(j.value("angularDamping", 0.05f));
     setUseGravity(j.value("useGravity", true));
+    setFreezeRotationX(j.value("freezeRotationX", false));
+    setFreezeRotationY(j.value("freezeRotationY", false));
+    setFreezeRotationZ(j.value("freezeRotationZ", false));
 
     if (j.contains("colliderSize") && j["colliderSize"].is_array() && j["colliderSize"].size() >= 3) {
         const auto& size = j["colliderSize"];
@@ -257,6 +263,39 @@ void RigidbodyComponent::setColliderSize(const Vec3& size) {
     m_colliderSize.y = std::max(0.01f, std::fabs(size.y));
     m_colliderSize.z = std::max(0.01f, std::fabs(size.z));
     markDirty();
+}
+
+void RigidbodyComponent::setFreezeRotationX(bool freeze) {
+    m_freezeRotationX = freeze;
+    if (m_body) {
+        m_body->setAngularFactor(btVector3(
+            m_freezeRotationX ? 0.0f : 1.0f,
+            m_freezeRotationY ? 0.0f : 1.0f,
+            m_freezeRotationZ ? 0.0f : 1.0f
+        ));
+    }
+}
+
+void RigidbodyComponent::setFreezeRotationY(bool freeze) {
+    m_freezeRotationY = freeze;
+    if (m_body) {
+        m_body->setAngularFactor(btVector3(
+            m_freezeRotationX ? 0.0f : 1.0f,
+            m_freezeRotationY ? 0.0f : 1.0f,
+            m_freezeRotationZ ? 0.0f : 1.0f
+        ));
+    }
+}
+
+void RigidbodyComponent::setFreezeRotationZ(bool freeze) {
+    m_freezeRotationZ = freeze;
+    if (m_body) {
+        m_body->setAngularFactor(btVector3(
+            m_freezeRotationX ? 0.0f : 1.0f,
+            m_freezeRotationY ? 0.0f : 1.0f,
+            m_freezeRotationZ ? 0.0f : 1.0f
+        ));
+    }
 }
 
 void RigidbodyComponent::resetMotion() {
@@ -439,6 +478,11 @@ void RigidbodyComponent::rebuildBody() {
 
     m_body = new btRigidBody(bodyInfo);
     m_body->setDamping(m_linearDamping, m_angularDamping);
+    m_body->setAngularFactor(btVector3(
+        m_freezeRotationX ? 0.0f : 1.0f,
+        m_freezeRotationY ? 0.0f : 1.0f,
+        m_freezeRotationZ ? 0.0f : 1.0f
+    ));
 
     if (isStatic) {
         m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);

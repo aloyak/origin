@@ -35,21 +35,13 @@ Camera::Camera(float fov, float aspect, float zNear, float zFar) {
 }
 
 void* Camera::getViewMatrix(const Transform& transform) const {
-    float yaw   = transform.rotation.y;
-    float pitch = transform.rotation.x;
-    float roll  = transform.rotation.z;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front = glm::normalize(front);
-
-    glm::vec3 worldUp(0.0f, 1.0f, 0.0f);
-    glm::mat4 rollMat = glm::rotate(glm::mat4(1.0f), glm::radians(roll), front);
-    glm::vec3 up = glm::vec3(rollMat * glm::vec4(worldUp, 0.0f));
+    Vec3 f = transform.forward();
+    Vec3 u = transform.up();
 
     glm::vec3 pos(transform.position.x, transform.position.y, transform.position.z);
+    glm::vec3 front(f.x, f.y, f.z);
+    glm::vec3 up(u.x, u.y, u.z);
+
     m_data->view = glm::lookAt(pos, pos + front, up);
     return &m_data->view;
 }
