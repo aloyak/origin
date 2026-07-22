@@ -95,6 +95,15 @@ Vec2 Window::getSize() const {
     return Vec2((float)w, (float)h);
 }
 
+int Window::getRefreshRate() const {
+    int displayIndex = SDL_GetWindowDisplayIndex(m_window);
+    SDL_DisplayMode mode;
+    if (SDL_GetDesktopDisplayMode(displayIndex, &mode) == 0) {
+        return mode.refresh_rate;
+    }
+    return 0;
+}
+
 void Window::setFullscreen(bool fullscreen) {
     SDL_SetWindowFullscreen(m_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }

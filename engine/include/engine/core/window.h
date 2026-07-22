@@ -20,6 +20,7 @@ public:
     bool isVSyncEnabled() const { return m_vsyncEnabled; }
 
     float getAspectRatio() const;
+    int getRefreshRate() const;
     Vec2 getSize() const;
     bool isFullscreen() const;
 
