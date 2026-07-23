@@ -618,6 +618,20 @@ void RigidbodyComponent::teleport(const Vec3& position, const Vec3& eulerDegrees
     }
 }
 
+void RigidbodyComponent::shiftOrigin(const Vec3& delta) {
+    if (!entity) return;
+    entity->transform.position = entity->transform.position + delta;
+
+    if (m_body) {
+        btTransform t = m_body->getWorldTransform();
+        t.setOrigin(t.getOrigin() + btVector3(delta.x, delta.y, delta.z));
+        m_body->setWorldTransform(t);
+        if (m_body->getMotionState())
+            m_body->getMotionState()->setWorldTransform(t);
+        if (m_world) m_world->updateSingleAabb(m_body);
+    }
+}
+
 Vec3 RigidbodyComponent::getLinearVelocity() const {
     if (!m_body) return Vec3(0.0f, 0.0f, 0.0f);
     const btVector3 vel = m_body->getLinearVelocity();

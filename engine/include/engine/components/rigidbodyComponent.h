@@ -85,6 +85,7 @@ public:
     void resetMotion();
 
     void teleport(const Vec3& position, const Vec3& eulerDegrees);
+    void shiftOrigin(const Vec3& delta);
 
 private:
     void markDirty();
