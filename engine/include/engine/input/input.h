@@ -25,6 +25,7 @@ public:
 
     void setCursorMode(bool locked);
 
+    void setMousePos(float x, float y);
     Vec2 getMousePos() const;
     Vec2 getMouseDelta();
     Vec2 getScrollDelta();

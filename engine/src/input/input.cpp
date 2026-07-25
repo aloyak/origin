@@ -140,6 +140,10 @@ bool Input::isMouseButtonPressed(int button) const {
     return SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(button);
 }
 
+void Input::setMousePos(float x, float y) {
+    SDL_WarpMouseInWindow(m_window, (int)x, (int)y);
+}
+
 Vec2 Input::getMousePos() const {
     int x, y;
     SDL_GetMouseState(&x, &y);
