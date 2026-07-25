@@ -230,3 +230,23 @@ InputMode Input::getActiveInputMode() const {
 void Input::setInputMode(InputMode mode) {
     m_forcedMode = mode;
 }
+
+int Input::getAnyKeyPressed() const {
+    for (size_t i = 0; i < m_currKeyState.size(); ++i) {
+        if (m_currKeyState[i] && !m_prevKeyState[i]) {
+            return static_cast<int>(i);
+        }
+    }
+    return 0;
+}
+
+int Input::getAnyControllerButtonPressed() const {
+    if (!m_controller) return -1;
+    
+    for (size_t i = 0; i < m_currControllerButtonState.size(); ++i) {
+        if (m_currControllerButtonState[i] && !m_prevControllerButtonState[i]) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
+}

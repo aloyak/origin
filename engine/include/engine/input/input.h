@@ -41,6 +41,10 @@ public:
     float getControllerAxis(int axis) const;
     bool isControllerConnected() const;
 
+    int getAnyKeyPressed() const;
+    int getAnyControllerButtonPressed() const;
+
+
     InputMode getLastUsedDevice() const { return m_lastUsedDevice; }
     InputMode getActiveInputMode() const;
     void setInputMode(InputMode mode);
