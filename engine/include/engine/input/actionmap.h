@@ -2,6 +2,7 @@
 
 #include "engine/input/input.h"
 #include "engine/input/inputTypes.h"
+#include "engine/input/keycodes.h"
 #include "engine/core/userSettings.h"
 
 #include <string>

@@ -19,7 +19,7 @@ static int frameBufferSizeCallback(void* userdata, SDL_Event* event) {
 
 Window::Window(unsigned int width, unsigned int height, const char* title) {
     SDL_SetMainReady();
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0) {
         Logger::error("Failed to initialize SDL: " + std::string(SDL_GetError()));
         SDL_Quit();
         throw std::runtime_error("SDL initialization failed");
