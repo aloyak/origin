@@ -34,7 +34,7 @@ public:
     void resetMouseDelta();
     void resetScrollDelta();
 
-
+    
     bool isControllerButtonPressed(int button) const;
     bool isControllerButtonDown(int button) const;
     float getControllerAxis(int axis) const;
@@ -47,6 +47,7 @@ public:
 private:
     void updateController();
     void openFirstController();
+    void refreshControllerConnection();
 
     SDL_Window* m_window;
     SDL_GameController* m_controller = nullptr;

@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <cstring>
 #include <cmath>
+#include <algorithm>
 
 #ifdef __EMSCRIPTEN__
     #include <emscripten.h>
@@ -77,6 +78,7 @@ void Input::update() {
     bool mouseActivity = (m_mouseDeltaX != 0 || m_mouseDeltaY != 0) ||
                           (SDL_GetMouseState(nullptr, nullptr) != 0);
 
+    refreshControllerConnection();
     updateController();
 
     bool controllerActivity = false;
@@ -96,6 +98,18 @@ void Input::update() {
     } else if (keyboardActivity || mouseActivity) {
         m_lastUsedDevice = InputMode::Keyboard;
     }
+}
+
+void Input::refreshControllerConnection() {
+    if (m_controller && !SDL_GameControllerGetAttached(m_controller)) {
+        SDL_GameControllerClose(m_controller);
+        m_controller = nullptr;
+        std::fill(m_currControllerButtonState.begin(), m_currControllerButtonState.end(), 0);
+        std::fill(m_prevControllerButtonState.begin(), m_prevControllerButtonState.end(), 0);
+        std::fill(m_controllerAxisState.begin(), m_controllerAxisState.end(), 0.0f);
+    }
+
+    if (!m_controller) openFirstController();
 }
 
 void Input::updateController() {
