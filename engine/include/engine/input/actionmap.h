@@ -22,7 +22,7 @@ public:
     void bindControllerAxis(const std::string& name, int axis, bool positive = true);
 
     const ActionBinding* getBinding(const std::string& name) const;
-
+    const std::unordered_map<std::string, ActionBinding>& getAllBindings() const { return m_settings.Get().actions; }
 
     void save();
     void load();
