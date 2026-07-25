@@ -23,13 +23,15 @@ public:
 
     const ActionBinding* getBinding(const std::string& name) const;
 
-    
+
     void save();
     void load();
 
     InputMode getActiveInputMode() const { return m_input.getActiveInputMode(); }
     void setInputMode(InputMode mode) { m_input.setInputMode(mode); }
 
+    Input& GetInput() { return m_input; }
+    const Input& GetInput() const { return m_input; }
 private:
     Input& m_input;
     SettingsManager<ActionBindings> m_settings;
