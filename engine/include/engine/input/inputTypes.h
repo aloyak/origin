@@ -12,12 +12,13 @@ enum class InputMode {
 
 struct ActionBinding {
     int key = 0;
+    int mouseButton = -1;
     int controllerButton = -1;
     int controllerAxis = -1;
     bool axisPositive = true;
     float axisDeadzone = 0.1f;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ActionBinding, key, controllerButton, controllerAxis, axisPositive, axisDeadzone)
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(ActionBinding, key, mouseButton, controllerButton, controllerAxis, axisPositive, axisDeadzone)
 };
 
 struct ActionBindings {

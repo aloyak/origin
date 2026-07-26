@@ -71,6 +71,9 @@ void Input::update() {
     memcpy(m_prevKeyState.data(), m_currKeyState.data(), numKeys);
     memcpy(m_currKeyState.data(), current, numKeys);
 
+    m_prevMouseButtonState = m_currMouseButtonState;
+    m_currMouseButtonState = SDL_GetMouseState(nullptr, nullptr);
+
     bool keyboardActivity = false;
     for (int i = 0; i < numKeys; ++i) {
         if (m_currKeyState[i]) { keyboardActivity = true; break; }
@@ -138,6 +141,15 @@ bool Input::isKeyDown(int key) const {
 
 bool Input::isMouseButtonPressed(int button) const {
     return SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(button);
+}
+
+bool Input::isMouseButtonDown(int button) const {
+    return (m_currMouseButtonState & SDL_BUTTON(button)) != 0;
+}
+
+bool Input::isMouseButtonJustPressed(int button) const {
+    return (m_currMouseButtonState & SDL_BUTTON(button)) != 0 &&
+           (m_prevMouseButtonState & SDL_BUTTON(button)) == 0;
 }
 
 void Input::setMousePos(float x, float y) {

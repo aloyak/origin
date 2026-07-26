@@ -16,6 +16,7 @@ bool ActionMap::isActionDown(const std::string& name) const {
     if (!b) return false;
 
     if (b->key != 0 && m_input.isKeyDown(b->key)) return true;
+    if (b->mouseButton >= 0 && m_input.isMouseButtonDown(b->mouseButton)) return true;
     if (b->controllerButton >= 0 && m_input.isControllerButtonDown(b->controllerButton)) return true;
     if (b->controllerAxis >= 0) {
         float v = m_input.getControllerAxis(b->controllerAxis);
@@ -30,6 +31,7 @@ bool ActionMap::isActionPressed(const std::string& name) const {
     if (!b) return false;
 
     if (b->key != 0 && m_input.isKeyPressed(b->key)) return true;
+    if (b->mouseButton >= 0 && m_input.isMouseButtonJustPressed(b->mouseButton)) return true;
     if (b->controllerButton >= 0 && m_input.isControllerButtonPressed(b->controllerButton)) return true;
 
     return false;
@@ -46,6 +48,10 @@ float ActionMap::getActionAxis(const std::string& name) const {
 
 void ActionMap::bindKey(const std::string& name, int key) {
     m_settings.Get().actions[name].key = key;
+}
+
+void ActionMap::bindMouseButton(const std::string& name, int button) {
+    m_settings.Get().actions[name].mouseButton = button;
 }
 
 void ActionMap::bindControllerButton(const std::string& name, int button) {

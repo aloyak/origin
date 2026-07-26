@@ -22,6 +22,8 @@ public:
     bool isKeyPressed(int key) const;
     bool isKeyDown(int key) const;
     bool isMouseButtonPressed(int button) const;
+    bool isMouseButtonDown(int button) const;
+    bool isMouseButtonJustPressed(int button) const;
 
     void setCursorMode(bool locked);
 
@@ -66,6 +68,9 @@ private:
 
     int m_mouseDeltaX = 0;
     int m_mouseDeltaY = 0;
+
+    uint32_t m_prevMouseButtonState = 0;
+    uint32_t m_currMouseButtonState = 0;
 
     float m_scrollDeltaX = 0.0f;
     float m_scrollDeltaY = 0.0f;

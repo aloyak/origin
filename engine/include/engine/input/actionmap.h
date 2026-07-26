@@ -18,6 +18,7 @@ public:
     float getActionAxis(const std::string& name) const;
 
     void bindKey(const std::string& name, int key);
+    void bindMouseButton(const std::string& name, int button);
     void bindControllerButton(const std::string& name, int button);
     void bindControllerAxis(const std::string& name, int axis, bool positive = true);
 
