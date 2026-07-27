@@ -19,6 +19,10 @@ public:
         return currentSettings;
     }
 
+    const T& Get() const {
+        return currentSettings;
+    }
+
     void Save() {
         nlohmann::json j = currentSettings;
         

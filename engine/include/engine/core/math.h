@@ -153,6 +153,9 @@ inline Vec2 operator+(const Vec2& a, const Vec2& b) { return Vec2(a.x + b.x, a.y
 inline Vec2 operator-(const Vec2& a, const Vec2& b) { return Vec2(a.x - b.x, a.y - b.y); }
 inline Vec2& operator+=(Vec2& a, const Vec2& b) { a.x += b.x; a.y += b.y; return a; }
 inline Vec2& operator-=(Vec2& a, const Vec2& b) { a.x -= b.x; a.y -= b.y; return a; }
+inline Vec2 operator*(const Vec2& a, float s) { return {a.x*s, a.y*s}; }
+inline Vec2 operator*(float s, const Vec2& a) { return {a.x*s, a.y*s}; }
+inline Vec2 operator/(const Vec2& a, float s) { return {a.x/s, a.y/s}; }
 
 inline Vec3 operator-(const Vec3& a) { return Vec3(-a.x, -a.y, -a.z); }
 inline Vec3 operator*(const Vec3& a, float s) { return {a.x*s, a.y*s, a.z*s}; }

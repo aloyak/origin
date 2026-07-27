@@ -363,7 +363,9 @@ void Engine::initUI() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
 
     ImGui_ImplSDL2_InitForOpenGL(m_window->getHandle(), m_window->getGLContext());
     ImGui_ImplOpenGL3_Init("#version 410");
