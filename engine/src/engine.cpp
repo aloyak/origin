@@ -367,6 +367,11 @@ void Engine::initUI() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
 
+    ImGuiContext& g = *GImGui;
+    g.ConfigNavWindowingKeyNext = 0;
+    g.ConfigNavWindowingKeyPrev = 0;
+    g.ConfigNavWindowingWithGamepad = false;
+
     ImGui_ImplSDL2_InitForOpenGL(m_window->getHandle(), m_window->getGLContext());
     ImGui_ImplOpenGL3_Init("#version 410");
 #endif
