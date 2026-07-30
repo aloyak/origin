@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -14,6 +15,13 @@
 #include "engine/render/shader.h"
 #include "engine/utils/path.h"
 #include "engine/utils/logger.h"
+
+#ifndef __EMSCRIPTEN__
+    #if defined(GL_SHADER_BINARY_FORMAT_SPIR_V_ARB) && !defined(GL_SHADER_BINARY_FORMAT_SPIR_V)
+        #define GL_SHADER_BINARY_FORMAT_SPIR_V GL_SHADER_BINARY_FORMAT_SPIR_V_ARB
+        #define glSpecializeShader glSpecializeShaderARB
+    #endif
+#endif
 
 auto replaceFirstLine = [](std::string& src, const std::string& newLine)
 {
@@ -24,10 +32,70 @@ auto replaceFirstLine = [](std::string& src, const std::string& newLine)
         src = newLine;
 };
 
+std::string Shader::toSpirVPath(const std::string& source) {
+    size_t dot = source.rfind('.');
+    return (dot == std::string::npos ? source : source.substr(0, dot)) + ".spv";
+}
+
+bool Shader::spirVSupported() {
+#if defined(__EMSCRIPTEN__) || !defined(GL_SHADER_BINARY_FORMAT_SPIR_V)
+    return false;
+#else
+    if (!glSpecializeShader) return false; // declared, but driver didn't resolve it
+    GLint numFormats = 0;
+    glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &numFormats);
+    return numFormats > 0;
+#endif
+}
+
+std::vector<char> Shader::readBinaryFile(const std::string& path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+        Logger::error("Failed to open precompiled shader file: " + path);
+        return {};
+    }
+
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<char> buffer(static_cast<size_t>(size));
+    if (size > 0 && !file.read(buffer.data(), size)) {
+        Logger::error("Failed to read precompiled shader file: " + path);
+        return {};
+    }
+    return buffer;
+}
+
 Shader::Shader(std::string vertexPath, std::string fragmentPath) {
     vertexPath = Path::resolve(vertexPath).string();
     fragmentPath = Path::resolve(fragmentPath).string();
 
+    bool hasSource = std::filesystem::exists(vertexPath) &&
+                     std::filesystem::exists(fragmentPath);
+    if (hasSource) {
+        compileFromSource(vertexPath, fragmentPath);
+        return;
+    }
+
+    std::string vertSpv = toSpirVPath(vertexPath);
+    std::string fragSpv = toSpirVPath(fragmentPath);
+    bool hasPrecompiled = std::filesystem::exists(vertSpv) &&
+                          std::filesystem::exists(fragSpv);
+
+    if (!hasPrecompiled) {
+        Logger::error("Shader not found (from source or precompiled): " + vertexPath);
+        return;
+    }
+
+    if (!spirVSupported()) {
+        Logger::error("Precompiled shader found but GL_ARB_gl_spirv is unavailable: " + vertSpv);
+        return;
+    }
+
+    loadFromSpirV(vertSpv, fragSpv);
+}
+
+void Shader::compileFromSource(const std::string& vertexPath, const std::string& fragmentPath) {
     std::string vertexCode;
     std::string fragmentCode;
     std::ifstream vShaderFile;
@@ -67,28 +135,55 @@ Shader::Shader(std::string vertexPath, std::string fragmentPath) {
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
-    this->checkShader(vertex);
+    checkShader(vertex);
 
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
-    this->checkShader(fragment);
+    checkShader(fragment);
 
     ID = glCreateProgram();
     glAttachShader(ID, vertex);
     glAttachShader(ID, fragment);
     glLinkProgram(ID);
-
-    int success;
-    char infoLog[512];
-    glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        Logger::error("Failed to link shader program: " + std::string(infoLog));
-    }
+    checkProgram();
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+}
+
+void Shader::loadFromSpirV(const std::string& vertexPath, const std::string& fragmentPath) {
+#if defined(__EMSCRIPTEN__) || !defined(GL_SHADER_BINARY_FORMAT_SPIR_V)
+    Logger::error("Precompiled SPIR-V shaders are not supported by this build (regenerate glad with GL_ARB_gl_spirv / GL 4.6 core): " + vertexPath);
+    return;
+#else
+    auto vertBytes = readBinaryFile(vertexPath);
+    auto fragBytes = readBinaryFile(fragmentPath);
+
+    if (vertBytes.empty() || fragBytes.empty()) {
+        Logger::error("Precompiled shader could not be loaded: " + vertexPath);
+        return;
+    }
+
+    unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderBinary(1, &vertex, GL_SHADER_BINARY_FORMAT_SPIR_V, vertBytes.data(), (int)vertBytes.size());
+    glSpecializeShader(vertex, "main", 0, nullptr, nullptr);
+    checkShader(vertex);
+
+    unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderBinary(1, &fragment, GL_SHADER_BINARY_FORMAT_SPIR_V, fragBytes.data(), (int)fragBytes.size());
+    glSpecializeShader(fragment, "main", 0, nullptr, nullptr);
+    checkShader(fragment);
+
+    ID = glCreateProgram();
+    glAttachShader(ID, vertex);
+    glAttachShader(ID, fragment);
+    glLinkProgram(ID);
+    checkProgram();
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+#endif
 }
 
 Shader::~Shader() {
@@ -142,5 +237,15 @@ void Shader::checkShader(unsigned int shader) {
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         Logger::error("Failed to compile shader: " + std::string(infoLog));
+    }
+}
+
+void Shader::checkProgram() {
+    int success;
+    char infoLog[512];
+    glGetProgramiv(ID, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(ID, 512, NULL, infoLog);
+        Logger::error("Failed to link shader program: " + std::string(infoLog));
     }
 }

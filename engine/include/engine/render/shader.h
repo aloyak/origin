@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "engine/core/math.h"
 #include "engine/render/texture.h"
 
@@ -25,5 +26,13 @@ public:
     void setTexture(const std::string& name, const class Texture& texture, int unit) const;
     
 private:
+    void compileFromSource(const std::string& vertexPath, const std::string& fragmentPath);
+    void loadFromSpirV(const std::string& vertexPath, const std::string& fragmentPath);
+
+    static std::string toSpirVPath(const std::string& source);
+    static bool spirVSupported();
+    static std::vector<char> readBinaryFile(const std::string& path);
+
     void checkShader(unsigned int shader);
+    void checkProgram();
 };
