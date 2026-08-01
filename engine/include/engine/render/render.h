@@ -88,6 +88,7 @@ public:
     PostProcessor& addPostProcessor(const std::string& vertPath, const std::string& fragPath);
     void removePostProcessor(size_t index);
     void removePostProcessor(PostProcessor* processor);
+    void setPostProcessorLast(PostProcessor* processor);
     PostProcessor& getPostProcessor(size_t index);
     size_t getPostProcessorCount() const { return m_postProcessors.size(); }
 

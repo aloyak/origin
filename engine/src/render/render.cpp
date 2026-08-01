@@ -183,6 +183,26 @@ void Renderer::removePostProcessor(PostProcessor* processor) {
     }
 }
 
+void Renderer::setPostProcessorLast(PostProcessor* processor) {
+    if (!processor) return;
+
+    auto it = std::find_if(m_postProcessors.begin(), m_postProcessors.end(),
+        [processor](const std::unique_ptr<PostProcessor>& p) {
+            return p.get() == processor;
+        });
+
+    if (it != m_postProcessors.end()) {
+        if (it == m_postProcessors.begin()) {
+            Logger::warn("setPostProcessorLast: The default pass at index 0 cannot be moved.");
+            return;
+        }
+        auto pass = std::move(*it);
+        m_postProcessors.erase(it);
+        m_postProcessors.push_back(std::move(pass));
+        updateOutputToScreenFlag();
+    }
+}
+
 void Renderer::removePostProcessor(size_t index) {
     if (index == 0 || index >= m_postProcessors.size()) {
         Logger::warn("removePostProcessor: invalid index (the default pass at 0 cannot be removed).");
