@@ -73,7 +73,10 @@ public:
     bool getFreezeRotationZ() const { return m_freezeRotationZ; }
 
     Vec3 getLinearVelocity() const;
+    void setLinearVelocity(const Vec3& velocity);
+
     Vec3 getAngularVelocity() const;
+    void setAngularVelocity(const Vec3& velocity);
 
     void applyForce(const Vec3& force);
     void applyTorque(const Vec3& torque);

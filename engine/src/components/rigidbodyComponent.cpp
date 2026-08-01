@@ -638,8 +638,18 @@ Vec3 RigidbodyComponent::getLinearVelocity() const {
     return Vec3(vel.x(), vel.y(), vel.z());
 }
 
+void RigidbodyComponent::setLinearVelocity(const Vec3& velocity) {
+    if (!m_body) return;
+    m_body->setLinearVelocity(btVector3(velocity.x, velocity.y, velocity.z));
+}
+
 Vec3 RigidbodyComponent::getAngularVelocity() const {
     if (!m_body) return Vec3(0.0f, 0.0f, 0.0f);
     const btVector3 vel = m_body->getAngularVelocity();
     return Vec3(vel.x(), vel.y(), vel.z());
+}
+
+void RigidbodyComponent::setAngularVelocity(const Vec3& velocity) {
+    if (!m_body) return;
+    m_body->setAngularVelocity(btVector3(velocity.x, velocity.y, velocity.z));
 }
