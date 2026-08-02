@@ -16,6 +16,7 @@ if(EMSCRIPTEN)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/bullet3.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/soloud.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imgui.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/implot3d.cmake)
 
     target_include_directories(engine PRIVATE ${bullet3_SOURCE_DIR}/src ${soloud_SOURCE_DIR}/include)
 
@@ -25,7 +26,7 @@ if(EMSCRIPTEN)
 
     target_link_libraries(engine 
         PRIVATE glm::glm spdlog::spdlog stb_image assimp::assimp BulletDynamics BulletCollision LinearMath soloud
-        PUBLIC  nlohmann_json::nlohmann_json imgui
+        PUBLIC  nlohmann_json::nlohmann_json imgui implot3d
     )
 
 else()
@@ -37,6 +38,7 @@ else()
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/assimp.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/nlohmann_json.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/imgui.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/implot3d.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/bullet3.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/soloud.cmake)
 
@@ -46,6 +48,6 @@ else()
 
     target_link_libraries(engine 
         PRIVATE glad glm::glm spdlog::spdlog stb_image assimp::assimp BulletDynamics BulletCollision LinearMath soloud
-        PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui 
+        PUBLIC  nlohmann_json::nlohmann_json SDL2::SDL2 imgui implot3d
     )
 endif()

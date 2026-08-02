@@ -42,6 +42,7 @@ Engine::~Engine() {
     if (ImGui::GetCurrentContext() != nullptr) {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
+        ImPlot3D::DestroyContext();
         ImGui::DestroyContext();
     }
 #endif
@@ -362,6 +363,8 @@ void Engine::initUI() {
 #ifndef __EMSCRIPTEN__
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot3D::CreateContext();
+    
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
