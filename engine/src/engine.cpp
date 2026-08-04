@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <spdlog/spdlog.h>
 
+#include "engine/utils/dispatcher.h"
 #include "engine/utils/path.h"
 
 Engine::Engine(unsigned int width, unsigned int height, const char* title) {
@@ -97,6 +98,8 @@ void Engine::run(std::function<void()> mainLoop, std::function<void()> lateLoop)
 // Frame pipeline: begin, reslolve, end
 void Engine::beginFrame() {
     if (SDL_QuitRequested()) m_running = false;
+
+    MainThreadDispatcher::instance().execute();
 
     m_input->update();
     m_input->resetMouseDelta();

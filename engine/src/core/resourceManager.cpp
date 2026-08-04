@@ -5,6 +5,9 @@
 #include "engine/render/shader.h"
 #include "engine/render/texture.h"
 
+#include "engine/utils/dispatcher.h"
+#include <thread>
+
 ResourceManager& ResourceManager::instance() {
     static ResourceManager manager;
     return manager;
@@ -35,6 +38,40 @@ std::shared_ptr<Model> ResourceManager::getModel(const std::string& modelPath) {
 
     m_models[key] = created;
     return created;
+}
+
+void ResourceManager::getModelAsync(const std::string& modelPath, std::function<void(std::shared_ptr<Model>)> callback) {
+    const std::string key = normalizePath(modelPath);
+
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto it = m_models.find(key);
+        if (it != m_models.end()) {
+            if (auto existing = it->second.lock()) {
+                MainThreadDispatcher::instance().dispatch([callback, existing]() {
+                    callback(existing);
+                });
+                return;
+            }
+        }
+    }
+
+    std::thread([this, key, callback]() {
+        auto created = std::make_shared<Model>(); 
+        
+        created->loadData(key.c_str());
+
+        MainThreadDispatcher::instance().dispatch([this, key, created, callback]() {
+            created->uploadToGPU();
+
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_models[key] = created;
+            }
+
+            callback(created);
+        });
+    }).detach();
 }
 
 std::shared_ptr<Shader> ResourceManager::getShader(const std::string& vertexPath, const std::string& fragmentPath) {
