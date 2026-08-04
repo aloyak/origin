@@ -5,10 +5,8 @@
 #include "engine/core/resourceManager.h"
 #include "engine/lighting/lightingManager.h"
 #include "engine/utils/path.h"
-#include "engine/utils/dispatcher.h"
 
 #include <nlohmann/json.hpp>
-#include <thread>
 
 RenderComponent::RenderComponent(const std::string& modelPath,
                                  const std::string& vertPath,
@@ -130,36 +128,6 @@ void RenderComponent::setModelPath(const std::string& modelPath) {
         m_model = std::make_shared<Model>(m_modelPath.c_str(), true);
     } else {
         m_model = ResourceManager::instance().getModel(m_modelPath);
-    }
-}
-
-void RenderComponent::setModelPathAsync(const std::string& modelPath) {
-    std::string targetPath = Path::toAssetsRelative(modelPath);
-
-    if (targetPath.empty()) {
-        m_modelPath = "";
-        m_model.reset();
-        return;
-    }
-
-    ensureMaterial();
-
-    if (m_dynamic) {
-        std::thread([this, targetPath]() {
-            auto newModel = std::make_shared<Model>();
-            newModel->loadData(targetPath.c_str());
-
-            MainThreadDispatcher::instance().dispatch([this, targetPath, newModel]() {
-                newModel->uploadToGPU();
-                this->m_modelPath = targetPath;
-                this->m_model = newModel;
-            });
-        }).detach();
-    } else {
-        ResourceManager::instance().getModelAsync(targetPath, [this, targetPath](std::shared_ptr<Model> loadedModel) {
-            this->m_modelPath = targetPath;
-            this->m_model = loadedModel;
-        });
     }
 }
 

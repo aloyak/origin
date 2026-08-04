@@ -48,7 +48,6 @@ public:
     void render(Renderer& renderer, const Camera& camera, const Transform& cameraTransform) override;
 
     void setModelPath(const std::string& modelPath);
-    void setModelPathAsync(const std::string& modelPath);
     void setVertPath(const std::string& vertPath);
     void setFragPath(const std::string& fragPath);
 

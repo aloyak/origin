@@ -64,28 +64,8 @@ static std::string restoreExtension(std::string path) {
     return path;
 }
 
-Model::Model(bool dynamic) : m_dynamic(dynamic) {
-}
-
 Model::Model(const char* path, bool dynamic) : m_dynamic(dynamic) {
-    loadData(path);
-    uploadToGPU();
-}
-
-void Model::loadData(const char* path) {
     loadModel(path);
-}
-
-void Model::uploadToGPU() {
-    for (auto& data : pendingMeshes) {
-        for (auto& meshTex : data.textures) {
-            if (meshTex.texture) {
-                meshTex.texture->uploadToGPU();
-            }
-        }
-        meshes.emplace_back(data.vertices, data.indices, data.textures, m_dynamic, data.baseColor);
-    }
-    pendingMeshes.clear();
 }
 
 void Model::draw(const Material& material,
@@ -124,14 +104,14 @@ void Model::loadModel(std::string path) {
 void Model::processNode(aiNode *node, const aiScene *scene) {
     for(unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        pendingMeshes.push_back(processMesh(mesh, scene));
+        meshes.push_back(processMesh(mesh, scene));
     }
     for(unsigned int i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene);
     }
 }
 
-MeshData Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<MeshTexture> textures;
@@ -193,7 +173,7 @@ MeshData Model::processMesh(aiMesh *mesh, const aiScene *scene) {
         baseColor = Vec3(aiColor.r, aiColor.g, aiColor.b);
     }
 
-    return MeshData{vertices, indices, textures, baseColor};
+    return Mesh(vertices, indices, textures, m_dynamic, baseColor);
 }
 
 std::vector<MeshTexture> Model::loadMaterialTextures(
@@ -241,9 +221,9 @@ std::vector<MeshTexture> Model::loadMaterialTextures(
             }
         } else {
             std::string unmangledPath = restoreExtension(texPath);
-
+            
             meshTex.texture = ResourceManager::instance().getTexture(directory + '/' + unmangledPath);
-
+            
             if (!meshTex.texture && unmangledPath != texPath) {
                 meshTex.texture = ResourceManager::instance().getTexture(directory + '/' + texPath);
             }
