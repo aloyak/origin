@@ -8,6 +8,7 @@ class btDefaultMotionState;
 class btRigidBody;
 class btTriangleMesh;
 class btTriangleInfoMap;
+class btBvhTriangleMeshShape;
 
 class RigidbodyComponent : public Component {
 public:
@@ -83,6 +84,11 @@ public:
     void applyTorque(const Vec3& torque);
     void applyImpulse(const Vec3& impulse);
 
+    // Swaps in a small, pre-filtered chunk of triangle-soup collision geometry
+    // without tearing down and rebuilding the whole rigid body
+    bool applyMeshColliderRegion(const std::vector<Vec3>& localVertices,
+                              const std::vector<unsigned int>& localIndices);
+
     // cant be used by the game
     btRigidBody* getRigidBody() const { return m_body; }
 
@@ -108,6 +114,15 @@ private:
     btTriangleInfoMap* m_triangleInfoMap = nullptr;
     bool m_registered = false;
     bool m_dirty = true;
+
+    bool buildTriangleMeshShape(const std::vector<Vec3>& localVertices,
+                             const std::vector<unsigned int>& localIndices,
+                             const Vec3& safeScale,
+                             btTriangleMesh*& outTriangleMesh,
+                             btBvhTriangleMeshShape*& outShape,
+                             btTriangleInfoMap*& outInfoMap);
+
+    void finalizeBody(const Vec3& safeScale);
 
     bool buildMeshColliderShape(const Vec3& safeScale);
     bool m_missingMeshWarningLogged = false;
