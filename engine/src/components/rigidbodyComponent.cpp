@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <vector>
 
 namespace {
 float toRadians(float degrees) {
@@ -319,6 +320,59 @@ void RigidbodyComponent::forceRebuild() {
     markDirty();
 }
 
+bool RigidbodyComponent::buildTriangleMeshShape(const std::vector<Vec3>& localVertices,
+                                                 const std::vector<unsigned int>& localIndices,
+                                                 const Vec3& safeScale,
+                                                 btTriangleMesh*& outTriangleMesh,
+                                                 btBvhTriangleMeshShape*& outShape,
+                                                 btTriangleInfoMap*& outInfoMap) {
+    outTriangleMesh = nullptr;
+    outShape = nullptr;
+    outInfoMap = nullptr;
+
+    if (localVertices.empty() || localIndices.size() < 3) {
+        return false;
+    }
+
+    auto* triangleMesh = new btTriangleMesh(true, true);
+    std::size_t triangleCount = 0;
+
+    for (std::size_t i = 0; i + 2 < localIndices.size(); i += 3) {
+        const unsigned int i0 = localIndices[i];
+        const unsigned int i1 = localIndices[i + 1];
+        const unsigned int i2 = localIndices[i + 2];
+
+        if (i0 >= localVertices.size() || i1 >= localVertices.size() || i2 >= localVertices.size()) {
+            continue;
+        }
+
+        const Vec3& p0 = localVertices[i0];
+        const Vec3& p1 = localVertices[i1];
+        const Vec3& p2 = localVertices[i2];
+
+        const btVector3 v0(p0.x * safeScale.x, p0.y * safeScale.y, p0.z * safeScale.z);
+        const btVector3 v1(p1.x * safeScale.x, p1.y * safeScale.y, p1.z * safeScale.z);
+        const btVector3 v2(p2.x * safeScale.x, p2.y * safeScale.y, p2.z * safeScale.z);
+
+        triangleMesh->addTriangle(v0, v1, v2, true);
+        triangleCount++;
+    }
+
+    if (triangleCount == 0) {
+        delete triangleMesh;
+        return false;
+    }
+
+    auto* shape = new btBvhTriangleMeshShape(triangleMesh, true, true);
+    auto* infoMap = new btTriangleInfoMap();
+    btGenerateInternalEdgeInfo(shape, infoMap);
+
+    outTriangleMesh = triangleMesh;
+    outShape = shape;
+    outInfoMap = infoMap;
+    return true;
+}
+
 bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
     if (!entity) return false;
 
@@ -349,42 +403,30 @@ bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
         return false;
     }
 
-    delete m_triangleMesh;
-    m_triangleMesh = new btTriangleMesh(true, true);
+    // NOTE: this flattens and copies the entire model's vertex/index data
+    // every time it's called, then hands it to Bullet to build a full BVH
+    // over all of it. See terrainCollider for the streaming alternative 
+    std::vector<Vec3> localVertices;
+    std::vector<unsigned int> localIndices;
 
-    std::size_t triangleCount = 0;
     for (const Mesh& mesh : meshes) {
         const auto& vertices = mesh.vertices;
         const auto& indices = mesh.indices;
-
         if (vertices.empty() || indices.size() < 3) continue;
 
-        for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
-            const unsigned int i0 = indices[i];
-            const unsigned int i1 = indices[i + 1];
-            const unsigned int i2 = indices[i + 2];
+        const unsigned int base = static_cast<unsigned int>(localVertices.size());
+        localVertices.reserve(localVertices.size() + vertices.size());
+        for (const auto& v : vertices) localVertices.push_back(v.Position);
 
-            if (i0 >= vertices.size() || i1 >= vertices.size() || i2 >= vertices.size()) {
-                continue;
-            }
-
-            const Vec3& p0 = vertices[i0].Position;
-            const Vec3& p1 = vertices[i1].Position;
-            const Vec3& p2 = vertices[i2].Position;
-
-            const btVector3 v0(p0.x * safeScale.x, p0.y * safeScale.y, p0.z * safeScale.z);
-            const btVector3 v1(p1.x * safeScale.x, p1.y * safeScale.y, p1.z * safeScale.z);
-            const btVector3 v2(p2.x * safeScale.x, p2.y * safeScale.y, p2.z * safeScale.z);
-
-            m_triangleMesh->addTriangle(v0, v1, v2, true);
-            triangleCount++;
-        }
+        localIndices.reserve(localIndices.size() + indices.size());
+        for (unsigned int idx : indices) localIndices.push_back(base + idx);
     }
 
-    if (triangleCount == 0) {
-        delete m_triangleMesh;
-        m_triangleMesh = nullptr;
+    btTriangleMesh* triangleMesh = nullptr;
+    btBvhTriangleMeshShape* shape = nullptr;
+    btTriangleInfoMap* infoMap = nullptr;
 
+    if (!buildTriangleMeshShape(localVertices, localIndices, safeScale, triangleMesh, shape, infoMap)) {
         if (!m_missingMeshWarningLogged) {
             Logger::warn("RigidbodyComponent: Mesh collider requested on entity '" + entity->name + "' but no valid triangles were found.");
             m_missingMeshWarningLogged = true;
@@ -392,14 +434,72 @@ bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
         return false;
     }
 
-    auto* triMeshShape = new btBvhTriangleMeshShape(m_triangleMesh, true, true);
-    m_shape = triMeshShape;
+    delete m_triangleMesh;
+    m_triangleMesh = triangleMesh;
+
+    delete m_shape;
+    m_shape = shape;
 
     delete m_triangleInfoMap;
-    m_triangleInfoMap = new btTriangleInfoMap();
-    btGenerateInternalEdgeInfo(triMeshShape, m_triangleInfoMap);
+    m_triangleInfoMap = infoMap;
 
     m_missingMeshWarningLogged = false;
+    return true;
+}
+
+// Swaps in a small, already-filtered chunk of collision geometry 
+// without tearing down and recreating the rigid body. Intended to
+// be called every time a TerrainCollider finishes streaming in a 
+// new local region
+bool RigidbodyComponent::applyMeshColliderRegion(const std::vector<Vec3>& localVertices,
+                                                  const std::vector<unsigned int>& localIndices) {
+    if (!entity || !m_world) return false;
+
+    if (m_bodyType == BodyType::Dynamic) {
+        if (!m_dynamicMeshWarningLogged) {
+            Logger::warn("RigidbodyComponent: Chunked mesh collider is not supported on entity '" + entity->name + "'. Use Static or Kinematic.");
+            m_dynamicMeshWarningLogged = true;
+        }
+        return false;
+    }
+
+    Vec3 safeScale = entity->transform.scale;
+    safeScale.x = std::max(0.01f, std::fabs(safeScale.x));
+    safeScale.y = std::max(0.01f, std::fabs(safeScale.y));
+    safeScale.z = std::max(0.01f, std::fabs(safeScale.z));
+
+    btTriangleMesh* triangleMesh = nullptr;
+    btBvhTriangleMeshShape* shape = nullptr;
+    btTriangleInfoMap* infoMap = nullptr;
+
+    if (!buildTriangleMeshShape(localVertices, localIndices, safeScale, triangleMesh, shape, infoMap)) {
+        return false;
+    }
+
+    m_colliderType = ColliderType::Mesh;
+    m_dynamicMeshWarningLogged = false;
+    m_missingMeshWarningLogged = false;
+
+    if (m_body) {
+        m_body->setCollisionShape(shape);
+        m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+        m_body->setUserPointer(infoMap);
+        m_world->updateSingleAabb(m_body);
+
+        delete m_shape;
+        delete m_triangleMesh;
+        delete m_triangleInfoMap;
+
+        m_shape = shape;
+        m_triangleMesh = triangleMesh;
+        m_triangleInfoMap = infoMap;
+    } else {
+        m_shape = shape;
+        m_triangleMesh = triangleMesh;
+        m_triangleInfoMap = infoMap;
+        finalizeBody(safeScale);
+    }
+
     return true;
 }
 
@@ -466,6 +566,12 @@ void RigidbodyComponent::rebuildBody() {
         return;
     }
 
+    finalizeBody(safeScale);
+}
+
+void RigidbodyComponent::finalizeBody(const Vec3& safeScale) {
+    const Vec3 scaledSize = scaledAbsSize(m_colliderSize, safeScale);
+
     btTransform startTransform;
     startTransform.setIdentity();
     startTransform.setOrigin(btVector3(entity->transform.position.x, entity->transform.position.y, entity->transform.position.z));
@@ -528,7 +634,6 @@ void RigidbodyComponent::rebuildBody() {
 
     m_registered = true;
     m_dirty = false;
-    
 
     m_lastTrackedScale = entity->transform.scale;
 }
