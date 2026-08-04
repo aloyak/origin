@@ -7,6 +7,7 @@ class btCollisionShape;
 class btDefaultMotionState;
 class btRigidBody;
 class btTriangleMesh;
+class btTriangleInfoMap;
 
 class RigidbodyComponent : public Component {
 public:
@@ -90,6 +91,7 @@ public:
     void teleport(const Vec3& position, const Vec3& eulerDegrees);
     void shiftOrigin(const Vec3& delta);
 
+    void forceRebuild();
 private:
     void markDirty();
     void rebuildBody();
@@ -103,6 +105,7 @@ private:
     btDefaultMotionState* m_motionState = nullptr;
     btRigidBody* m_body = nullptr;
     btTriangleMesh* m_triangleMesh = nullptr;
+    btTriangleInfoMap* m_triangleInfoMap = nullptr;
     bool m_registered = false;
     bool m_dirty = true;
 

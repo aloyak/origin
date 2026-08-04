@@ -10,6 +10,8 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
+#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 
@@ -313,6 +315,10 @@ void RigidbodyComponent::markDirty() {
     m_dirty = true;
 }
 
+void RigidbodyComponent::forceRebuild() {
+    markDirty();
+}
+
 bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
     if (!entity) return false;
 
@@ -386,7 +392,12 @@ bool RigidbodyComponent::buildMeshColliderShape(const Vec3& safeScale) {
         return false;
     }
 
-    m_shape = new btBvhTriangleMeshShape(m_triangleMesh, true, true);
+    auto* triMeshShape = new btBvhTriangleMeshShape(m_triangleMesh, true, true);
+    m_shape = triMeshShape;
+
+    delete m_triangleInfoMap;
+    m_triangleInfoMap = new btTriangleInfoMap();
+    btGenerateInternalEdgeInfo(triMeshShape, m_triangleInfoMap);
 
     m_missingMeshWarningLogged = false;
     return true;
@@ -493,6 +504,11 @@ void RigidbodyComponent::rebuildBody() {
         m_body->setActivationState(DISABLE_DEACTIVATION);
     }
 
+    if (m_colliderType == ColliderType::Mesh && m_triangleInfoMap) {
+        m_body->setCollisionFlags(m_body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+        m_body->setUserPointer(m_triangleInfoMap);
+    }
+
     if (!m_useGravity) {
         m_body->setFlags(m_body->getFlags() | BT_DISABLE_WORLD_GRAVITY);
         m_body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
@@ -535,6 +551,9 @@ void RigidbodyComponent::destroyBody() {
 
     delete m_triangleMesh;
     m_triangleMesh = nullptr;
+
+    delete m_triangleInfoMap;
+    m_triangleInfoMap = nullptr;
 }
 
 void RigidbodyComponent::syncTransformFromBody() const {

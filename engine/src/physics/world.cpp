@@ -10,9 +10,12 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcher.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+#include <BulletCollision/CollisionShapes/btTriangleInfoMap.h>
+#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
@@ -28,6 +31,33 @@
 
 namespace {
 PhysicsWorld* g_activeWorld = nullptr;
+
+bool internalEdgeContactAddedCallback(btManifoldPoint& cp,
+                                       const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
+                                       const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
+    const btCollisionObjectWrapper* triWrap = nullptr;
+    const btCollisionObjectWrapper* otherWrap = nullptr;
+    int triPartId = 0;
+    int triIndex = 0;
+
+    if (colObj0Wrap->getCollisionObject()->getUserPointer()) {
+        triWrap = colObj0Wrap;
+        otherWrap = colObj1Wrap;
+        triPartId = partId0;
+        triIndex = index0;
+    } else if (colObj1Wrap->getCollisionObject()->getUserPointer()) {
+        triWrap = colObj1Wrap;
+        otherWrap = colObj0Wrap;
+        triPartId = partId1;
+        triIndex = index1;
+    }
+
+    if (triWrap) {
+        btAdjustInternalEdgeContacts(cp, triWrap, otherWrap, triPartId, triIndex);
+    }
+
+    return true;
+}
 } 
 
 struct PhysicsWorld::Data {
@@ -41,6 +71,8 @@ struct PhysicsWorld::Data {
         : dispatcher(&collisionConfig),
           world(&dispatcher, &broadphase, &solver, &collisionConfig) {
         world.setGravity(btVector3(0.0f, -9.81f, 0.0f));
+
+        gContactAddedCallback = internalEdgeContactAddedCallback;
     }
 };
 
