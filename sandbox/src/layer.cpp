@@ -31,10 +31,10 @@ void Layer::ApplyAudioSettings() {
     m_Engine.getAudioSystem().setGlobalVolume(appliedVolume);
 }
 
-Layer::Layer(Engine& engine) 
-    : m_Engine(engine) {
+Layer::Layer(Engine& engine) : m_Engine(engine) {
     
     ImGuiIO& io = m_Engine.getIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     static std::string layout = Path::resolve("resources/layout.ini").string();
     io.IniFilename = layout.c_str();
     m_UserPreferencesPath = Path::resolve("resources/user.json");
@@ -42,6 +42,7 @@ Layer::Layer(Engine& engine)
     // Styles
     ImGui::StyleColorsDark();
     Styles::setupDarkTheme();
+
 
     LoadUserPreferences();
     ApplyAudioSettings();
