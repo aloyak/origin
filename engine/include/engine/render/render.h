@@ -23,6 +23,21 @@ struct Ray {
     Vec3 direction;  // normalized
 };
 
+struct RenderSettings {
+    bool  pixelArtEnabled = false;
+    int   colorDepth      = 32;
+ 
+    bool  vertexSnap    = false;
+    float snapIntensity = 40.0f;
+ 
+    bool  lightingEnabled  = true;
+    float minAmbientLight  = 0.05f;
+ 
+    float gamma                  = 2.2f;
+    bool  gammaCorrectionEnabled = true;
+    float exposure                = 1.0f;
+};
+
 class Renderer {
 public:
     explicit Renderer(Window& window);
@@ -32,29 +47,32 @@ public:
     void resizeRenderTarget(unsigned int width, unsigned int height);
 
     void setPixelArt(bool enabled, int colorDepth = 32);
-    bool isPixelArtEnabled() const { return m_pixelArtEnabled; }
+    bool isPixelArtEnabled() const { return m_settings.pixelArtEnabled; }
 
-    void setLightingEnabled(bool enabled) { m_lightingEnabled = enabled; }
-    bool isLightingEnabled() const { return m_lightingEnabled; }
+    void setLightingEnabled(bool enabled) { m_settings.lightingEnabled = enabled; }
+    bool isLightingEnabled() const { return m_settings.lightingEnabled; }
 
     void setMinimumAmbientLight(float value);
-    float getMinimumAmbientLight() const { return m_minAmbientLight; }
+    float getMinimumAmbientLight() const { return m_settings.minAmbientLight; }
     void setAmbientLightChangedCallback(std::function<void(float)> callback) {
         m_onMinimumAmbientLightChanged = std::move(callback);
     }
 
     void setVertexSnap(bool enabled, float intensity = 40.0f) {
-        m_vertexSnap = enabled;
-        m_snapIntensity = intensity;
+        m_settings.vertexSnap = enabled;
+        m_settings.snapIntensity = intensity;
     }
-    bool isVertexSnapEnabled() const { return m_vertexSnap; }
+    bool isVertexSnapEnabled() const { return m_settings.vertexSnap; }
 
-    void setGammaCorrection(float gamma) { m_gamma = std::max(0.01f, gamma); }
-    float getGammaCorrection() const { return m_gamma; }
-    void setGammaCorrectionEnabled(bool enabled) { m_gammaCorrectionEnabled = enabled; }
-    bool isGammaCorrectionEnabled() const { return m_gammaCorrectionEnabled; }
-    void setExposure(float exposure) { m_exposure = std::max(0.0f, exposure); }
-    float getExposure() const { return m_exposure; }
+    void setGammaCorrection(float gamma) { m_settings.gamma = std::max(0.01f, gamma); }
+    float getGammaCorrection() const { return m_settings.gamma; }
+    void setGammaCorrectionEnabled(bool enabled) { m_settings.gammaCorrectionEnabled = enabled; }
+    bool isGammaCorrectionEnabled() const { return m_settings.gammaCorrectionEnabled; }
+    void setExposure(float exposure) { m_settings.exposure = std::max(0.0f, exposure); }
+    float getExposure() const { return m_settings.exposure; }
+
+    // Direct read-only access to the full settings bag, e.g. for an editor panel.
+    const RenderSettings& getSettings() const { return m_settings; }
 
     void beginFrame();
     void resolveFrame();
@@ -110,18 +128,6 @@ private:
     unsigned int m_lineVBO    = 0;
     std::unique_ptr<Shader> m_lineShader;
 
-    bool  m_pixelArtEnabled = false;
-    int   m_colorDepth      = 32;
-
-    bool  m_vertexSnap    = false;
-    float m_snapIntensity = 40.0f;
-
-    bool  m_lightingEnabled = true;
-    float m_minAmbientLight = 0.05f;
+    RenderSettings m_settings;
     std::function<void(float)> m_onMinimumAmbientLightChanged;
-
-    // Gamma correction (forwarded)
-    float m_gamma = 2.2f;
-    bool m_gammaCorrectionEnabled = true;
-    float m_exposure = 1.0f;
 };

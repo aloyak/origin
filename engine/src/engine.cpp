@@ -257,6 +257,7 @@ void Engine::updateScene() {
     }
 
     for (auto& entity : m_entities)
+        // Updates components, not rendering or physics
         entity->update(m_deltaTime);
 
     if (m_sceneManager->getActiveScene())

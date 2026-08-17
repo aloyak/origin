@@ -23,6 +23,14 @@
 #include <cmath>
 #include <vector>
 
+static Mat4 mat4FromGLM(const glm::mat4& glmMat) {
+    Mat4 mat4;
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+            mat4[col][row] = glmMat[col][row];
+    return mat4;
+}
+
 Renderer::Renderer(Window& window)
     : m_window(window)
 {}
@@ -138,16 +146,16 @@ void Renderer::setPixelArt(bool enabled, int colorDepth) {
     if (enabled && m_postProcessors.empty()) {
         Logger::warn("setPixelArt() called before setupRenderTarget!");
     }
-    m_pixelArtEnabled = enabled;
-    m_colorDepth      = colorDepth;
+    m_settings.pixelArtEnabled = enabled;
+    m_settings.colorDepth      = colorDepth;
 }
 
 void Renderer::setMinimumAmbientLight(float value) {
-    if (std::abs(m_minAmbientLight - value) <= 0.0001f) {
+    if (std::abs(m_settings.minAmbientLight - value) <= 0.0001f) {
         return;
     }
 
-    m_minAmbientLight = value;
+    m_settings.minAmbientLight = value;
     if (m_onMinimumAmbientLightChanged) {
         m_onMinimumAmbientLightChanged(value);
     }
@@ -216,6 +224,8 @@ PostProcessor& Renderer::getPostProcessor(size_t index) {
     return *m_postProcessors.at(index);
 }
 
+// This tells the previously last postprocessor to stop drawing to the screen,
+// and instead pass its frame buffer to the next, now last, postprocessor layer
 void Renderer::updateOutputToScreenFlag() {
     for (size_t i = 0; i < m_postProcessors.size(); ++i) {
         m_postProcessors[i]->setOutputToScreen(i == m_postProcessors.size() - 1);
@@ -238,27 +248,26 @@ void Renderer::beginFrame() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+// Resolve Frame applies the postprocessing effects and outputs
 void Renderer::resolveFrame() {
     if (m_postProcessors.empty()) return;
     
     Vec2 windowSize = m_window.getSize();
 
     PostProcessor& defaultPass = *m_postProcessors.front();
-    defaultPass.setBool("u_GammaEnabled", m_gammaCorrectionEnabled);
-    defaultPass.setFloat("u_Gamma", m_gamma);
-    defaultPass.setFloat("u_Exposure", m_exposure);
+    defaultPass.setBool("u_GammaEnabled", m_settings.gammaCorrectionEnabled);
+    defaultPass.setFloat("u_Gamma", m_settings.gamma);
+    defaultPass.setFloat("u_Exposure", m_settings.exposure);
 
     float levels = 0.0f;
-    if (m_pixelArtEnabled) {
+    if (m_settings.pixelArtEnabled) {
         levels = 255.0f;
-        if      (m_colorDepth <= 4)  levels = 4.0f;
-        else if (m_colorDepth <= 8)  levels = 8.0f;
-        else if (m_colorDepth <= 16) levels = 32.0f;
-        else if (m_colorDepth >= 32) levels = 0.0f;
+        if      (m_settings.colorDepth <= 4)  levels = 4.0f;
+        else if (m_settings.colorDepth <= 8)  levels = 8.0f;
+        else if (m_settings.colorDepth <= 16) levels = 32.0f;
+        else if (m_settings.colorDepth >= 32) levels = 0.0f;
     }
     defaultPass.setFloat("colorLevels", levels);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     unsigned int inputTexture = m_sceneTexture;
 
@@ -295,26 +304,20 @@ void Renderer::render(Model& model, Material& material,
                                                modelTransform.scale.y,
                                                modelTransform.scale.z));
 
-    Mat4 modelMat4;
-    for (int col = 0; col < 4; col++)
-        for (int row = 0; row < 4; row++)
-            modelMat4[col][row] = modelMat[col][row];
+    Mat4 modelMat4 = mat4FromGLM(modelMat);
     shader.setMat4("u_Model", modelMat4);
 
-    Mat4 viewMat4;
-    for (int col = 0; col < 4; col++)
-        for (int row = 0; row < 4; row++)
-            viewMat4[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    Mat4 viewMat4 = mat4FromGLM(*(glm::mat4*)camera.getViewMatrix(cameraTransform));
     shader.setMat4("u_View", viewMat4);
 
     Mat4 projMat4;
     camera.getProjectionMatrix(projMat4);
     shader.setMat4("u_Projection", projMat4);
 
-    shader.setBool ("u_VertexSnap",    m_vertexSnap);
-    shader.setFloat("u_SnapIntensity", m_snapIntensity);
-    shader.setBool ("u_LightingEnabled", m_lightingEnabled);
-    shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
+    shader.setBool ("u_VertexSnap",    m_settings.vertexSnap);
+    shader.setFloat("u_SnapIntensity", m_settings.snapIntensity);
+    shader.setBool ("u_LightingEnabled", m_settings.lightingEnabled);
+    shader.setFloat("u_MinAmbientLight", m_settings.minAmbientLight);
 
     shader.setVec3("u_ViewPos", cameraTransform.position);
 
@@ -333,20 +336,17 @@ void Renderer::renderInstanced(Model& model, Material& material,
     Shader& shader = material.getShader();
     shader.use();
 
-    Mat4 viewMat4Instanced;
-    for (int col = 0; col < 4; col++)
-        for (int row = 0; row < 4; row++)
-            viewMat4Instanced[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    Mat4 viewMat4Instanced = mat4FromGLM(*(glm::mat4*)camera.getViewMatrix(cameraTransform));
     shader.setMat4("u_View", viewMat4Instanced);
 
     Mat4 projMat4Instanced;
     camera.getProjectionMatrix(projMat4Instanced);
     shader.setMat4("u_Projection", projMat4Instanced);
 
-    shader.setBool ("u_VertexSnap",      m_vertexSnap);
-    shader.setFloat("u_SnapIntensity",   m_snapIntensity);
-    shader.setBool ("u_LightingEnabled", m_lightingEnabled);
-    shader.setFloat("u_MinAmbientLight", m_minAmbientLight);
+    shader.setBool ("u_VertexSnap",      m_settings.vertexSnap);
+    shader.setFloat("u_SnapIntensity",   m_settings.snapIntensity);
+    shader.setBool ("u_LightingEnabled", m_settings.lightingEnabled);
+    shader.setFloat("u_MinAmbientLight", m_settings.minAmbientLight);
     shader.setVec3 ("u_ViewPos",         cameraTransform.position);
 
     std::vector<glm::mat4> modelMatrices;
@@ -398,10 +398,8 @@ void Renderer::drawLine(const Vec3& start, const Vec3& end,
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
     m_lineShader->use();
-    Mat4 viewMat4Line;
-    for (int col = 0; col < 4; col++)
-        for (int row = 0; row < 4; row++)
-            viewMat4Line[col][row] = (*(glm::mat4*)camera.getViewMatrix(cameraTransform))[col][row];
+    
+    Mat4 viewMat4Line = mat4FromGLM(*(glm::mat4*)camera.getViewMatrix(cameraTransform));
     m_lineShader->setMat4("u_View", viewMat4Line);
 
     Mat4 projMat4Line;
