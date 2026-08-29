@@ -1,5 +1,6 @@
 .vscode
 build
 build-web
+build-win
 TODO
 CMakeFiles/
