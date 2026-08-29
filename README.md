@@ -7,11 +7,11 @@
 * **[Demo Game](https://origin.aloyak.dev/game)**
 
 ## General Information
-Origin is a true 3D pixel-art game engine written from scratch in modern C++. It uses OpenGL for rendering and is designed to be cross-platform, supporting Windows, MacOS, Linux, and Web Builds. Web builds are enabled through WebAssembly using Emscripten.
+The origin engine is a 3D pixel-art lightweight game engine written in modern C++. It uses OpenGL 4.6 as the graphics backend. It handles rendering, physics, audio, input as well as many different other builtin systems and features
 
-The engine features a custom-built editor called the Sandbox, which allows for scene editing, entity management, and component manipulation. Moreover, it uses ImGui for the editor's user interface.
+Apart from that, the engine ships with a sandbox level editor that allows you to create and edit your own levels that the game might use
 
-Physics is handled by the Bullet3 Physics library, and the engine supports various effects and features such as dynamic lighting, and post-processing effects.
+The physics layer abstracts Bullet3 physics engine to provide a simple and easy to use interface for the user. The engine also provides tools for spatial audio, supports many 3d model formats and compiles shaders at runtime!
 
 ## Showcase
 ![Screenshot](assets/demo.png)
@@ -26,9 +26,9 @@ Physics is handled by the Bullet3 Physics library, and the engine supports vario
 
 The project uses **CMake** to generate and build the engine. The repository is organized into three main modules:
 
-* `engine` — the core engine code
-* `game` — the game project that uses the engine
-* `sandbox` — map editor with extra features
+* `engine` core engine code, holds the basic systems like rendering, physics, audio, input, window...
+* `game` the game project that uses the engine, contains the game logic and assets
+* `sandbox` works as any other game project, but includes the an imgui layer and many features to edit and create levels/scenes!
 
 You may want to change your game's name in `game/CMakeLists.txt`.
 
@@ -56,6 +56,8 @@ The final executable can be found in `build/game/`
 To build the project on Windows, you can use the same `build.sh` script if you have a compatible environment (like Git Bash or WSL). Alternatively, you can use CMake directly:
 
 * Tested using ninja but Visual Studio should work as well (recommended even!)
+
+* This can also be done from linux using a cross-compiler toolchain!
 
 ```sh
 mkdir build
